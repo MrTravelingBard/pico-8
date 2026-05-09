@@ -82,10 +82,26 @@ function init_use_menu()
 end
 
 --game data
+function init_npc(id,name,sprite,x,y,dialogue)
+ return {
+  id=id,
+  name=name,
+  sprite=sprite,
+  x=x,
+  y=y,
+  --dialogue should be {{},{}}
+  dialogue=dialogue
+ }
+end
+
 function init_npcs()
+	--main npc data source
 	npc_data={}
+	--for easier maintenance
+	npc_temp1={} --non-dialogue
+	npc_temp2={} --dialogue only
 	--map1
-	add(npc_data,split([[
+	npc_temp1=split([[
 	1,elder,136,3,10;
 	2,kid,134,12,4;
 	3,kid,133,7,3;
@@ -106,7 +122,18 @@ function init_npcs()
 	18,monster,162,3,14;
 	19,monster,167,2,15;
 	20,monster,162,12,14;
-	21,monster,167,13,15]],";"))
+	21,monster,167,13,15]],";")
+
+--npcid,order,end?,self?,switch,story_req,set_story,text		
+	npc_temp2=split([[
+	1;1;false;false;;0;0;elder: in our most dire need, \where are the gnomes, the \the wild me, & the wizards|
+	1;2;true;false;;0;0;elder: of the spiral tower? \will they stand by & watch us\burn? or are they already dead?]],"|")
+	
+	for i=1,#npc_temp1 do
+		local id,name,sprite,x,y=unpack(split(npc_temp1[i],","))
+		local dialogue=parse_text(npc_temp2,true,id)
+		add(npc_data,init_npc(id,name,sprite,x,y,dialogue))
+	end
 end
 
 function init_inventory()
@@ -753,15 +780,24 @@ function draw_print(split_string,x,y,color_flag)
 	end
 end
 
-function draw_textbox(text,face)
+function draw_textbox(face)
 	--faces: default 64;hero 66
 	face=face or 64
 	textx=mapx*8
 	texty=mapy*8+96
 	
-	--draw_box(3,15,0,52,face)
-	draw_box(3,15,0,96,face)
-	print(text,textx+10,texty+7,7)
+	if active_dialogue then
+		--draw_box(3,15,0,52,face)
+		draw_box(3,15,0,96,face)
+		print(active_dialogue,textx+10,texty+7,7)
+	end
+	
+	if (btnp(🅾️) and read) then
+		active_dialogue=nil
+		read=false	
+	else
+		read=true
+	end
 end
 
 function draw_text(rows,col,x,y)
@@ -1187,7 +1223,17 @@ end
 
 function interact(x,y)
 	--check for text
-	active_text=get_text(x,y)	
+	active_text=get_text(x,y)
+	--check for npc dialogue
+	if btnp(4) then 
+  for n in all(npc_data) do
+   -- distance check between player and this specific npc
+   if abs(p.x - n.x) < 8 and abs(p.y - n.y) < 8 then
+    active_dialogue=get_npctext(n) 
+    break
+   end
+  end
+ end	
 end
 
 -->8
@@ -1230,12 +1276,9 @@ function draw_map()
 end
 
 function draw_npcs()
-	for i=1,#npc_data do
-		for j=1,#npc_data[i] do
-			local sprite,x,y=unpack(split(npc_data[i][j],","),3,5)
-			draw_npc(sprite,x,y)
-		end
-	end
+	for n in all(npc_data) do
+  draw_npc(n.sprite, n.x, n.y)
+ end
 end
 
 function draw_npc(sprite,x,y)
@@ -1292,13 +1335,24 @@ function set_alltext()
 	--map1
 	temp_text_data=split([[
 	2;4;1;false;true;;0;0;as you leave this once holy \place to face the agents of \darkness, you are struck by|
- 2;4;2;flase;true;;0;0;a feeling that you will \likely never return.|
+ 2;4;2;false;true;;0;0;a feeling that you will \likely never return.|
  2;4;3;true;true;;0;1;did your goddess feel the \same when she stood alone \against the dark gods?]],"|")
  
  --load data into text_data 
- for i=1,#temp_text_data do
- 	local x,y,order,text_end,set_selfswitch,switch,story_req,set_story,text=unpack(split(temp_text_data[i],";"))
+ parse_text(temp_text_data,false)	
+end
+
+function parse_text(split_table,npc_flag,id)
+ local id=id or 0
+ local	unpack_start= npc_flag==true and 2 or 3
+	local unpack_end= npc_flag==true and 8 or 9
+	local npc_dialogue={}
+	
+	for i=1,#split_table do
+ 	local order,text_end,set_selfswitch,switch,story_req,set_story,text=unpack(split(split_table[i],";"),unpack_start,unpack_end)
  	local split_text=split(text,"\\")
+ 	local end_flag= text_end=="true" and true or false
+		local self_flag= set_selfswitch=="true" and true or false
  	
  	if #split_text>1 then
  		local temp_text=""
@@ -1308,14 +1362,23 @@ function set_alltext()
  		--override text with temp
  		text=temp_text
  	end
- 	--add text to text_data
- 	add_text(x,y,order,text_end,set_selfswitch,switch,story_req,set_story,text)
- end	
+ 	if npc_flag then
+ 		local npcid=unpack(split(split_table[i],";"),1,1)
+ 		if npcid==id then
+ 			add(npc_dialogue,{npcid,false,order,end_flag,self_flag,false,switch,story_req,set_story,text})
+ 		end
+ 	else
+ 		local x,y=unpack(split(split_table[i],";"),1,2)
+ 		add_text(x,y,order,end_flag,self_flag,switch,story_req,set_story,text)
+ 	end
+ end
+ --returns a dialogue table for a npc init
+ if npc_flag then
+ 	return npc_dialogue
+ end
 end
 
 function add_text(x,y,order,text_end,set_selfswitch,switch,story_req,set_story,text)
-	local end_flag= text_end=="true" and true or false
-	local self_flag= set_selfswitch=="true" and true or false
 --x,y that triggers it
 --the boolean here is being set for normal iteration as false by default
 --order of text as a number
@@ -1325,7 +1388,7 @@ function add_text(x,y,order,text_end,set_selfswitch,switch,story_req,set_story,t
 --switch is a string that will be looked up if true otherwise ignore
 --story_req is a num of the required story_beat, if 0 then doesn't matter
 --set_story sets the story beat
-	add(text_data,{x+y*128,false,order,end_flag,self_flag,false,switch,story_req,set_story,text})
+	add(text_data,{x+y*128,false,order,text_end,set_selfswitch,false,switch,story_req,set_story,text})
 end
 
 function get_text(x,y)
@@ -1388,6 +1451,13 @@ function clean_reads()
 	for i=1,#text_data do
 		if text_data[i][6]==false and text_data[i][2] then
 			text_data[i][2]=false
+		end
+	end
+	for n in npc_data do
+		for i=1,#n.dialogue do
+			if n.dialogue[i][6]==false and n.dialogue[i][2] then
+				n.dialogue[i][2]=false
+			end
 		end
 	end
 	cleaned_reads=true
