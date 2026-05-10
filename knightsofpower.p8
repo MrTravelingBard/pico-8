@@ -6,6 +6,7 @@ __lua__
 
 --global variables
 routines={}
+--test=false
 
 --==game state inits==
 --intro state init
@@ -126,8 +127,8 @@ function init_npcs()
 
 --npcid,order,end?,self?,switch,story_req,set_story,text		
 	npc_temp2=split([[
-	1;1;false;false;;0;0;elder: in our most dire need, \where are the gnomes, the \the wild me, & the wizards|
-	1;2;true;false;;0;0;elder: of the spiral tower? \will they stand by & watch us\burn? or are they already dead?]],"|")
+	1;1;false;false;;0;0;elder: in our most dire need, \where are the gnomes, the wild\men, and the wizards of the|
+	1;2;true;false;;0;0;elder: spiral tower? will they \stand by & watch us burn?! \or...are they already dead?]],"|")
 	
 	for i=1,#npc_temp1 do
 		local id,name,sprite,x,y=unpack(split(npc_temp1[i],","))
@@ -498,10 +499,13 @@ function draw_game()
 		draw_npcs()
 		draw_player()
 		if (not active_text) then
-			--x button checks
-			if (btnp(❎) and (not menu_active)) then
-				init_menu()
-				menu_active=true
+			if active_dialogue then
+				draw_textbox()
+			else
+				--x button checks
+				if (btnp(❎) and (not menu_active)) then
+					init_menu()
+					menu_active=true
  			elseif (btnp(❎) and menu_active) then
  				if not (inventory_menu or use_menu or skills_menu or status_menu) then
 					menu_active=false
@@ -523,14 +527,15 @@ function draw_game()
 					end
 				end
 			end
-			--draw active menus
-			if menu_active then
-				check_hp_color()
-				draw_menu()
-				draw_mini_status(66)
-				--main menu options
-				if (btnp(🅾️) and menuselect==1) then 
-					if (not inventory_menu) init_inventory()
+		end
+		--draw active menus
+		if menu_active then
+			check_hp_color()
+			draw_menu()
+			draw_mini_status(66)
+			--main menu options
+			if (btnp(🅾️) and menuselect==1) then 
+				if (not inventory_menu) init_inventory()
 					inventory_menu=true 
 				elseif (btnp(🅾️) and menuselect==2) then
 					if (not skills_menu) init_skills()
@@ -602,10 +607,14 @@ function draw_game()
 			end
 		else
 			draw_text()
-			--draw_textbox(active_text)
 		end
 		--==testing area==
-		--print(tile,12)
+		--print(p.x,0,0,9)
+		--print(p.y,0,8,9)
+		--print(npc_data[1].x,0,16,12)
+		--print(npc_data[1].y,0,24,12)
+		--print("diff x: "..abs(p.x - npc_data[1].x),0,32,0)
+		--print("diff y: "..abs(p.y - npc_data[1].y),0,40,0)
 		--==end of testing area==
 	else
 		draw_win_lose()
@@ -789,7 +798,7 @@ function draw_textbox(face)
 	if active_dialogue then
 		--draw_box(3,15,0,52,face)
 		draw_box(3,15,0,96,face)
-		print(active_dialogue,textx+10,texty+7,7)
+		print(active_dialogue,textx+5,texty+5,7)
 	end
 	
 	if (btnp(🅾️) and read) then
@@ -1225,14 +1234,14 @@ function interact(x,y)
 	--check for text
 	active_text=get_text(x,y)
 	--check for npc dialogue
-	if btnp(4) then 
-  for n in all(npc_data) do
-   -- distance check between player and this specific npc
-   if abs(p.x - n.x) < 8 and abs(p.y - n.y) < 8 then
-    active_dialogue=get_npctext(n) 
-    break
-   end
-  end
+	if btnp(🅾️) then 
+ 	for n in all(npc_data) do
+  	-- distance check between player and this specific npc
+  	if abs(p.x - n.x) + abs(p.y - n.y) == 1 then
+   	active_dialogue=get_npc_dialogue(n) 
+   	break
+  	end
+ 	end
  end	
 end
 
@@ -1400,48 +1409,85 @@ function get_text(x,y)
 	if exists then
 		exists+=next_text
 		local index,read,order,text_end,set_self,self,switch,story_req,set_story,text=unpack(text_data[exists])
-		local switch_exists=exists_in(switches,switch)
-		
-		--check switches
-		if switch_exists then
-			if switches[switch_exists][2]==false then
-				return nil
-			end
-		end
-		--check story req
-		if story_req~=0 and story_req>story_beat then
-			return nil
-		end
+		local checked=text_check(read,text_end,switch,story_req,set_story)
 		
 		--show text if not read yet
-		if read then
-			return nil
-		else
+		if checked then
 			--update read
 			text_data[exists][2]=true
 			--update selfswitch as needed
 			if set_self then
 				text_data[exists][6]=true
 			end
-			--update story beat as needed
-			if story_beat<set_story then
-				story_beat=set_story
-			end
-			--iterate if needed
-			if text_end then
-				next_text=0
-				--setup cleaner
-				cleaned_reads=false
-			else
-				next_text+=1
-			end
 			--send text
 			return text
+		else
+			return nil
 		end
 	else
 		--nothing was found for this tile
 		return nil
 	end
+end
+
+function get_npc_dialogue(npc)
+	local line_index=1
+	local empty=is_empty(npc.dialogue)
+	--does this npc have dialogue?
+	if empty then
+		return nil
+	else
+		line_index+=next_text
+		local npcid,read,order,text_end,set_self,self,switch,story_req,set_story,text=unpack(npc.dialogue[line_index])
+		local checked=text_check(read,text_end,switch,story_req,set_story)
+		
+		--show text if not read yet
+		if checked then
+			--update read
+			npc.dialogue[line_index][2]=true
+			--update selfswitch as needed
+			if set_self then
+				npc.dialogue[line_index][6]=true
+			end
+			--send text
+			return text
+		else
+			return nil
+		end
+	end	
+end
+
+function text_check(read,text_end,switch,story_req,set_story)
+	local switch_exists=exists_in(switches,switch)
+	--==checks==	
+	--check switches
+	if switch_exists then
+		if switches[switch_exists][2]==false then
+			return nil
+		end
+	end
+	--check story req
+	if story_req~=0 and story_req>story_beat then
+		return nil
+	end
+	--show text if not read yet
+	if read then
+			return nil
+	end
+	--==passes==
+	--update story beat as needed
+	if story_beat<set_story then
+		story_beat=set_story
+	end
+	--iterate if needed
+	if text_end then
+		next_text=0
+		--setup cleaner
+		cleaned_reads=false
+	else
+		next_text+=1
+	end
+	return true
 end
 
 function clean_reads()
@@ -1453,7 +1499,7 @@ function clean_reads()
 			text_data[i][2]=false
 		end
 	end
-	for n in npc_data do
+	for n in all(npc_data) do
 		for i=1,#n.dialogue do
 			if n.dialogue[i][6]==false and n.dialogue[i][2] then
 				n.dialogue[i][2]=false
