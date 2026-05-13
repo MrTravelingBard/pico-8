@@ -127,8 +127,8 @@ function init_npcs()
 
 --npcid,order,end?,self?,switch,story_req,set_story,text		
 	npc_temp2=split([[
-	1;1;false;false;;0;0;elder: in our most dire need, \where are the gnomes, the wild\men, and the wizards of the|
-	1;2;true;false;;0;0;elder: spiral tower? will they \stand by & watch us burn?! \or...are they already dead?]],"|")
+	1;1;false;false;;0;0;in our most dire need, where \are the gnomes, the wild men, \and the wizards of the spiral|
+	1;2;true;false;;0;0;tower? will they stand by & \watch us burn?! or...are they \already dead?]],"|")
 	
 	for i=1,#npc_temp1 do
 		local id,name,sprite,x,y=unpack(split(npc_temp1[i],","))
@@ -265,7 +265,7 @@ end
 --game state update
 function update_game()
 	if (not game_over) then
-		if ((not active_text) and (not menu_active)) then
+		if ((not active_text) and (not menu_active) and (not active_dialogue)) then
 			update_map()
 			move_player()
 			check_win_lose()
@@ -609,10 +609,15 @@ function draw_game()
 			draw_text()
 		end
 		--==testing area==
+		--print(next_text,9)
 		--print(p.x,0,0,9)
 		--print(p.y,0,8,9)
-		--print(npc_data[1].x,0,16,12)
-		--print(npc_data[1].y,0,24,12)
+		--print(text_data[1][2],0,0,9)
+		--print(text_data[2][2],0,8,9)
+		--print(text_data[3][2],0,16,9)
+		--print(npc_data[1].dialogue[1][2],0,24,0)
+		--print(npc_data[1].dialogue[2][2],0,32,0)
+		--print(npc_data[1].dialogue[3][2],0,40,0)	
 		--print("diff x: "..abs(p.x - npc_data[1].x),0,32,0)
 		--print("diff y: "..abs(p.y - npc_data[1].y),0,40,0)
 		--==end of testing area==
@@ -799,6 +804,9 @@ function draw_textbox(face)
 		--draw_box(3,15,0,52,face)
 		draw_box(3,15,0,96,face)
 		print(active_dialogue,textx+5,texty+5,7)
+		if (flr(time()*4)%2==0) then
+			spr(100,textx+116,texty+20)
+		end
 	end
 	
 	if (btnp(🅾️) and read) then
@@ -816,7 +824,6 @@ function draw_text(rows,col,x,y)
 	local col=col or 14
 	local x=x or 4
 	local y=y or 52
-	--end
 	 
 	if active_text then
 		if scene=="game" then
@@ -1215,13 +1222,7 @@ function move_player()
 	if (btnp(⬇️)) newy+=1
 	
 	interact(newx,newy)
-	
-	if newx~=p.x or newy~=p.y then
-		if cleaned_reads==false then
-			clean_reads()
-		end
-	end
-	
+		
 	if (can_move(newx,newy)) then
 		p.x=mid(0,newx,127)
 		p.y=mid(0,newy,63)
@@ -1234,7 +1235,10 @@ function interact(x,y)
 	--check for text
 	active_text=get_text(x,y)
 	--check for npc dialogue
-	if btnp(🅾️) then 
+	if btnp(🅾️) and active_dialogue==nil then 
+ 	talking=true
+ end
+ if talking then
  	for n in all(npc_data) do
   	-- distance check between player and this specific npc
   	if abs(p.x - n.x) + abs(p.y - n.y) == 1 then
@@ -1242,7 +1246,11 @@ function interact(x,y)
    	break
   	end
  	end
- end	
+ end
+ if active_dialogue==nil then
+ 	talking=false
+ 	clean_reads()
+ end
 end
 
 -->8
