@@ -629,8 +629,12 @@ function draw_game()
 		end
 		--==testing area==
 		--print(next_text,9)
-		--print(p.x,0,0,9)
-		--print(p.y,0,8,9)
+		--print("p.x: "..p.x,0,0,0)
+		--print("p.y: "..p.y,0,8,0)
+		--print("p.dx: "..p.dx,0,16,0)
+		--print("p.dy: "..p.dy,0,24,0)
+		--print("t.x: "..(targetx or 0),0,32,0)
+		--print("t.y: "..(targety or 0),0,40,0)
 		--print(text_data[1][2],0,0,9)
 		--print(text_data[2][2],0,8,9)
 		--print(text_data[3][2],0,16,9)
@@ -943,23 +947,25 @@ function init_player()
 --[[	
  p.x=2 --starting x
 	p.y=3 --starting y
+	p.dx=0 --x facing: -1 (left), 0, 1 (right)
+ p.dy=-1 --y facing: -1 (up), 0, 1 (down)
 	p.sprite=1
 	==starting stats==
 	p.name="????"
 	p.title="the last"
-	p.lvl = 1
-	p.mp = 60
-	p.xp = 0
-	p.str = 4
-	p.dex = 4
-	p.con = 4
-	p.mag = 4
+	p.lvl=1
+	p.mp=60
+	p.xp=0
+	p.str=4
+	p.dex=4
+	p.con=4
+	p.mag=4
 	==starting equipment stats==
-	p.sword_score = 5
-	p.shield_score = 2
+	p.sword_score=5
+	p.shield_score=2
 	]]
-	p.x,p.y,p.sprite,p.name,p.title,p.lvl,p.mp,p.xp,p.str,p.dex,p.con,p.mag,p.sword_score,p.shield_score=
-	unpack(split("2,3,1,????,the last light,1,60,0,4,4,4,4,5,2"))
+	p.x,p.y,p.dx,p.dy,p.sprite,p.name,p.title,p.lvl,p.mp,p.xp,p.str,p.dex,p.con,p.mag,p.sword_score,p.shield_score=
+	unpack(split("2,3,0,-1,1,????,the last light,1,60,0,4,4,4,4,5,2"))
 	--starting stats
 	p_maxmp=60 --just for drawing
 	p.status={}
@@ -1228,17 +1234,31 @@ function set_last_light()
 end
 
 function draw_player()
-	spr(p.sprite,p.x*8,p.y*8)
+	spr(p.sprite,p.x*8,p.y*8,1.0,1.0,flip_x)
 end
 
 function move_player()
-	newx=p.x
-	newy=p.y
+	local movex=0
+	local movey=0
 	
-	if (btnp(⬅️)) newx-=1
-	if (btnp(➡️)) newx+=1
-	if (btnp(⬆️)) newy-=1
-	if (btnp(⬇️)) newy+=1
+	if btnp(⬅️) then
+	 movex=-1
+	 flip_x=true
+	end
+	if btnp(➡️) then 
+		movex=1
+		flip_x=false
+	end
+	if (btnp(⬆️))	movey=-1
+	if (btnp(⬇️))	movey=1
+	
+	if movex!=0 or movey!=0 then
+		p.dx=movex
+		p.dy=movey
+	end
+	
+	local newx=p.x+movex
+	local newy=p.y+movey
 	
 	interact(newx,newy)
 		
@@ -1251,6 +1271,8 @@ function move_player()
 end
 
 function interact(x,y)
+	targetx=p.x+p.dx
+	targety=p.y+p.dy
 	--check for text
 	active_text=get_text(x,y)
 	--check for npc dialogue
@@ -1260,7 +1282,7 @@ function interact(x,y)
  if talking then
  	for n in all(npc_data) do
   	-- distance check between player and this specific npc
-  	if abs(p.x - n.x) + abs(p.y - n.y) == 1 then
+  	if targetx==n.x and targety==n.y then
    	active_dialogue,face=get_npc_dialogue(n) 
    	break
   	end
@@ -1330,6 +1352,13 @@ function is_tile(tile_type,x,y)
 end
 
 function can_move(x,y)
+	--check if an npc is there
+	for n in all(npc_data) do
+		if x==n.x and y==n.y then
+			return false
+		end
+	end
+	--if no npc, is it a wall?
 	return not is_tile(wall,x,y)
 end
 
