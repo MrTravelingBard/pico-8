@@ -8,6 +8,8 @@ __lua__
 wait=0
 wait_cnt=0
 main_sel=1
+--for dialogue
+flags={}
 
 --init scenes
 function init_intro()
@@ -45,7 +47,7 @@ function init_game()
 	init_titles()
 	init_skills()
 	init_skillpools()
-	--init_npcs() --in dialogue code
+	--init_npcs()
 	init_party()
 	set_wait(30)
 	_update=update_game
@@ -286,6 +288,106 @@ function init_skillpools()
 	}
 end
 
+function init_npcs()
+	--npcs
+	npcs={
+		guard={
+			name="guard",
+			x=60, y=40,
+			dialogue={
+				{
+					cond=function()
+					return not get_flag("enemies_defeated")
+					end,
+					pages={
+						"the city is under\nattack! monsters\nfrom the east!",
+						"please, you must\nhelp us before it\nis too late!",
+					},
+					on_end=function()
+					set_flag("quest_started", true)
+					end,
+				},
+				{
+					cond=function()
+					return get_flag("enemies_defeated")
+					and not get_flag("mayor_thanked")
+					end,
+					pages={
+						"you did it! the\nmonsters are gone!",
+						"the mayor wants to\nspeak with you at\nthe town hall.",
+					},
+					on_end=nil,
+				},
+				{
+					pages={
+						"the city is safe\nonce more, thanks\nto you.",
+					},
+					on_end=nil,
+				}
+			}
+		},
+		merchant={
+			name="merchant",
+			x=90, y=50,
+			dialogue={
+				{
+					cond=function()
+					return not get_flag("quest_started")
+					end,
+					pages={
+						"sorry, i'm closed\nright now. come\nback later.",
+					},
+					on_end=nil,
+					},
+				{
+					pages={
+						"welcome! looking\nfor supplies before\nyour journey?",
+						"i have potions,\nropes, and maps\navailable.",
+					},
+					on_end=function()
+					set_flag("merchant_visited", true)
+					end,
+				}
+			}
+		}
+	}
+end
+
+function init_party()
+	party={
+		x=0,
+		y=0,
+		dx=0, --x facing: -1 (left), 0, 1 (right)
+		dy=-1, --y facing: -1 (up), 0, 1 (down)
+		l_spr=1,
+		members={
+			init_member("slime1,immortal,1,1,1,1"),
+			init_member("slime2,quick_draw,1,1,1,1"),
+			init_member("slime3,eldest,1,1,1,1"),
+			init_member("slime4,red,1,1,1,1")
+		},
+		inventory={}
+	}
+end
+
+--init window functions
+function init_dialogue()
+	dialogue={
+		active=false,
+		npc=nil,     
+		entry=nil,   
+		page=1,      
+		on_end=nil,  
+		--text box config
+		box_x=4,
+		box_y=88,
+		box_w=120,
+		box_h=36,
+		pad=4,
+		name_h=8
+	}
+end
+
 --init helper functions
 function init_temp_stats()
 	--1=str 2=dex 3=con 4=mag
@@ -314,6 +416,39 @@ function init_skillpool(string_data)
 		add(skill_set,skills[name])
 	end
 	return skill_set
+end
+
+function init_member(string_data)
+	local name,title,str,dex,con,mag=unpack(split(string_data))
+	local member = {
+		name=name,
+		title=title,
+		sprite=titles[title].sprite,
+		mastered_titles={},
+		active_zones=titles[title].zones,
+		maxhp=5,
+		hp=5,
+		maxmp=0,
+		mp=0,
+		atk=1,
+		def=1,
+		spd=1,
+		matk=1,
+		mdef=1,
+		str=str,
+		dex=dex,
+		con=con,
+		mag=mag,
+		str_total=0,
+		dex_total=0,
+		con_total=0,
+		mag_total=0,
+		status={},
+		temp_stats=init_temp_stats(),
+		skills=skill_pools[title]
+	}
+	member = refresh_stats(member)
+	return member
 end
 
 --main config
@@ -350,7 +485,7 @@ function update_game()
 	if wait_check() then
 		if (not game_over) then
 			update_map()
-			--move_party()
+			update_party()
 			check_win_lose()
 		else
 			if (btnp(5)) extcmd("reset")
@@ -358,7 +493,46 @@ function update_game()
 	end
 end
 
---update menus, windows, etc
+--update party and window functions
+function update_party()
+	local movex=0
+	local movey=0
+	
+	if btnp(⬅️) then
+	 movex=-1
+	 flip_x=true
+	end
+	if btnp(➡️) then 
+		movex=1
+		flip_x=false
+	end
+	if (btnp(⬆️))	movey=-1
+	if (btnp(⬇️))	movey=1
+	
+	if movex!=0 or movey!=0 then
+		party.dx=movex
+		party.dy=movey
+	end
+	
+	local newx=party.x+movex
+	local newy=party.y+movey
+	
+	party_interact(newx,newy)
+		
+	if (can_move(newx,newy)) then
+		party.x=mid(0,newx,127)
+		party.y=mid(0,newy,63)
+	else
+		sfx(0)
+	end
+end
+
+function update_dialogue()
+	if not dialogue.active then return end
+
+	if btnp(4) then dialogue_advance() end
+end
+
 -->8
 --draw code
 
@@ -396,13 +570,53 @@ function draw_game()
 	if game_over==false then
 		if wait_check() then
 			draw_map()
+			draw_npcs()
+			draw_party()
 		end
 	else
 		draw_win_lose()
 	end
 end
 
---draw menus, windows, etc
+--draw party and window functions
+function draw_party()
+	spr(party.sprite,party.x*8,party.y*8,1.0,1.0,flip_x)
+end
+
+function draw_dialogue()
+	if not dialogue.active then return end
+
+	local bx=dialogue.box_x
+	local by=dialogue.box_y
+	local bw=dialogue.box_w
+	local bh=dialogue.box_h
+	local p=dialogue.pad
+	
+	-- shadow
+	rectfill(bx+2,by+2,bx+bw+2,by+bh+2,0)
+
+	-- box
+	rectfill(bx,by,bx+bw,by+bh,1)
+	rect(bx,by,bx+bw,by+bh,7)
+
+	-- speaker
+	if dialogue.npc and dialogue.npc.name then
+	local name=dialogue.npc.name
+	local nw=#name*4+p*2
+	rectfill(bx,by-dialogue.name_h,bx+nw,by,1)
+	rect(bx,by-dialogue.name_h,bx+nw,by,7)
+	print(name,bx+p,by-dialogue.name_h+1,10)
+	end
+
+	-- page text
+	local txt=dialogue.entry.pages[dialogue.page]
+	print(txt,bx+p,by+p,7)
+
+	-- advance prompt w/ blink
+	if (time()*4)%2<1 then
+	print("v",bx+bw-6,by+bh-6,6)
+	end
+end
 
 --draw misc
 function draw_win_lose()
@@ -411,190 +625,64 @@ function draw_win_lose()
 	 print("★ you win! ★",37,64,7) 
 	else 
 		print("game over! :(",38,64,7)
- end
- print("press ❎ to play again",20,72,5)
+ 	end
+	print("press ❎ to play again",20,72,5)
 end
 -->8
 --dialogue code
 
--- flags
-flags={}
+function dialogue_find_entry(npc)
+	for entry in all(npc.dialogue) do
+		if entry.cond==nil or entry.cond() then
+			return entry
+		end
+	end
+	return nil
+end
 
+function dialogue_start(npc)
+	local entry=dialogue_find_entry(npc)
+	if entry==nil then return end
+
+	dialogue.active=true
+	dialogue.npc=npc
+	dialogue.entry=entry
+	dialogue.page=1
+	dialogue.on_end=entry.on_end
+end
+
+function dialogue_advance()
+	if not dialogue.active then return end
+
+	if dialogue.page<#dialogue.entry.pages then
+		dialogue.page+=1
+	else
+		dialogue_close()
+	end
+end
+
+function dialogue_close()
+	local cb=dialogue.on_end
+	dialogue.active=false
+	dialogue.npc=nil
+	dialogue.entry=nil
+	dialogue.on_end=nil
+	if cb then cb() end
+end
+
+--dialogue helper functions
 function set_flag(key,val)
- flags[key]=val
+	flags[key]=val
 end
 
 function get_flag(key)
- return flags[key]
+	return flags[key]
 end
 
--- dialogue engine
-dlg={
- active=false,
- npc=nil,     
- entry=nil,   
- page=1,      
- on_end=nil,  
- --text box config
- box_x=4,
- box_y=88,
- box_w=120,
- box_h=36,
- pad=4,
- name_h=8
-}
-
-function dlg_find_entry(npc)
- for entry in all(npc.dialogue) do
-  if entry.cond==nil or entry.cond() then
-   return entry
-  end
- end
- return nil
-end
-
-function dlg_start(npc)
- local entry=dlg_find_entry(npc)
- if entry==nil then return end
-
- dlg.active=true
- dlg.npc=npc
- dlg.entry=entry
- dlg.page=1
- dlg.on_end=entry.on_end
-end
-
-function dlg_advance()
- if not dlg.active then return end
- 
- if dlg.page<#dlg.entry.pages then
-  dlg.page+=1
- else
-  dlg_close()
- end
-end
-
-function dlg_close()
- local cb=dlg.on_end
- dlg.active=false
- dlg.npc=nil
- dlg.entry=nil
- dlg.on_end=nil
- if cb then cb() end
-end
-
-function dlg_update()
- if not dlg.active then return end
-
- if btnp(4) then
-  dlg_advance()
- end
-end
-
-function dlg_draw()
- if not dlg.active then return end
-
- local bx=dlg.box_x
- local by=dlg.box_y
- local bw=dlg.box_w
- local bh=dlg.box_h
- local p=dlg.pad
-	
-	-- shadow
- rectfill(bx+2,by+2,bx+bw+2,by+bh+2,0)
-
- -- box body
- rectfill(bx,by,bx+bw,by+bh,1)
- rect(bx,by,bx+bw,by+bh,7)
-
- -- speaker
- if dlg.npc and dlg.npc.name then
-  local name=dlg.npc.name
-  local nw=#name*4+p*2
-  rectfill(bx,by-dlg.name_h,bx+nw,by,1)
-  rect(bx,by-dlg.name_h,bx+nw,by,7)
-  print(name,bx+p,by-dlg.name_h+1,10)
- end
-
- -- page text
- local txt=dlg.entry.pages[dlg.page]
- print(txt,bx+p,by+p,7)
-
- -- advance prompt w/ blink
- if (time()*4)%2<1 then
-  print("v",bx+bw-6,by+bh-6,6)
- end
-end
-
-
-function init_npcs()
-	--npcs
-npcs={
- guard={
-  name="guard",
-  x=60, y=40,
-  dialogue={
-   {
-   	cond=function()
-     return not get_flag("enemies_defeated")
-    end,
-    pages={
-     "the city is under\nattack! monsters\nfrom the east!",
-     "please, you must\nhelp us before it\nis too late!",
-    },
-    on_end=function()
-     set_flag("quest_started", true)
-    end,
-   },
-   {
-    cond=function()
-     return get_flag("enemies_defeated")
-      and not get_flag("mayor_thanked")
-     end,
-    pages={
-     "you did it! the\nmonsters are gone!",
-     "the mayor wants to\nspeak with you at\nthe town hall.",
-    },
-    on_end=nil,
-   },
-   {
-    pages={
-     "the city is safe\nonce more, thanks\nto you.",
-  	 },
-    on_end=nil,
-   }
-  }
- },
-	merchant={
-  name="merchant",
-  x=90, y=50,
-  dialogue={
-   {
-    cond=function()
-     return not get_flag("quest_started")
-    end,
-    pages={
-     "sorry, i'm closed\nright now. come\nback later.",
-    },
-    on_end=nil,
-    },
-   {
-    pages={
-     "welcome! looking\nfor supplies before\nyour journey?",
-     "i have potions,\nropes, and maps\navailable.",
-    },
-    on_end=function()
-     set_flag("merchant_visited", true)
-    end,
-   }
-  }
- }
-}
-end
 -->8
 --battlesystem code
 
-function init_battle()
+function init_battle(enemy_data)
 	--game states
 	battle_state={
 		player_turn=1,
@@ -605,6 +693,48 @@ function init_battle()
 		win=6,
 		lose=7
 	}
+	battle={
+		enemies={},
+		battlers={}
+	}
+
+	for m in all(party.members) do
+		add(battle.battlers, init_battler(m))
+	end
+
+	for e in all(enemy_data) do
+		add(battle.enemies, init_battler(e, true))
+	end
+
+	e_spr=battle.enemies[1].sprite
+	p_spr=party.l_spr
+end
+
+function init_battler(src, is_enemy)
+	return {
+		member=src, -- keep a reference back to the source-of-truth data
+		name=src.name,
+		is_enemy=is_enemy,
+		sprite=src.sprite,
+		hp=src.hp,
+		maxhp=src.maxhp,
+		mp=src.mp,
+		maxmp=src.maxmp,
+		atk=src.atk,
+		def=src.def,
+		spd=src.spd,
+		matk=src.matk,
+		mdef=src.mdef,
+		zones=src.active_zones,
+		skills=src.skills,
+		status={},
+		temp_stats=init_temp_stats(),
+		spin=init_spin(src.active_zones)
+	}
+end
+
+function init_battle()
+
 	--battle test data
 	battle={
 		state=1,
@@ -636,14 +766,14 @@ function init_battle()
 	
 	--wheel init
 	wheel={
-  angle=0,
-  speed=2,
-  spinning=false
+  		angle=0,
+  		speed=2,
+  		spinning=false
 	}
 	zones={
-  {label="miss",zone_start=0,zone_stop=200,result="miss"},
-  {label="hit",zone_start=200,zone_stop=320,result="hit"},
-  {label="crit",zone_start=320,zone_stop=360,result="crit"}
+  		{label="miss",zone_start=0,zone_stop=200,result="miss"},
+  		{label="hit",zone_start=200,zone_stop=320,result="hit"},
+  		{label="crit",zone_start=320,zone_stop=360,result="crit"}
 	}
 	
 	init_battlers()
@@ -657,10 +787,10 @@ end
 -- init battler helper
 function init_battlers()
 	party={
-  {name="knight",hp=30,maxhp=30,atk=8,zones=zones_physical},
-  {name="mage",hp=20,maxhp=20,atk=12,zones=zones_magic},
-  {name="rogue",hp=22,maxhp=22,atk=7,zones=zones_rogue},
-  {name="healer",hp=18,maxhp=18,atk=4,zones=zones_heal}
+  		{name="knight",hp=30,maxhp=30,atk=8,zones=zones_physical},
+  		{name="mage",hp=20,maxhp=20,atk=12,zones=zones_magic},
+  		{name="rogue",hp=22,maxhp=22,atk=7,zones=zones_rogue},
+  		{name="healer",hp=18,maxhp=18,atk=4,zones=zones_heal}
 	}
 	e_spr=battle.enemy.sprite
 	p_spr=2
@@ -678,14 +808,14 @@ function update_battle()
 	if battle.state==battle_state.player_turn then
 		update_battle_menu()
 	elseif battle.state==battle_state.player_spin then
-  update_wheel()
-  if btnp(4) then
-   battle.result=check_zone(wheel.angle)
-   battle.state=battle_state.result
-  end
- elseif battle.state==battle_state.player_result then
-  apply_result(battle.result)
-  -- advance to next character or enemy turn
+  		update_wheel()
+  		if btnp(4) then
+   			battle.result=check_zone(wheel.angle)
+   			battle.state=battle_state.result
+  		end
+ 	elseif battle.state==battle_state.player_result then
+  		apply_result(battle.result)
+  		-- advance to next character or enemy turn
 	elseif battle.state==battle_state.enemy_turn then
 		--wait for animation, then enemy acts
 		if battle.anim_timer<=0 then
@@ -706,7 +836,8 @@ function update_battle()
 					battle.message=battle.enemy.name.." hits for "..dmg.."!"
 					battle.anim_timer=30
 					battle.state=battle_state.player_turn
-				end)
+				end
+			)
 			--check lose
 			if p.hp<=0 then
 				p.hp=0
@@ -719,7 +850,7 @@ function update_battle()
 		if battle.anim_timer<=0 then
 			scene="game"
 			_update=update_game 
-		 _draw=draw_game					
+			_draw=draw_game					
 		end
 	end
 end
@@ -841,7 +972,8 @@ function update_battle_menu()
 						return
 					end
 					battle.state=battle_state.enemy_turn
-				end)	
+				end
+			)	
 		end
 	end
 end
@@ -875,34 +1007,34 @@ end
 
 -- wheel logic
 function update_wheel()
- if wheel.spinning then
-  wheel.angle=(wheel.angle+wheel.speed)%360
- end
+	if wheel.spinning then
+		wheel.angle=(wheel.angle+wheel.speed)%360
+ 	end
 end
 
 function check_zone(angle)
- for _,z in ipairs(zones) do
-  if angle>=z.deg_start and angle<z.deg_stop then
-   return z.result
-  end
- end
+	for _,z in ipairs(zones) do
+		if angle>=z.deg_start and angle<z.deg_stop then
+   			return z.result
+  		end
+ 	end
 end
 
 function draw_wheel(cx,cy,r)
- -- draw zone arcs
- for _, z in ipairs(zones) do
-  for deg = z.deg_start, z.deg_stop do
-   local t = deg / 360  
-   local x = cx + cos(t) * r
-   local y = cy - sin(t) * r 
-   line(cx, cy, x, y, z.color)
-  end
- end
- -- draw needle
- local t=wheel.angle/360
- local nx=cx+cos(t)*r
- local ny=cy+sin(t)*r
- line(cx,cy,nx,ny,7)
+	-- draw zone arcs
+ 	for _, z in ipairs(zones) do
+  		for deg = z.deg_start, z.deg_stop do
+   			local t = deg / 360  
+   			local x = cx + cos(t) * r
+   			local y = cy - sin(t) * r 
+   			line(cx, cy, x, y, z.color)
+  		end
+ 	end
+ 	-- draw needle
+ 	local t=wheel.angle/360
+ 	local nx=cx+cos(t)*r
+ 	local ny=cy+sin(t)*r
+ 	line(cx,cy,nx,ny,7)
 end
 
 
@@ -943,9 +1075,9 @@ function draw_map()
 end
 
 function draw_npcs()
-	for n in all(npc_data) do
-  draw_npc(n.sprite, n.x, n.y)
- end
+	for npc in all(npcs) do
+  		draw_npc(npc.sprite, npc.x, npc.y)
+ 	end
 end
 
 function draw_npc(sprite,x,y)
@@ -962,8 +1094,8 @@ end
 
 function can_move(x,y)
 	--check if an npc is there
-	for n in all(npc_data) do
-		if x==n.x and y==n.y then
+	for npc in all(npcs) do
+		if x==npc.x and y==npc.y then
 			return false
 		end
 	end
@@ -997,84 +1129,65 @@ end
 -->8
 --party code
 
-function init_party()
-	party={
-		x=0,
-		y=0,
-		dx=0, --x facing: -1 (left), 0, 1 (right)
-		dy=-1, --y facing: -1 (up), 0, 1 (down)
-		l_spr=1,
-		members={
-			init_member("slime1,immortal,1,1,1,1")
-		}
-	}
-	--set_stats()
-	--starting inventory
-	--p_inventory={}
-	--set_inventory()
+function party_interact(x,y)
+	targetx=party.x+party.dx
+	targety=party.y+party.dy
+	--check for text
+		--active_text=get_text(x,y)
+	--check for fight
+	
+	--check for npc dialogue
+	if btnp(🅾️) and dialogue.active==false then 
+ 		talking=true
+ 	end
+ 	if talking then
+ 		for npc in all(npcs) do
+  			-- distance check between player and this specific npc
+  			if targetx==npc.x and targety==npc.y then
+   				dialogue_start(npc) 
+   				break
+  			end
+ 		end
+ 	end
+ 	if dialogue.active==false then
+ 		talking=false
+ 	end
+	--check for items to pickup
+
 end
 
-function init_member(string_data)
-	local name,title,str,dex,con,mag=unpack(split(string_data))
-	--add math
-	return {
-		name=name,
-		title=title,
-		sprite=titles[title].sprite,
-		mastered_titles={},
-		active_zones=titles[title].zones,
-		maxhp=con*5,
-		hp=con*5,
-		maxmp=0,
-		mp=0,
-		atk=str*2,
-		def=con*2,
-		spd=dex*2,
-		matk=mag*2,
-		mdef=mag*2,
-		str=str,
-		dex=dex,
-		con=con,
-		mag=mag,
-		status={},
-		temp_stats=init_temp_stats(),
-		skills=skill_pools[title]
-	}
-end
-
-function refresh_stats(member)
---sets all member stats
+function refresh_stats(member,refresh)
+	--sets all member stats
 	local refresh=refresh or false
 	local temp_str,temp_dex,temp_con,temp_mag,temp_atk,temp_def,temp_spd,temp_matk,temp_mdef=unpack(member.temp_stats)
-	local maxhp_start=p.maxhp
+	local maxhp_start=member.maxhp
 	
-	p_str_total=p.str+temp_str
-	p_dex_total=p.dex+temp_dex
-	p_con_total=p.con+temp_con
-	p_mag_total=p.mag+temp_mag
+	member.str_total=member.str+temp_str
+	member.dex_total=member.dex+temp_dex
+	member.con_total=member.con+temp_con
+	member.mag_total=member.mag+temp_mag
 	
-	p.atk = p.str + p.lvl + p.sword_score + temp_atk
-	p.def = p.con + p.shield_score + temp_def
-	p.spd = p.dex + p.lvl + temp_spd
-	p.matk = p.mag + p.lvl + p.sword_score + temp_matk
-	p.mdef = p.mag + p.shield_score + temp_mdef
-	p.maxhp = (p.con*4) + (p.lvl*4) + (temp_con*3)
+	member.atk = (member.str_total * 2) + temp_atk
+	member.def = (member.con_total * 2) + temp_def
+	member.spd = (member.dex_total * 2) + temp_spd
+	member.matk = (member.mag_total * 2) + temp_matk
+	member.mdef = (member.mag_total * 2) + temp_mdef
+	member.maxhp = max(1,member.con_total) * 5
 	if refresh then
 		--if maxhp increases hp increases
-		local hpdiff=p.maxhp-maxhp_start
+		local hpdiff=member.maxhp-maxhp_start
 		if hpdiff>0 then
-			p.hp+=hpdiff
+			member.hp+=hpdiff
 		end
 		--if maxhp decreases hp decreases to match maxhp if over it
-		if p.hp>p.maxhp then
-			p.hp=p.maxhp
+		if member.hp>member.maxhp then
+			member.hp=member.maxhp
 		end
-		return
+		return member
 	end
-	p.hp = p.maxhp
+	member.hp = member.maxhp
+	return member
 end
-
-
 
 -->8
 --utility functions
@@ -1093,20 +1206,21 @@ function set_wait(num)
 end
 
 function nearest_npc(px,py,range)
- local best=nil
- local best_dst=range*range
+	--Might not use this, delete if not
+	local best=nil
+	local best_dst=range*range
 
- for _,npc in pairs(npcs) do
-  local dx=npc.x-px
-  local dy=npc.y-py
-  local dst=dx*dx+dy*dy
-  if dst<=best_dst then
-   best=npc
-   best_dst=dst
-  end
- end
+	for _,npc in pairs(npcs) do
+  		local dx=npc.x-px
+  		local dy=npc.y-py
+  		local dst=dx*dx+dy*dy
+  		if dst<=best_dst then
+   			best=npc
+   			best_dst=dst
+  		end
+ 	end
 
- return best
+ 	return best
 end
 
 function menu_control(option_cnt)
@@ -1138,12 +1252,12 @@ function check_win_lose()
 end
 
 function party_wiped()
- for i=1,#party.members do
-  if party.members[i].hp>0 then
-   return false
-  end
- end
- return true
+	for i=1,#party.members do
+  		if party.members[i].hp>0 then
+   			return false
+  		end
+ 	end
+ 	return true
 end
 __gfx__
 000000000000000000000000000000000000c0000000c00070000000000000000000000000000000000000000000100000001000700000000000000000000000
