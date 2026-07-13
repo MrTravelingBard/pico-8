@@ -359,7 +359,7 @@ function init_party()
 		y=0,
 		dx=0, --x facing: -1 (left), 0, 1 (right)
 		dy=-1, --y facing: -1 (up), 0, 1 (down)
-		l_spr=1,
+		sprite=1,
 		members={
 			init_member("slime1,immortal,1,1,1,1"),
 			init_member("slime2,quick_draw,1,1,1,1"),
@@ -368,6 +368,7 @@ function init_party()
 		},
 		inventory={}
 	}
+	party_set_leader()
 end
 
 --init window functions
@@ -683,7 +684,6 @@ end
 --battlesystem code
 
 function init_battle(enemy_data)
-	--game states
 	battle_state={
 		player_turn=1,
 		player_spin=2,
@@ -694,10 +694,20 @@ function init_battle(enemy_data)
 		lose=7
 	}
 	battle={
+		state=1,
+		active_char=1,
+		message="your turn!",
+		battle_select=1,
+		anim_timer=0,
+		frames=0,
+		player_defends=false,
+		enemy_defends=false,
+		result=nil,
 		enemies={},
 		battlers={}
 	}
 
+	--battlers init
 	for m in all(party.members) do
 		add(battle.battlers, init_battler(m))
 	end
@@ -705,11 +715,29 @@ function init_battle(enemy_data)
 	for e in all(enemy_data) do
 		add(battle.enemies, init_battler(e, true))
 	end
+	
+	--battle animations init
+	anim={
+		frames=0,
+		maxframes=0,
+		fn=nil,
+		done=nil
+	}
+	
+	--wheel init
+	wheel={
+  		angle=0,
+  		speed=2,
+  		spinning=false
+	}
 
-	e_spr=battle.enemies[1].sprite
-	p_spr=party.l_spr
+	--setup main functions
+	scene="battle"
+	_update = update_battle 
+	_draw = draw_battle
 end
 
+--init battle helpers
 function init_battler(src, is_enemy)
 	return {
 		member=src, -- keep a reference back to the source-of-truth data
@@ -733,70 +761,7 @@ function init_battler(src, is_enemy)
 	}
 end
 
-function init_battle()
-
-	--battle test data
-	battle={
-		state=1,
-		active_char=1,
-		enemy={
-			name="rat",
-			sprite=70,
-			hp=15,
-			maxhp=15,
-			atk=10,
-			def=4,
-			status={}
-		},
-		message="your turn!",
-		battle_select=1,
-		anim_timer=0,
-		frames=0,
-		player_defends=false,
-		enemy_defends=false,
-		result=nil
-	}
-	--anim config
-	anim={
-		frames=0,
-		maxframes=0,
-		fn=nil,
-		done=nil
-	}
-	
-	--wheel init
-	wheel={
-  		angle=0,
-  		speed=2,
-  		spinning=false
-	}
-	zones={
-  		{label="miss",zone_start=0,zone_stop=200,result="miss"},
-  		{label="hit",zone_start=200,zone_stop=320,result="hit"},
-  		{label="crit",zone_start=320,zone_stop=360,result="crit"}
-	}
-	
-	init_battlers()
-	
-	--setup main functions
-	scene="battle"
-	_update = update_battle 
-	_draw = draw_battle
-end
-
--- init battler helper
-function init_battlers()
-	party={
-  		{name="knight",hp=30,maxhp=30,atk=8,zones=zones_physical},
-  		{name="mage",hp=20,maxhp=20,atk=12,zones=zones_magic},
-  		{name="rogue",hp=22,maxhp=22,atk=7,zones=zones_rogue},
-  		{name="healer",hp=18,maxhp=18,atk=4,zones=zones_heal}
-	}
-	e_spr=battle.enemy.sprite
-	p_spr=2
-end
-
--- update battle scene
+--update battle scene
 function update_battle()
 	battle.anim_timer-=1
 		
@@ -855,7 +820,7 @@ function update_battle()
 	end
 end
 
--- draw battle scene
+--draw battle scene
 function draw_battle()
 	cls()
 	--enemy info
@@ -899,6 +864,53 @@ function draw_bar(x,y,val,maxval,col)
 	local fill=max(0,flr((val/maxval)*w)-1)
 	if fill>0 then rectfill(x+1,y+1,x+fill,y+3,col) end
 	print(val.."/"..maxval,x+w+2,y,7)
+end
+
+function draw_enemy_row(enemies, center_x, y, padding)
+ --lays out a list of entities in a horizontal row, centered on center_x
+ --each entity needs an e.w (sprite width in pixels)
+	padding = padding or 4
+    local total_w = 0
+    for i,e in ipairs(enemies) do
+        total_w += e.w
+        if i < #enemies then total_w += padding end
+    end
+
+    local x = center_x - total_w/2
+    for i,e in ipairs(enemies) do
+        e.x = x
+        e.y = y
+        x += e.w + padding
+    end
+end
+
+function draw_battle_layout()
+    --enemies are centered & count-flexible
+    for i,e in ipairs(battle.enemies) do
+        e.w = e.w or 16 --default sprite width if not set per-enemy
+    end
+    draw_enemy_row(battle.enemies, 64, 40, 6) --center_x=64 (mid-screen), y=40
+
+    --battlers: always 4, so just use fixed slots instead of layout_row
+    local battler_slots = {
+        {x=68,  y=70},
+        {x=84,  y=78},
+        {x=100, y=70},
+        {x=116, y=78},
+    }
+    for i,b in ipairs(battle.battlers) do
+        b.x = battler_slots[i].x
+        b.y = battler_slots[i].y
+    end
+end
+
+function draw_battle_sprites()
+    for i,e in ipairs(battle.enemies) do
+        spr(e.sprite, e.x, e.y, e.w/8, e.h/8 or 2)
+    end
+    for i,b in ipairs(battle.battlers) do
+        spr(b.sprite, b.x, b.y, b.w/8 or 1, b.h/8 or 1)
+    end
 end
 
 function update_battle_menu()
@@ -978,7 +990,7 @@ function update_battle_menu()
 	end
 end
 
--- battle animations
+--battle animations
 function play_anim(maxframes,fn,done)
 	anim.frames=maxframes
 	anim.maxframes=maxframes
@@ -1005,7 +1017,7 @@ function heal_anim(heal)
 		end)
 end
 
--- wheel logic
+--wheel logic
 function update_wheel()
 	if wheel.spinning then
 		wheel.angle=(wheel.angle+wheel.speed)%360
@@ -1154,6 +1166,10 @@ function party_interact(x,y)
  	end
 	--check for items to pickup
 
+end
+
+function party_set_leader()
+	party.sprite = party.members[1].sprite
 end
 
 function refresh_stats(member,refresh)
