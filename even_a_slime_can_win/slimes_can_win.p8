@@ -47,7 +47,8 @@ function init_game()
 	init_titles()
 	init_skills()
 	init_skillpools()
-	--init_npcs()
+	init_npcs()
+	init_dialogue()
 	init_party()
 	set_wait(30)
 	_update=update_game
@@ -66,7 +67,7 @@ end
 function init_titles()
 	titles={
 		immortal={
-			name="The Immortal",
+			name="the immortal",
 			sprite=8,
 			arrow=133,
 			zones={
@@ -77,7 +78,7 @@ function init_titles()
 			}
 		},
 		quick_blow={
-			name="The Quick Blow",
+			name="the quick blow",
 			sprite=1,
 			arrow=132,
 			zones={
@@ -88,7 +89,7 @@ function init_titles()
 			}
 		},
 		eldest={
-			name="The Eldest's Legacy",
+			name="the eldest's legacy",
 			sprite=1,
 			arrow=132,
 			zones={
@@ -99,7 +100,7 @@ function init_titles()
 			}
 		},
 		slip_master={
-			name="The Slip Master",
+			name="the slip naster",
 			sprite=1,
 			arrow=132,
 			zones={
@@ -110,7 +111,7 @@ function init_titles()
 			}
 		},
 		coiled={
-			name="The Coiled One",
+			name="the coiled one",
 			sprite=1,
 			arrow=132,
 			zones={
@@ -121,7 +122,7 @@ function init_titles()
 			}
 		},
 		constrictor={
-			name="The Constrictor",
+			name="the constrictor",
 			sprite=1,
 			arrow=132,
 			zones={
@@ -132,7 +133,7 @@ function init_titles()
 			}
 		},
 		red={
-			name="The Red",
+			name="the red",
 			sprite=15,
 			arrow=134,
 			zones={
@@ -143,7 +144,7 @@ function init_titles()
 			}
 		},
 		once_red={
-			name="The Once Red",
+			name="the once red",
 			sprite=29,
 			arrow=136,
 			zones={
@@ -154,7 +155,7 @@ function init_titles()
 			}
 		},
 		green={
-			name="The Green",
+			name="the green",
 			sprite=22,
 			arrow=135,
 			zones={
@@ -165,7 +166,7 @@ function init_titles()
 			}
 		},
 		metal_sworn={
-			name="The Metalsworn",
+			name="the metalsworn",
 			sprite=57,
 			arrow=140,
 			zones={
@@ -176,7 +177,7 @@ function init_titles()
 			}
 		},
 		metal={
-			name="The Metal",
+			name="the metal",
 			sprite=50,
 			arrow=139,
 			zones={
@@ -187,7 +188,7 @@ function init_titles()
 			}
 		},
 		creeping_death={
-			name="The Creeping Death",
+			name="the creeping death",
 			sprite=43,
 			arrow=138,
 			zones={
@@ -198,7 +199,7 @@ function init_titles()
 			}
 		},
 		kingslayer={
-			name="The Kingslayer",
+			name="the kingslayer",
 			sprite=36,
 			arrow=137,
 			zones={
@@ -291,9 +292,10 @@ end
 function init_npcs()
 	--npcs
 	npcs={
-		guard={
+		{
 			name="guard",
-			x=60, y=40,
+			x=12, y=8,
+			sprite=1,
 			dialogue={
 				{
 					cond=function()
@@ -326,9 +328,10 @@ function init_npcs()
 				}
 			}
 		},
-		merchant={
+		{
 			name="merchant",
-			x=90, y=50,
+			x=8, y=4,
+			sprite=1,
 			dialogue={
 				{
 					cond=function()
@@ -355,14 +358,14 @@ end
 
 function init_party()
 	party={
-		x=0,
-		y=0,
+		x=3,
+		y=3,
 		dx=0, --x facing: -1 (left), 0, 1 (right)
 		dy=-1, --y facing: -1 (up), 0, 1 (down)
 		sprite=1,
 		members={
 			init_member("slime1,immortal,1,1,1,1"),
-			init_member("slime2,quick_draw,1,1,1,1"),
+			init_member("slime2,quick_blow,1,1,1,1"),
 			init_member("slime3,eldest,1,1,1,1"),
 			init_member("slime4,red,1,1,1,1")
 		},
@@ -573,6 +576,9 @@ function draw_game()
 			draw_map()
 			draw_npcs()
 			draw_party()
+			--test start
+			print("npc: "..npcs[1].name,0,0,7)
+			--test end
 		end
 	else
 		draw_win_lose()
@@ -739,6 +745,8 @@ end
 
 --init battle helpers
 function init_battler(src, is_enemy)
+	local zones=src.active_zones or {}
+
 	return {
 		member=src, -- keep a reference back to the source-of-truth data
 		name=src.name,
@@ -753,11 +761,11 @@ function init_battler(src, is_enemy)
 		spd=src.spd,
 		matk=src.matk,
 		mdef=src.mdef,
-		zones=src.active_zones,
+		zones=zones,
 		skills=src.skills,
 		status={},
 		temp_stats=init_temp_stats(),
-		spin=init_spin(src.active_zones)
+		spin=init_spin(zones)
 	}
 end
 
@@ -1088,7 +1096,7 @@ end
 
 function draw_npcs()
 	for npc in all(npcs) do
-  		draw_npc(npc.sprite, npc.x, npc.y)
+  		draw_npc(npc.sprite,npc.x,npc.y)
  	end
 end
 
