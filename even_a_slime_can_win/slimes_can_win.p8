@@ -55,7 +55,7 @@ function init_game()
 	_draw=draw_game
 end
 
-function init_battle()
+function init_battle(enemy_group_id)
 	scene="battle"
 	menu_sel=1
 	set_wait(30)
@@ -302,11 +302,29 @@ function init_npcs()
 					return not get_flag("enemies_defeated")
 					end,
 					pages={
-						"the city is under\nattack! monsters\nfrom the east!",
-						"please, you must\nhelp us before it\nis too late!",
+						"the city is under attack!\nmonsters from the east!",
+						"please, you must help us\nbefore it is too late!"
 					},
 					on_end=function()
 					set_flag("quest_started", true)
+					end,
+				},
+				{
+					cond=function()
+						return get_flag("quest_started") 
+						and not get_flag("enemies_defeated")
+					end,
+					pages={
+						"here they come!"
+					},
+					on_end=function()
+						start_battle("east_gate_monsters", function(won)
+							if won then
+								set_flag("enemies_defeated", true)
+							else
+								-- optional: handle loss, retry, game over, etc.
+							end
+						end)
 					end,
 				},
 				{
@@ -315,14 +333,14 @@ function init_npcs()
 					and not get_flag("mayor_thanked")
 					end,
 					pages={
-						"you did it! the\nmonsters are gone!",
-						"the mayor wants to\nspeak with you at\nthe town hall.",
+						"you did it! the monsters\nare gone!",
+						"the mayor wants to speak\nwith you at the town\nhall."
 					},
 					on_end=nil,
 				},
 				{
 					pages={
-						"the city is safe\nonce more, thanks\nto you.",
+						"the city is safe once more\nthanks to you."
 					},
 					on_end=nil,
 				}
@@ -338,14 +356,14 @@ function init_npcs()
 					return not get_flag("quest_started")
 					end,
 					pages={
-						"sorry, i'm closed\nright now. come\nback later.",
+						"sorry, i'm closed right now.\ncome back later."
 					},
 					on_end=nil,
 					},
 				{
 					pages={
-						"welcome! looking\nfor supplies before\nyour journey?",
-						"i have potions,\nropes, and maps\navailable.",
+						"welcome! looking for supplies\nbefore your journey?",
+						"i have potions, ropes, and \nmaps available."
 					},
 					on_end=function()
 					set_flag("merchant_visited", true)
@@ -372,6 +390,14 @@ function init_party()
 		inventory={}
 	}
 	party_set_leader()
+end
+
+function init_enemies()
+	--should be fun...
+end
+
+function init_enemy_groups()
+	--also fun, consumed by init_battle and turned into battlers
 end
 
 --init window functions
@@ -489,7 +515,11 @@ function update_game()
 	if wait_check() then
 		if (not game_over) then
 			update_map()
-			update_party()
+			if dialogue.active then
+				update_dialogue()
+			else 
+				update_party()
+			end
 			check_win_lose()
 		else
 			if (btnp(5)) extcmd("reset")
@@ -576,9 +606,15 @@ function draw_game()
 			draw_map()
 			draw_npcs()
 			draw_party()
-			--test start
-			print("npc: "..npcs[1].name,0,0,7)
-			--test end
+			draw_dialogue()
+			--==test start==
+			--print("npc: "..npcs[1].name.." x: "..npcs[1].x.." y: "..npcs[1].y,0,0,7)
+			--print("p.x: "..party.x.." p.y: "..party.y,0,8,7)
+			--print("t.x: "..(party.x+party.dx).." t.y: "..(party.y+party.dy),0,16,7)
+			--print("d.active: "..tostring(dialogue.active),0,24,7)
+			--print("dlg.page: "..tostring(dialogue.page),0,0,7)
+			--print("pages: "..tostring(dialogue.entry and dialogue.entry.pages),0,8,7)
+			--==test end==
 		end
 	else
 		draw_win_lose()
@@ -612,7 +648,7 @@ function draw_dialogue()
 	local nw=#name*4+p*2
 	rectfill(bx,by-dialogue.name_h,bx+nw,by,1)
 	rect(bx,by-dialogue.name_h,bx+nw,by,7)
-	print(name,bx+p,by-dialogue.name_h+1,10)
+	print(name,bx+p,by-dialogue.name_h+2,10)
 	end
 
 	-- page text
@@ -621,7 +657,7 @@ function draw_dialogue()
 
 	-- advance prompt w/ blink
 	if (time()*4)%2<1 then
-	print("v",bx+bw-6,by+bh-6,6)
+	print("z",bx+bw-6,by+bh-6,6)
 	end
 end
 
@@ -661,7 +697,7 @@ end
 function dialogue_advance()
 	if not dialogue.active then return end
 
-	if dialogue.page<#dialogue.entry.pages then
+	if dialogue.page < #dialogue.entry.pages then
 		dialogue.page+=1
 	else
 		dialogue_close()
@@ -769,6 +805,10 @@ function init_battler(src, is_enemy)
 	}
 end
 
+function start_battle(enemy_group_id, on_battle_end)
+    battle = init_battle(enemy_group_id)
+    battle.on_end = on_battle_end
+end
 --update battle scene
 function update_battle()
 	battle.anim_timer-=1
@@ -787,7 +827,7 @@ function update_battle()
    			battle.state=battle_state.result
   		end
  	elseif battle.state==battle_state.player_result then
-  		apply_result(battle.result)
+  		apply_spin_result(battle.result)
   		-- advance to next character or enemy turn
 	elseif battle.state==battle_state.enemy_turn then
 		--wait for animation, then enemy acts
@@ -1026,6 +1066,10 @@ function heal_anim(heal)
 end
 
 --wheel logic
+function init_spin()
+	--I imagine setting/resetting variables...
+end
+
 function update_wheel()
 	if wheel.spinning then
 		wheel.angle=(wheel.angle+wheel.speed)%360
@@ -1057,6 +1101,9 @@ function draw_wheel(cx,cy,r)
  	line(cx,cy,nx,ny,7)
 end
 
+function apply_spin_result()
+	--the idea would be to apply the result of the spin to the battle. Basically kick off skills or effects
+end
 
 -->8
 --map code
@@ -1158,9 +1205,6 @@ function party_interact(x,y)
 	
 	--check for npc dialogue
 	if btnp(🅾️) and dialogue.active==false then 
- 		talking=true
- 	end
- 	if talking then
  		for npc in all(npcs) do
   			-- distance check between player and this specific npc
   			if targetx==npc.x and targety==npc.y then
@@ -1168,9 +1212,6 @@ function party_interact(x,y)
    				break
   			end
  		end
- 	end
- 	if dialogue.active==false then
- 		talking=false
  	end
 	--check for items to pickup
 
