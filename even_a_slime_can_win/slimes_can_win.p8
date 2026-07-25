@@ -50,6 +50,7 @@ function init_game()
 	init_npcs()
 	init_dialogue()
 	init_party()
+	init_status()
 	set_wait(30)
 	_update=update_game
 	_draw=draw_game
@@ -482,6 +483,15 @@ function init_member(string_data)
 	return member
 end
 
+function init_item(string_data)
+	local name,desc,quantity=unpack(split(string_data))
+	return {
+		name=name,
+		desc=desc,
+		quantity=quantity
+	}
+end
+
 --main config
 _init = init_intro
 -->8
@@ -518,8 +528,13 @@ function update_game()
 			update_map()
 			if dialogue.active then
 				update_dialogue()
-			else 
+			elseif status.active then
+				update_status()
+			else
 				update_party()
+				if btnp(5) then
+					init_status()
+				end
 			end
 			check_win_lose()
 		else
@@ -532,18 +547,18 @@ end
 function update_party()
 	local movex,movey=0,0
 	
-	if btnp(⬅️) then
+	if btnp(0) then
 	 	party.sprite_offset=2
 		movex,flip_x=-1,true
-	elseif btnp(➡️) then 
+	elseif btnp(1) then 
 		party.sprite_offset=2
 		movex,flip_x=1,false
 	end
 
-	if btnp(⬆️)	then
+	if btnp(2)	then
 		party.sprite_offset=1
 		movey=-1
-	elseif btnp(⬇️) then
+	elseif btnp(3) then
 		party.sprite_offset=0
 		movey=1
 	end
@@ -609,6 +624,7 @@ function draw_game()
 			draw_npcs()
 			draw_party()
 			draw_dialogue()
+			draw_status()
 			--==test start==
 			--print("npc: "..npcs[1].name.." x: "..npcs[1].x.." y: "..npcs[1].y,0,0,7)
 			--print("p.x: "..party.x.." p.y: "..party.y,0,8,7)
@@ -650,7 +666,7 @@ function draw_dialogue()
 	local nw=#name*4+p*2
 	rectfill(bx,by-dialogue.name_h,bx+nw,by,1)
 	rect(bx,by-dialogue.name_h,bx+nw,by,7)
-	print(name,bx+p,by-dialogue.name_h+2,10)
+	print(name,bx+p,by-dialogue.name_h+2,7)
 	end
 
 	-- page text
@@ -1206,7 +1222,7 @@ function party_interact(x,y)
 	--check for fight
 	
 	--check for npc dialogue
-	if btnp(🅾️) and dialogue.active==false then 
+	if btnp(4) and dialogue.active==false then 
  		for npc in all(npcs) do
   			-- distance check between player and this specific npc
   			if targetx==npc.x and targety==npc.y then
@@ -1254,6 +1270,185 @@ function refresh_stats(member,refresh)
 	end
 	member.hp = member.maxhp
 	return member
+end
+
+function init_status()
+	local setup=status==nil
+
+	status={
+		active=not setup,
+		mode="list",
+		cursor=1,
+		skill_cursor=1
+	}
+end
+
+function update_status()
+	if status.mode=="list" then
+		if btnp(0) or btnp(1) then
+			status.mode="inventory"
+		end
+		if btnp(2) then
+			status.cursor=status.cursor-1
+			if status.cursor<1 then status.cursor=#party.members end
+		end
+		if btnp(3) then
+			status.cursor=status.cursor+1
+			if status.cursor>#party.members then status.cursor=1 end
+		end
+		if btnp(4) then
+			status.mode="detail"
+			status.skill_cursor=1
+		end
+		if btnp(5) then
+			status.active=false
+		end
+	elseif status.mode=="inventory" then
+		if btnp(0) or btnp(1) then
+			status.mode="list"
+		end
+		if btnp(2) then
+			status.item_cursor=status.item_cursor-1
+			if status.item_cursor<1 then status.item_cursor=#party.inventory end
+		end
+		if btnp(3) then
+			status.item_cursor=status.item_cursor+1
+			if status.item_cursor>#party.inventory then status.item_cursor=1 end
+		end
+		if btnp(5) then
+			status.active=false
+		end
+	elseif status.mode=="detail" then
+		local skills=skill_pools[party.members[status.cursor].title]
+		if btnp(2) then
+			status.skill_cursor=status.skill_cursor-1
+			if status.skill_cursor<1 then status.skill_cursor=#skills end
+		end
+		if btnp(3) then
+			status.skill_cursor=status.skill_cursor+1
+			if status.skill_cursor>#skills then status.skill_cursor=1 end
+		end
+		if btnp(4) then
+			status.mode="skill_detail"
+		end
+		if btnp(5) then
+			status.mode="list"
+		end
+
+	else --skill_detail
+		if btnp(5) or btnp(4) then
+			status.mode="detail"
+		end
+	end
+end
+
+function draw_status()
+	if not status.active then return end
+
+	if status.mode=="list" then
+		draw_status_list()
+	elseif status.mode=="inventory" then
+		draw_status_inventory()
+	elseif status.mode=="detail" then
+		draw_status_detail(party.members[status.cursor])
+	else
+		draw_skill_detail(skill_pools[party.members[status.cursor].title][status.skill_cursor])
+	end
+end
+
+function draw_status_list()
+	cls(0)
+	print("party status",4,2,7)
+	line(0,9,127,9,5)
+
+	for i,m in pairs(party.members) do
+		local y=12+(i-1)*28
+
+		if i==status.cursor then
+			rectfill(0,y-1,127,y+22,1)
+		end
+
+		print(m.name,4,y,7)
+		print(m.title,4,y+7,6)
+
+		print("hp",44,y,8)
+		rectfill(56,y,56+m.maxhp*4,y+4,1)
+		rectfill(56,y,56+m.hp*4,y+4,8)
+
+		print("mp",44,y+7,12)
+		rectfill(56,y+7,56+(m.maxmp>0 and m.maxmp*4 or 0),y+11,1)
+		rectfill(56,y+7,56+m.mp*4,y+11,12)
+
+		print("str"..m.str.." dex"..m.dex.." con"..m.con.." mag"..m.mag,4,y+15,13)
+
+		line(0,y+24,127,y+24,5)
+	end
+end
+
+function draw_status_detail(m)
+	cls(0)
+	print(m.name,4,2,7)
+	print(m.title,4,9,6)
+	line(0,16,127,16,5)
+
+	print("hp "..m.hp.."/"..m.maxhp,4,20,8)
+	print("mp "..m.mp.."/"..m.maxmp,4,27,12)
+
+	print("atk "..m.atk,4,38,7)
+	print("def "..m.def,4,45,7)
+	print("spd "..m.spd,4,52,7)
+	print("matk "..m.matk,64,38,7)
+	print("mdef "..m.mdef,64,45,7)
+
+	line(0,60,127,60,5)
+	print("skills",4,63,7)
+
+	local skills=skill_pools[m.title]
+	for i,s in pairs(skills) do
+		local y=70+(i-1)*7
+		if i==status.skill_cursor then
+			rectfill(0,y-1,127,y+5,1)
+		end
+		print(s.name,4,y,13)
+		print(s.mp_cost.."mp",90,y,12)
+	end
+
+	print("🅾️ view ❎ back",4,120,6)
+end
+
+function draw_skill_detail(s)
+	cls(0)
+	print(s.name,4,2,7)
+	print(s.type,4,9,6)
+	line(0,16,127,16,5)
+
+	print("mp cost "..s.mp_cost,4,20,12)
+
+	print(s.desc,4,32,7)
+
+	print("🅾️/❎ back",4,120,6)
+end
+
+function draw_status_inventory()
+	cls(0)
+	print("party inventory",4,2,7)
+	line(0,9,127,9,5)
+
+	for i,item in pairs(party.inventory) do
+		local y=12+(i-1)*10
+		if i==status.item_cursor then
+			rectfill(0,y-1,127,y+7,1)
+		end
+		print(item.name,4,y,7)
+		print("x"..item.quantity,100,y,10)
+	end
+
+	line(0,110,127,110,5)
+	if party.inventory[status.item_cursor] then
+		print(party.inventory[status.item_cursor].desc,4,113,6)
+	end
+
+	print("⬅️➡️ party  🅾️ back",4,122,6)
 end
 
 -->8
