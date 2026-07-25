@@ -299,7 +299,7 @@ function init_npcs()
 			dialogue={
 				{
 					cond=function()
-					return not get_flag("enemies_defeated")
+					return not get_flag("quest_started")
 					end,
 					pages={
 						"the city is under attack!\nmonsters from the east!",
@@ -381,6 +381,7 @@ function init_party()
 		dx=0, --x facing: -1 (left), 0, 1 (right)
 		dy=-1, --y facing: -1 (up), 0, 1 (down)
 		sprite=1,
+		sprite_offset=0,
 		members={
 			init_member("slime1,immortal,1,1,1,1"),
 			init_member("slime2,quick_blow,1,1,1,1"),
@@ -392,8 +393,8 @@ function init_party()
 	party_set_leader()
 end
 
-function init_enemies()
-	--should be fun...
+function init_enemies(string_data)
+	local name,maxhp,str,dex,con,mag=unpack(split(string_data))
 end
 
 function init_enemy_groups()
@@ -529,33 +530,34 @@ end
 
 --update party and window functions
 function update_party()
-	local movex=0
-	local movey=0
+	local movex,movey=0,0
 	
 	if btnp(⬅️) then
-	 movex=-1
-	 flip_x=true
+	 	party.sprite_offset=2
+		movex,flip_x=-1,true
+	elseif btnp(➡️) then 
+		party.sprite_offset=2
+		movex,flip_x=1,false
 	end
-	if btnp(➡️) then 
-		movex=1
-		flip_x=false
+
+	if btnp(⬆️)	then
+		party.sprite_offset=1
+		movey=-1
+	elseif btnp(⬇️) then
+		party.sprite_offset=0
+		movey=1
 	end
-	if (btnp(⬆️))	movey=-1
-	if (btnp(⬇️))	movey=1
-	
+
 	if movex!=0 or movey!=0 then
-		party.dx=movex
-		party.dy=movey
+		party.dx,party.dy=movex,movey
 	end
 	
-	local newx=party.x+movex
-	local newy=party.y+movey
+	local newx,newy=party.x+movex,party.y+movey
 	
 	party_interact(newx,newy)
 		
-	if (can_move(newx,newy)) then
-		party.x=mid(0,newx,127)
-		party.y=mid(0,newy,63)
+	if can_move(newx,newy) then
+		party.x,party.y=mid(0,newx,127),mid(0,newy,63)
 	else
 		sfx(0)
 	end
@@ -623,7 +625,7 @@ end
 
 --draw party and window functions
 function draw_party()
-	spr(party.sprite,party.x*8,party.y*8,1.0,1.0,flip_x)
+	spr(party.sprite+party.sprite_offset,party.x*8,party.y*8,1.0,1.0,flip_x)
 end
 
 function draw_dialogue()
