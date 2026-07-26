@@ -216,57 +216,57 @@ end
 function init_skills()
 	skills={
 		--immortal
-		immortal=init_skill("immortal,passive,0,resurrect at beginning of round"),
-		revenge=init_skill("revenge,active,0,deals damage based on # of deaths since last use"),
+		immortal=init_skill("immortal,passive,0,resurrect at the beginning of the round with 50% hp."),
+		revenge=init_skill("revenge,active,0,deals damage based on the number of deaths suffered since last use."),
 		--quick_blow
-		stunning=init_skill("stunning,passive,0,all attacks have a chance to stun"),
-		quick_blow=init_skill("quick blow,active,0,deals damage with higher priority"),
+		stunning=init_skill("stunning,passive,0,all attacks have a 25% chance to stun."),
+		quick_blow=init_skill("quick blow,active,0,deals damage to single target with higher spd priority."),
 		--eldest
-		legacy=init_skill("eldest's legacy,passive,0,increased HP by 300%"),
-		gift=init_skill("eldest's gift,active,0,give a portion of your hp to others 1:3"),
+		legacy=init_skill("eldest's legacy,passive,0,increased max hp by 300%."),
+		gift=init_skill("eldest's gift,active,0,gift a portion of your hp to others as healing with a 1:3 ratio."),
 		--slip_master
-		slippery=init_skill("slippery,passive,0,upon dodging an attack inflict prone"),
-		slip_stance=init_skill("slip stance,active,0,dodge all physical attacks but cannot act"),
+		slippery=init_skill("slippery,passive,0,upon dodging an attack inflict prone on attacker."),
+		slip_stance=init_skill("slip stance,active,0,take a slippery stance which dodges all physical attacks."),
 		--coiled
-		capitalize=init_skill("capitalize,passive,0,deals double damage to stunned, proned, or constrict"),
-		coil=init_skill("coil,active,0,charges for x turns and deals x * damage"),
+		capitalize=init_skill("capitalize,passive,0,deals double damage to stunned, proned, or constricted enemies."),
+		coil=init_skill("coil,active,0,charges a powerful attack for x turns and deals x * damage."),
 		--constrictor
-		lingering=init_skill("lingering impact,passive,0,when a debuff caused by you is removed add new debuffs"),
-		constrict=init_skill("constrict,active,0,constrict target based on strength"),
+		lingering=init_skill("lingering impact,passive,0,when a debuff caused directly by you is removed add new debuffs in it's place."),
+		constrict=init_skill("constrict,active,0,constrict a single target which prevents them from acting. constrict holds based on strength vs target strength."),
 		--red
-		red=init_skill("red,passive,0,can use magic and gain mp based on magic stat"),
+		red=init_skill("red,passive,0,gains access to spells and gains mp based on mag stat with a 5:1 ratio"),
 		gold_burn=init_skill("gold burn,passive,0,each coin used to regain mp reduces maxhp by 1"),
-		recover_mp=init_skill("recover mp,active,1,use a coin to recover all mp & increase max by 3"),
+		recover_mp=init_skill("recover mp,active,1,use a coin to recover all mp & increase max mp by 3"),
 		--once_red
-		once_red=init_skill("once red,passive,0,can use magic and retains mp from being red"),
+		once_red=init_skill("once red,passive,0,retains access to spells and mp from being red"),
 		mana_dart=init_skill("mana dart,active,1,magical damage based on remaining mana"),
 		--green
-		green=init_skill("green,passive,0,can absorb herbs as charges to be used in healing"),
+		green=init_skill("green,passive,0,can absorb herbs as charges to be used in healing skills"),
 		healing_poultice=init_skill("healing poultice,active,0,use 1 charge to heal a single target"),
-		the_green=init_skill("the green,active,0,use 3 charges to heal the party"),
+		the_green=init_skill("the green,active,0,use 3 charges to heal the whole party"),
 		--metal_sworn
 		metal_sworn=init_skill("metal_sworn,passive,0,once the metal is absorbed a new power will be born"),
-		absorb=init_skill("absorb,active,0,restores a low amount of hp to self"),
+		absorb=init_skill("absorb,active,0,absorbs some of the metal and restores a low amount of hp to self"),
 		--metal
-		metal=init_skill("metal,passive,0,damage taken reduced by 50%"),
-		sword=init_skill("sword,active,0,deals 2x damage & can inflict bleeding"),
-		shield=init_skill("shield,active,0,takes the hits for the party for a turn"),
+		metal=init_skill("metal,passive,0,all damage taken reduced by 50%"),
+		sword=init_skill("sword,active,0,deals double damage & can inflict bleeding on a single target"),
+		shield=init_skill("shield,active,0,acts as a shield by taking the hits for the party for a turn"),
 		--creeping_death
 		purple=init_skill("purple,passive,0,physical attacks dealt or taken can inflict poison"),
-		poison_impact=init_skill("poison impact,active,0,deals damage based on # of poison stacks"),
+		poison_impact=init_skill("poison impact,active,0,deals damage based on number of poison stacks on target"),
 		--kingslayer
-		kingslayer=init_skill("kingslayer,passive,0,deal 2x total damage to boss enemies or 3x if bleeding"),
-		sharpen=init_skill("sharpen,active,0,increases attack stat by 4 (stacks up to 3)"),
+		kingslayer=init_skill("kingslayer,passive,0,deal 2x total damage to boss enemies or 3x if they are bleeding"),
+		sharpen=init_skill("sharpen,active,0,increases a single target's atk stat by 4 (stacks up to 3 times)"),
 		--spells
-		fire_dart=init_skill("fire dart,active,1,fire damage to single target"),
-		lesser_fireball=init_skill("lesser fireball,active,1,fire damage & chance to inflict burn"),
-		lesser_heat=init_skill("lesser heat,active,1,if wearing metal target takes fire damage & def debuff"),
-		cold_breeze=init_skill("cold breeze,active,1,ice damage to single target"),
-		lesser_frost=init_skill("lesser frost,active,1,ice damage & chance to inflict slow"),
-		static_bolt=init_skill("static bolt,active,1,lightning damage to random target"),
-		lesser_lightning=init_skill("lesser lightning,active,1,lightning damage & chance to inflict stun"),
-		minor_shielding=init_skill("minor shielding,active,1,increases defense by 4 to single target"),
-		minor_bulwark=init_skill("minor bulwark,active,1,increases defense by 4 to party")
+		fire_dart=init_skill("fire dart,active,1,deals minor fire damage to a single target"),
+		lesser_fireball=init_skill("lesser fireball,active,1,deals moderate fire damage to a single target with a 50% chance to inflict burn"),
+		lesser_heat=init_skill("lesser heat,active,1,if wearing metal a single target takes major fire damage and is inflicted with a def debuff"),
+		cold_breeze=init_skill("cold breeze,active,1,deals minor ice damage to a single target"),
+		lesser_frost=init_skill("lesser frost,active,1,deals moderate ice damage to a single target with a 50% chance to inflict slow"),
+		static_bolt=init_skill("static bolt,active,1,deals moderate lightning damage to a random target"),
+		lesser_lightning=init_skill("lesser lightning,active,1,deals major lightning damage to a random target with a 50% chance to inflict stun"),
+		minor_shielding=init_skill("minor shielding,active,1,increases a single target's def by 4 (stacks up to 3 times)"),
+		minor_bulwark=init_skill("minor bulwark,active,1,increases the whole party's def by 4 (stacks up to 3 times)")
 	}
 end
 
@@ -389,7 +389,8 @@ function init_party()
 			init_member("slime3,eldest,1,1,1,1"),
 			init_member("slime4,red,1,1,1,1")
 		},
-		inventory={}
+		inventory={},
+		gold=0
 	}
 	party_set_leader()
 end
@@ -475,6 +476,8 @@ function init_member(string_data)
 		dex_total=0,
 		con_total=0,
 		mag_total=0,
+		maxhp_total=0,
+		maxmp_total=0,
 		status={},
 		temp_stats=init_temp_stats(),
 		skills=skill_pools[title]
@@ -647,11 +650,7 @@ end
 function draw_dialogue()
 	if not dialogue.active then return end
 
-	local bx=dialogue.box_x
-	local by=dialogue.box_y
-	local bw=dialogue.box_w
-	local bh=dialogue.box_h
-	local p=dialogue.pad
+	local bx, by, bw, bh, p= dialogue.box_x, dialogue.box_y, dialogue.box_w, dialogue.box_h, dialogue.pad
 	
 	-- shadow
 	rectfill(bx+2,by+2,bx+bw+2,by+bh+2,0)
@@ -675,7 +674,7 @@ function draw_dialogue()
 
 	-- advance prompt w/ blink
 	if (time()*4)%2<1 then
-	print("z",bx+bw-6,by+bh-6,6)
+	print("🅾️",bx+bw-8,by+bh-6,6)
 	end
 end
 
@@ -1242,8 +1241,8 @@ end
 function refresh_stats(member,refresh)
 	--sets all member stats
 	local refresh=refresh or false
-	local temp_str,temp_dex,temp_con,temp_mag,temp_atk,temp_def,temp_spd,temp_matk,temp_mdef=unpack(member.temp_stats)
-	local maxhp_start=member.maxhp
+	local temp_str,temp_dex,temp_con,temp_mag,temp_atk,temp_def,temp_spd,temp_matk,temp_mdef,temp_maxhp,temp_maxmp=unpack(member.temp_stats)
+	local maxhp_start,maxmp_start=member.maxhp,member.maxmp
 	
 	member.str_total=member.str+temp_str
 	member.dex_total=member.dex+temp_dex
@@ -1255,20 +1254,44 @@ function refresh_stats(member,refresh)
 	member.spd = (member.dex_total * 2) + temp_spd
 	member.matk = (member.mag_total * 2) + temp_matk
 	member.mdef = (member.mag_total * 2) + temp_mdef
-	member.maxhp = max(1,member.con_total) * 5
+	
+	member.maxhp_total=max(1,(max(1,member.con_total) * 5) + temp_maxhp)
+	member.maxmp_total=max(0,member.maxmp + temp_maxmp)
+	
 	if refresh then
 		--if maxhp increases hp increases
-		local hpdiff=member.maxhp-maxhp_start
+		local hpdiff,mpdiff=member.maxhp_total-maxhp_start,member.maxmp_total-maxmp_start
 		if hpdiff>0 then
+			member.maxhp+=hpdiff
 			member.hp+=hpdiff
 		end
+		if mpdiff>0 then
+			member.maxmp+=mpdiff
+			member.mp+=mpdiff
+		end
 		--if maxhp decreases hp decreases to match maxhp if over it
-		if member.hp>member.maxhp then
-			member.hp=member.maxhp
+		if member.hp>member.maxhp_total then
+			member.maxhp=member.maxhp_total
+			member.hp=member.maxhp_total
+		end
+		if member.mp>member.maxmp_total then
+			member.maxmp=member.maxmp_total
+			member.mp=member.maxmp_total
 		end
 		return member
 	end
-	member.hp = member.maxhp
+	
+	for i,s in ipairs(member.skills) do
+		if s.name=="red" or s.name=="once red" then
+			member.maxmp_total = (max(1,member.mag_total) * 5) + temp_maxmp
+		end
+		if s.name=="eldest's legacy" then 
+			member.maxhp_total*=3
+		end
+	end
+	
+	member.maxhp, member.maxmp = member.maxhp_total, member.maxmp_total
+	member.hp, member.mp = member.maxhp, member.maxmp
 	return member
 end
 
@@ -1359,6 +1382,7 @@ end
 function draw_status_list()
 	cls(0)
 	print("party status",4,2,7)
+	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
 	line(0,9,127,9,5)
 
 	for i,m in pairs(party.members) do
@@ -1409,8 +1433,12 @@ function draw_status_detail(m)
 		if i==status.skill_cursor then
 			rectfill(0,y-1,127,y+5,1)
 		end
-		print(s.name,4,y,13)
-		print(s.mp_cost.."mp",90,y,12)
+		print(s.name,4,y,s.type=="active" and 7 or 13)
+		if s.name=="recover mp" then
+			print("1 coin",90,y,9)
+		elseif s.mp_cost>0 then
+			print(s.mp_cost.." mp",90,y,12)
+		end
 	end
 
 	print("🅾️ view ❎ back",4,120,6)
@@ -1420,11 +1448,15 @@ function draw_skill_detail(s)
 	cls(0)
 	print(s.name,4,2,7)
 	print(s.type,4,9,6)
+	if s.name=="recover mp" then
+		print("1 coin",90,9,9)
+	elseif s.mp_cost>0 then 
+		print("mp cost "..s.mp_cost,90,9,12)
+	end
 	line(0,16,127,16,5)
 
-	print("mp cost "..s.mp_cost,4,20,12)
-
-	print(s.desc,4,32,7)
+	local detail_wrap = wrap_string(s.desc)
+	print(detail_wrap,4,24,7)
 
 	print("🅾️/❎ back",4,120,6)
 end
@@ -1445,7 +1477,8 @@ function draw_status_inventory()
 
 	line(0,110,127,110,5)
 	if party.inventory[status.item_cursor] then
-		print(party.inventory[status.item_cursor].desc,4,113,6)
+		local desc_wrap = wrap_string(party.inventory[status.item_cursor].desc)
+		print(desc_wrap,4,113,6)
 	end
 
 	print("⬅️➡️ party  🅾️ back",4,122,6)
@@ -1501,6 +1534,9 @@ function menu_control(option_cnt)
 	if btnp(4) then
 		return true
 	end
+	if btnp(5) then
+		return false
+	end
 end
 
 function check_win_lose()
@@ -1521,6 +1557,36 @@ function party_wiped()
  	end
  	return true
 end
+
+function wrap_string(str)
+	local limit,result,cur_line,word=31,"","",""
+
+	local function add_break()
+		if word == "" then return end
+		if #cur_line == 0 then
+			cur_line = word
+		elseif #cur_line + 1 + #word <= limit then
+			cur_line = cur_line.." "..word
+		else
+			result = result..cur_line.."\n"
+			cur_line = word
+		end
+		word = ""
+	end
+
+	for i=1,#str do
+		local c = sub(str,i,i)
+		if c == " " then
+			add_break()
+		else
+			word = word..c
+		end
+	end
+	add_break()
+
+	return result..cur_line
+end
+
 __gfx__
 000000000000000000000000000000000000c0000000c00070000000000000000000000000000000000000000000100000001000700000000000000000000000
 00000000000000000000000000000000000d7c00000d7c007000700000000000000000000000000000000000000d6100000d6100700070000000000000000000
