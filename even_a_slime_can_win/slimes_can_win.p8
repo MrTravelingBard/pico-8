@@ -384,10 +384,10 @@ function init_party()
 		sprite=1,
 		sprite_offset=0,
 		members={
-			init_member("slime1,immortal,1,1,1,1"),
-			init_member("slime2,quick_blow,1,1,1,1"),
-			init_member("slime3,eldest,1,1,1,1"),
-			init_member("slime4,red,1,1,1,1")
+			init_member("nib,immortal,1,1,1,1"),
+			init_member("gig,quick_blow,1,1,1,1"),
+			init_member("mub,eldest,1,1,1,1"),
+			init_member("mab,red,1,1,1,1")
 		},
 		inventory={},
 		gold=0
@@ -456,6 +456,7 @@ function init_member(string_data)
 	local member = {
 		name=name,
 		title=title,
+		title_pretty=titles[title].name,
 		sprite=titles[title].sprite,
 		mastered_titles={},
 		active_zones=titles[title].zones,
@@ -1392,27 +1393,23 @@ function draw_status_list()
 			rectfill(0,y-1,127,y+22,1)
 		end
 
-		print(m.name,4,y,7)
-		print(m.title,4,y+7,6)
+		print(m.name.." "..m.title_pretty,4,y,7)
 
-		print("hp",44,y,8)
-		rectfill(56,y,56+m.maxhp*4,y+4,1)
-		rectfill(56,y,56+m.hp*4,y+4,8)
+		print("hp "..m.hp.."/"..m.maxhp,4,y+7,8)
+		print("mp "..m.mp.."/"..m.maxmp,44,y+7,12)
+		spr(m.sprite,106,y+4)
 
-		print("mp",44,y+7,12)
-		rectfill(56,y+7,56+(m.maxmp>0 and m.maxmp*4 or 0),y+11,1)
-		rectfill(56,y+7,56+m.mp*4,y+11,12)
-
-		print("str"..m.str.." dex"..m.dex.." con"..m.con.." mag"..m.mag,4,y+15,13)
+		print("str "..m.str.." dex "..m.dex.." con "..m.con.." mag "..m.mag,4,y+15,13)
 
 		line(0,y+24,127,y+24,5)
 	end
+	print("⬅️➡️ inventory  🅾️ back",4,122,6)
 end
 
 function draw_status_detail(m)
 	cls(0)
 	print(m.name,4,2,7)
-	print(m.title,4,9,6)
+	print(m.title_pretty,4,9,6)
 	line(0,16,127,16,5)
 
 	print("hp "..m.hp.."/"..m.maxhp,4,20,8)
@@ -1433,7 +1430,7 @@ function draw_status_detail(m)
 		if i==status.skill_cursor then
 			rectfill(0,y-1,127,y+5,1)
 		end
-		print(s.name,4,y,s.type=="active" and 7 or 13)
+		print(s.name,4,y,s.type=="active" and 7 or 15)
 		if s.name=="recover mp" then
 			print("1 coin",90,y,9)
 		elseif s.mp_cost>0 then
@@ -1441,7 +1438,8 @@ function draw_status_detail(m)
 		end
 	end
 
-	print("🅾️ view ❎ back",4,120,6)
+	line(0,120,127,120,5)
+	print("🅾️ view ❎ back",4,122,6)
 end
 
 function draw_skill_detail(s)
@@ -1456,14 +1454,16 @@ function draw_skill_detail(s)
 	line(0,16,127,16,5)
 
 	local detail_wrap = wrap_string(s.desc)
-	print(detail_wrap,4,24,7)
+	print(detail_wrap,4,20,7)
 
-	print("🅾️/❎ back",4,120,6)
+	line(0,120,127,120,5)
+	print("🅾️/❎ back",4,122,6)
 end
 
 function draw_status_inventory()
 	cls(0)
 	print("party inventory",4,2,7)
+	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
 	line(0,9,127,9,5)
 
 	for i,item in pairs(party.inventory) do
@@ -1475,7 +1475,7 @@ function draw_status_inventory()
 		print("x"..item.quantity,100,y,10)
 	end
 
-	line(0,110,127,110,5)
+	line(0,120,127,120,5)
 	if party.inventory[status.item_cursor] then
 		local desc_wrap = wrap_string(party.inventory[status.item_cursor].desc)
 		print(desc_wrap,4,113,6)
