@@ -481,7 +481,8 @@ function init_member(string_data)
 		maxmp_total=0,
 		status={},
 		temp_stats=init_temp_stats(),
-		skills=skill_pools[title]
+		skills=skill_pools[title],
+		spells={} --for now
 	}
 	member = refresh_stats(member)
 	return member
@@ -1322,7 +1323,9 @@ function update_status()
 		end
 		if btnp(4) then
 			status.mode="detail"
+			status.detail_section="skills"
 			status.skill_cursor=1
+			status.spell_cursor=1
 		end
 		if btnp(5) then
 			status.active=false
@@ -1343,23 +1346,38 @@ function update_status()
 			status.active=false
 		end
 	elseif status.mode=="detail" then
-		local skills=skill_pools[party.members[status.cursor].title]
+		local m=party.members[status.cursor]
+		local section=status.detail_section or "skills"
+		local list=section=="skills" and skill_pools[m.title] or {}--spell_pools[m.title]
+
+		if btnp(0) or btnp(1) then
+			status.detail_section=(section=="skills") and "spells" or "skills"
+		end
 		if btnp(2) then
-			status.skill_cursor=status.skill_cursor-1
-			if status.skill_cursor<1 then status.skill_cursor=#skills end
+			if section=="skills" then
+				status.skill_cursor=status.skill_cursor-1
+				if status.skill_cursor<1 then status.skill_cursor=#list end
+			else
+				status.spell_cursor=status.spell_cursor-1
+				if status.spell_cursor<1 then status.spell_cursor=#list end
+			end
 		end
 		if btnp(3) then
-			status.skill_cursor=status.skill_cursor+1
-			if status.skill_cursor>#skills then status.skill_cursor=1 end
+			if section=="skills" then
+				status.skill_cursor=status.skill_cursor+1
+				if status.skill_cursor>#list then status.skill_cursor=1 end
+			else
+				status.spell_cursor=status.spell_cursor+1
+				if status.spell_cursor>#list then status.spell_cursor=1 end
+			end
 		end
 		if btnp(4) then
-			status.mode="skill_detail"
+			status.mode=(section=="skills") and "skill_detail" or "spell_detail"
 		end
 		if btnp(5) then
 			status.mode="list"
 		end
-
-	else --skill_detail
+	else --skill_detail or spell_detail
 		if btnp(5) or btnp(4) then
 			status.mode="detail"
 		end
@@ -1375,8 +1393,10 @@ function draw_status()
 		draw_status_inventory()
 	elseif status.mode=="detail" then
 		draw_status_detail(party.members[status.cursor])
-	else
-		draw_skill_detail(skill_pools[party.members[status.cursor].title][status.skill_cursor])
+	elseif status.mode=="skill_detail" then
+		draw_ability_detail(skill_pools[party.members[status.cursor].title][status.skill_cursor])
+	else --spell_detail
+		--draw_ability_detail(spell_pools[party.members[status.cursor].title][status.spell_cursor])
 	end
 end
 
@@ -1395,11 +1415,11 @@ function draw_status_list()
 
 		print(m.name.." "..m.title_pretty,4,y,7)
 
-		print("hp "..m.hp.."/"..m.maxhp,4,y+7,8)
-		print("mp "..m.mp.."/"..m.maxmp,44,y+7,12)
-		spr(m.sprite,106,y+4)
+		print("hp "..m.hp.."/"..m.maxhp,4,y+8,8)
+		print("mp "..m.mp.."/"..m.maxmp,44,y+8,12)
+		spr(m.sprite,106,y+5)
 
-		print("str "..m.str.." dex "..m.dex.." con "..m.con.." mag "..m.mag,4,y+15,13)
+		print("str "..m.str.." dex "..m.dex.." con "..m.con.." mag "..m.mag,4,y+16,13)
 
 		line(0,y+24,127,y+24,5)
 	end
@@ -1422,12 +1442,22 @@ function draw_status_detail(m)
 	print("mdef "..m.mdef,64,45,7)
 
 	line(0,60,127,60,5)
-	print("skills",4,63,7)
 
-	local skills=skill_pools[m.title]
-	for i,s in pairs(skills) do
+	local section=status.detail_section or "skills"
+	print(section,4,63,7)
+	local list,cursor
+	if section=="skills" then
+		list=skill_pools[m.title]
+		cursor=status.skill_cursor
+	else
+		--list=spell_pools[m.title]
+		list={} --for now
+		cursor=status.spell_cursor
+	end
+
+	for i,s in pairs(list) do
 		local y=70+(i-1)*7
-		if i==status.skill_cursor then
+		if i==cursor then
 			rectfill(0,y-1,127,y+5,1)
 		end
 		print(s.name,4,y,s.type=="active" and 7 or 15)
@@ -1439,10 +1469,10 @@ function draw_status_detail(m)
 	end
 
 	line(0,120,127,120,5)
-	print("🅾️ view ❎ back",4,122,6)
+	print("⬅️➡️ "..section.."  🅾️ view ❎ back",4,122,6)
 end
 
-function draw_skill_detail(s)
+function draw_ability_detail(s)
 	cls(0)
 	print(s.name,4,2,7)
 	print(s.type,4,9,6)
