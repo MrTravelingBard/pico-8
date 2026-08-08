@@ -8,6 +8,8 @@ __lua__
 wait=0
 wait_cnt=0
 main_sel=1
+--for status
+section_order={"skills","spells","titles"}
 --for dialogue
 flags={}
 
@@ -1304,83 +1306,66 @@ function init_status()
 		active=not setup,
 		mode="list",
 		cursor=1,
-		skill_cursor=1
+		item_cursor=1,
+		detail_section="skills",
+		skill_cursor=1,
+		spell_cursor=1,
+		title_cursor=1
 	}
 end
 
 function update_status()
-	if status.mode=="list" then
-		if btnp(0) or btnp(1) then
-			status.mode="inventory"
+	local mode=status.mode
+
+	if mode=="list" then
+		if(btnp(0) or btnp(1)) status.mode="inventory"
+
+		local d=btnp(2) and -1 or (btnp(3) and 1 or 0)
+		if d!=0 then
+			status.cursor=(status.cursor+d-1)%#party.members+1
 		end
-		if btnp(2) then
-			status.cursor=status.cursor-1
-			if status.cursor<1 then status.cursor=#party.members end
-		end
-		if btnp(3) then
-			status.cursor=status.cursor+1
-			if status.cursor>#party.members then status.cursor=1 end
-		end
+
 		if btnp(4) then
 			status.mode="detail"
 			status.detail_section="skills"
-			status.skill_cursor=1
-			status.spell_cursor=1
 		end
-		if btnp(5) then
-			status.active=false
-		end
-	elseif status.mode=="inventory" then
-		if btnp(0) or btnp(1) then
-			status.mode="list"
-		end
-		if btnp(2) then
-			status.item_cursor=status.item_cursor-1
-			if status.item_cursor<1 then status.item_cursor=#party.inventory end
-		end
-		if btnp(3) then
-			status.item_cursor=status.item_cursor+1
-			if status.item_cursor>#party.inventory then status.item_cursor=1 end
-		end
-		if btnp(5) then
-			status.active=false
-		end
-	elseif status.mode=="detail" then
-		local m=party.members[status.cursor]
-		local section=status.detail_section or "skills"
-		local list=section=="skills" and skill_pools[m.title] or {}--spell_pools[m.title]
+		if(btnp(5)) status.active=false
 
-		if btnp(0) or btnp(1) then
-			status.detail_section=(section=="skills") and "spells" or "skills"
+	elseif mode=="inventory" then
+		if(btnp(0) or btnp(1)) status.mode="list"
+
+		local d=btnp(2) and -1 or (btnp(3) and 1 or 0)
+		if d!=0 then
+			status.item_cursor=(status.item_cursor+d-1)%#party.inventory+1
 		end
-		if btnp(2) then
-			if section=="skills" then
-				status.skill_cursor=status.skill_cursor-1
-				if status.skill_cursor<1 then status.skill_cursor=#list end
-			else
-				status.spell_cursor=status.spell_cursor-1
-				if status.spell_cursor<1 then status.spell_cursor=#list end
-			end
+
+		if(btnp(5)) status.active=false
+
+	elseif mode=="detail" then
+		local m=party.members[status.cursor]
+		local sec=status.detail_section or "skills"
+
+		if btnp(0) then
+			status.detail_section=next_section(sec,-1)
+		elseif btnp(1) then
+			status.detail_section=next_section(sec,1)
 		end
-		if btnp(3) then
-			if section=="skills" then
-				status.skill_cursor=status.skill_cursor+1
-				if status.skill_cursor>#list then status.skill_cursor=1 end
-			else
-				status.spell_cursor=status.spell_cursor+1
-				if status.spell_cursor>#list then status.spell_cursor=1 end
-			end
+
+		-- re-fetch sec/list in case it just changed this frame
+		sec=status.detail_section
+		local list=get_section_list(sec,m)
+
+		local d=btnp(2) and -1 or (btnp(3) and 1 or 0)
+		if d!=0 and #list>0 then
+			local key=sub(sec,1,-2).."_cursor"
+			status[key]=(status[key]+d-1)%#list+1
 		end
-		if btnp(4) then
-			status.mode=(section=="skills") and "skill_detail" or "spell_detail"
-		end
-		if btnp(5) then
-			status.mode="list"
-		end
-	else --skill_detail or spell_detail
-		if btnp(5) or btnp(4) then
-			status.mode="detail"
-		end
+
+		if(btnp(4)) status.mode=sub(sec,1,-2).."_detail" -- "skill_detail"/"spell_detail"/"title_detail"
+		if(btnp(5)) status.mode="list"
+
+	else -- skill_detail / spell_detail / title_detail
+		if(btnp(5) or btnp(4)) status.mode="detail"
 	end
 end
 
@@ -1427,49 +1412,54 @@ function draw_status_list()
 end
 
 function draw_status_detail(m)
-	cls(0)
+	cls()
 	print(m.name,4,2,7)
 	print(m.title_pretty,4,9,6)
+
 	line(0,16,127,16,5)
-
-	print("hp "..m.hp.."/"..m.maxhp,4,20,8)
-	print("mp "..m.mp.."/"..m.maxmp,4,27,12)
-
-	print("atk "..m.atk,4,38,7)
-	print("def "..m.def,4,45,7)
-	print("spd "..m.spd,4,52,7)
-	print("matk "..m.matk,64,38,7)
-	print("mdef "..m.mdef,64,45,7)
-
-	line(0,60,127,60,5)
-
-	local section=status.detail_section or "skills"
-	print(section,4,63,7)
-	local list,cursor
-	if section=="skills" then
-		list=skill_pools[m.title]
-		cursor=status.skill_cursor
-	else
-		--list=spell_pools[m.title]
-		list={} --for now
-		cursor=status.spell_cursor
+	
+	spr(m.sprite,18,24)
+	print("hp "..m.hp.."/"..m.maxhp,10,43,8)
+	print("mp "..m.mp.."/"..m.maxmp,10,50,12)
+	
+	local stats=split("str ,str,dex ,dex,con ,con,mag ,mag, atk ,atk, def ,def, spd ,spd,matk ,matk,mdef ,mdef")
+	for i=1,9 do
+		local x,y=56,22+((i-1)%4)*7
+		if(i>4) x,y=94,22+(i-5)*7
+		local idx=(i-1)*2+1
+		print(stats[idx]..m[stats[idx+1]],x,y,7)
 	end
+	
+	line(0,60,127,60,5)
+	
+	local sec=status.detail_section or "skills"
+	print("skills",4,63,sec=="skills" and 7 or 5)
+	print("spells",52,63,sec=="spells" and 7 or 5)
+	print("titles",100,63,sec=="titles" and 7 or 5)
+
+	line(0,70,127,70,5)
+
+	local cursor_key=sub(sec,1,-2).."_cursor"
+	local cursor=status[cursor_key]
+	local list=get_section_list(sec,m)
 
 	for i,s in pairs(list) do
-		local y=70+(i-1)*7
-		if i==cursor then
-			rectfill(0,y-1,127,y+5,1)
-		end
+		local y=73+(i-1)*7
+
+		if(i==cursor) rectfill(0,y-1,127,y+5,1)
+
 		print(s.name,4,y,s.type=="active" and 7 or 15)
+
 		if s.name=="recover mp" then
 			print("1 coin",90,y,9)
-		elseif s.mp_cost>0 then
+		elseif s.mp_cost and s.mp_cost>0 then
 			print(s.mp_cost.." mp",90,y,12)
 		end
 	end
 
 	line(0,120,127,120,5)
-	print("⬅️➡️ "..section.."  🅾️ view ❎ back",4,122,6)
+
+	print("⬅️➡️ toggle  🅾️ view  ❎ back",4,122,6)
 end
 
 function draw_ability_detail(s)
@@ -1512,6 +1502,26 @@ function draw_status_inventory()
 	end
 
 	print("⬅️➡️ party  🅾️ back",4,122,6)
+end
+
+--helpers for party and status
+function get_section_list(sec,m)
+	if sec=="skills" then
+		return skill_pools[m.title] or {}
+	elseif sec=="spells" then
+		return (spell_pools and spell_pools[m.title]) or {}
+	else -- titles
+		return m.mastered_titles or {}
+	end
+end
+
+function next_section(sec,dir)
+	local idx=1
+	for i,v in ipairs(section_order) do
+		if v==sec then idx=i break end
+	end
+	idx=((idx-1+dir)%#section_order)+1
+	return section_order[idx]
 end
 
 -->8
