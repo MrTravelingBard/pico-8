@@ -3,10 +3,11 @@ name: Dynamic Multi-Game Deployer
 on:
   push:
     branches: [ main ]
-    #Only run the workflow if files change inside a project folder
+    # Run when a project folder changes, OR when the landing page changes
     paths:
       - 'even-a-slime-can-win/**'
       - 'knights-of-power-last-light/**'
+      - 'landing-page/**'
   workflow_dispatch: #Allows manual re-runs from the Actions tab
     inputs:
       project:
@@ -18,39 +19,58 @@ on:
           - auto-detect
           - even-a-slime-can-win
           - knights-of-power-last-light
-          - both
+          - all-games
+          - landing-page
 
 jobs:
   detect:
     runs-on: ubuntu-latest
     outputs:
       projects: ${{ steps.info.outputs.projects }}
+      landing_changed: ${{ steps.info.outputs.landing_changed }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2 #Required to compare changes with the previous commit
+          fetch-depth: 2 #Compares changes with the previous commit
 
       - name: Identify Modified Projects
         id: info
         run: |
-          #Manual runs (workflow_dispatch) let you force which project(s) deploy,
-          #since a manual run has no natural "previous commit" to diff against.
           MANUAL_PROJECT="${{ github.event.inputs.project }}"
 
+          #Manual override to force-deploy just the landing page, skip game detection entirely.
+          if [ "$MANUAL_PROJECT" = "landing-page" ]; then
+            echo "Manual override: deploying landing page only."
+            echo "landing_changed=true" >> "$GITHUB_OUTPUT"
+            echo "projects=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          #Manual overrides for specific game(s) should not also redeploy the landing page.
           if [ "$MANUAL_PROJECT" = "even-a-slime-can-win" ] || [ "$MANUAL_PROJECT" = "knights-of-power-last-light" ]; then
             echo "Manual override: deploying $MANUAL_PROJECT only."
+            echo "landing_changed=false" >> "$GITHUB_OUTPUT"
             echo "projects=[\"$MANUAL_PROJECT\"]" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          if [ "$MANUAL_PROJECT" = "both" ]; then
-            echo "Manual override: deploying both projects."
+          if [ "$MANUAL_PROJECT" = "all-games" ]; then
+            echo "Manual override: deploying all game projects."
+            echo "landing_changed=false" >> "$GITHUB_OUTPUT"
             echo 'projects=["even-a-slime-can-win","knights-of-power-last-light"]' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           #Otherwise (push events, or manual "auto-detect") fall back to diffing the last commit.
+          if git diff --name-only HEAD~1 | grep -qE '^landing-page/'; then
+            echo "Landing page changed."
+            echo "landing_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Landing page unchanged."
+            echo "landing_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
           #Detect all supported game folders changed in the last commit (not just the first)
           CHANGED_DIRS=$(git diff --name-only HEAD~1 | grep -E '^(even-a-slime-can-win|knights-of-power-last-light)/' | cut -d'/' -f1 | sort -u)
 
@@ -90,10 +110,29 @@ jobs:
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
 
-      - name: Deploy to GitHub Pages (Subdirectory)
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: ./${{ matrix.project }}/build
-          target-folder: docs/${{ matrix.project }} #Saves to a sub-folder on your pages branch
+          target-folder: docs/${{ matrix.project }} #Each saves to a sub-folder on gh-pages branch
           branch: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-landing:
+    needs: detect
+    if: needs.detect.outputs.landing_changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write #Needed to push to gh-pages
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy Landing Page to GitHub Pages Root
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: ./landing-page
+          target-folder: docs
+          branch: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+          clean: false 
