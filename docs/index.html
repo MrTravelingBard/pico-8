@@ -25,8 +25,8 @@ replace it with a web dev's work.
     --panel: #24345f;
     --ink: var(--p7);
     --ink-dim: var(--p6);
-    --slime: var(--p8);
-    --knight: var(--p12);
+    --slime: var(--p12);
+    --knight: var(--p9);
   }
 
   *{ box-sizing:border-box; }
@@ -136,29 +136,10 @@ replace it with a web dev's work.
 
   .sprite{
     flex: none;
-    width: 32px; height: 32px;
-    box-shadow: var(--shadow);
+    width: 40px; height: 40px;
     margin-top: 4px;
-  }
-  .sprite.slime{ --shadow:
-    8px 0px 0 #000000, 12px 0px 0 #000000, 16px 0px 0 #000000, 20px 0px 0 #000000,
-    4px 4px 0 #000000, 8px 4px 0 #ff004d, 12px 4px 0 #ff004d, 16px 4px 0 #ff004d, 20px 4px 0 #ff004d, 24px 4px 0 #000000,
-    0px 8px 0 #000000, 4px 8px 0 #ff004d, 8px 8px 0 #ff004d, 12px 8px 0 #ff004d, 16px 8px 0 #ff004d, 20px 8px 0 #ff004d, 24px 8px 0 #ff004d, 28px 8px 0 #000000,
-    0px 12px 0 #000000, 4px 12px 0 #ff004d, 8px 12px 0 #ff004d, 12px 12px 0 #fff1e8, 16px 12px 0 #ff004d, 20px 12px 0 #fff1e8, 24px 12px 0 #ff004d, 28px 12px 0 #000000,
-    0px 16px 0 #000000, 4px 16px 0 #ff004d, 8px 16px 0 #ff004d, 12px 16px 0 #ff004d, 16px 16px 0 #ff004d, 20px 16px 0 #ff004d, 24px 16px 0 #ff004d, 28px 16px 0 #000000,
-    0px 20px 0 #000000, 4px 20px 0 #ff004d, 8px 20px 0 #ff004d, 12px 20px 0 #ff004d, 16px 20px 0 #ff004d, 20px 20px 0 #ff004d, 24px 20px 0 #ff004d, 28px 20px 0 #000000,
-    4px 24px 0 #000000, 8px 24px 0 #ff004d, 12px 24px 0 #ff004d, 16px 24px 0 #ff004d, 20px 24px 0 #ff004d, 24px 24px 0 #000000,
-    8px 28px 0 #000000, 12px 28px 0 #000000, 16px 28px 0 #000000, 20px 28px 0 #000000;
-  }
-  .sprite.knight{ --shadow:
-    8px 0px 0 #000000, 12px 0px 0 #000000, 16px 0px 0 #000000, 20px 0px 0 #000000,
-    4px 4px 0 #000000, 8px 4px 0 #29adff, 12px 4px 0 #29adff, 16px 4px 0 #29adff, 20px 4px 0 #29adff, 24px 4px 0 #000000,
-    0px 8px 0 #000000, 4px 8px 0 #29adff, 8px 8px 0 #fff1e8, 12px 8px 0 #29adff, 16px 8px 0 #fff1e8, 20px 8px 0 #29adff, 24px 8px 0 #29adff, 28px 8px 0 #000000,
-    0px 12px 0 #000000, 4px 12px 0 #29adff, 8px 12px 0 #29adff, 12px 12px 0 #29adff, 16px 12px 0 #29adff, 20px 12px 0 #29adff, 24px 12px 0 #29adff, 28px 12px 0 #000000,
-    4px 16px 0 #000000, 8px 16px 0 #29adff, 12px 16px 0 #29adff, 16px 16px 0 #29adff, 20px 16px 0 #29adff, 24px 16px 0 #000000,
-    8px 20px 0 #000000, 12px 20px 0 #29adff, 16px 20px 0 #29adff, 20px 20px 0 #000000,
-    4px 24px 0 #000000, 8px 24px 0 #000000, 12px 24px 0 #29adff, 16px 24px 0 #29adff, 20px 24px 0 #000000, 24px 24px 0 #000000,
-    0px 28px 0 #000000, 4px 28px 0 #000000, 12px 28px 0 #29adff, 16px 28px 0 #29adff, 24px 28px 0 #000000, 28px 28px 0 #000000;
+    object-fit: contain;
+    image-rendering: pixelated;
   }
 
   .cart-title{
@@ -254,9 +235,9 @@ replace it with a web dev's work.
 
     <div class="cart slime-cart">
       <div class="cart-top">
-        <div class="sprite slime"></div>
+        <img class="sprite" src="./assets/sprite-slime.png" alt="Pixel art slime sprite">
         <div>
-          <h2 class="cart-title">Even a Slime<br>Can Win</h2>
+          <h2 class="cart-title">Even a Slime Can Win</h2>
           <span class="status">IN PROGRESS</span>
         </div>
       </div>
@@ -276,9 +257,9 @@ replace it with a web dev's work.
 
     <div class="cart knight-cart">
       <div class="cart-top">
-        <div class="sprite knight"></div>
+        <img class="sprite" src="./assets/sprite-knight.png" alt="Pixel art knight sprite">
         <div>
-          <h2 class="cart-title">Knights of Power<br>- Last Light</h2>
+          <h2 class="cart-title">Knights of Power -<br>Last Light</h2>
           <span class="status">IN PROGRESS</span>
         </div>
       </div>
