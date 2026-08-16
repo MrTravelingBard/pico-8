@@ -9,7 +9,7 @@
 ## 🎮 Play
 
 - **PICO-8 BBS:** [TBD]
-- **Itch.io:** [TBD]
+- **Itch.io:** [https://travelingbardstudios.itch.io/even-a-slime-can-win]
 
 ---
 
@@ -60,8 +60,8 @@ to defeat other monsters for their gold coins and ultimately save your people fr
 ## 📁 Project Structure
 
 ```
-even_a_slime_can_win/
-├── slimes_can_win.p8       # main cart
+even-a-slime-can-win/
+├── even-a-slime-can-win.p8       # main cart
 ├── README.md
 └── screenshot.png
 ```

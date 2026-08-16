@@ -10,7 +10,7 @@
 ## 🎮 Play
 
 - **PICO-8 BBS:** [TBD]
-- **Itch.io:** [TBD]
+- **Itch.io:** [https://travelingbardstudios.itch.io/knights-of-power-last-light]
 
 ---
 
@@ -61,8 +61,8 @@ The light still burns within.
 ## 📁 Project Structure
 
 ```
-knights_of_power/
-├── knightsofpower.p8       # main cart
+knights-of-power-last-light/
+├── knights-of-power-last-light.p8       # main cart
 ├── README.md
 └── screenshot.png
 ```

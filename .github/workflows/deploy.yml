@@ -1,0 +1,53 @@
+name: Dynamic Multi-Game Deployer
+
+on:
+  push:
+    branches: [ main ]
+    # Only run the workflow if files change inside a project folder
+    paths:
+      - 'even-a-slime-can-win/**'
+      - 'knights-of-power-last-light/**'
+
+jobs:
+  detect-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Required to compare changes with the previous commit
+
+      - name: Identify Modified Project
+        id: info
+        run: |
+          # Detect which folder changed in the last commit
+          CHANGED_DIR=$(git diff --name-only HEAD~1 | grep -E '^(even-a-slime-can-win|knights-of-power-last-light)/' | head -n 1 | cut -d'/' -f1)
+          
+          if [ -z "$CHANGED_DIR" ]; then
+            echo "No supported game folder modifications detected."
+            exit 0
+          fi
+          
+          echo "Detected change in: $CHANGED_DIR"
+          echo "project_name=$CHANGED_DIR" >> $GITHUB_OUTPUT
+
+      - name: Install Butler CLI (itch.io)
+        if: steps.info.outputs.project_name != ''
+        uses: remarkablegames/setup-butler@v3
+
+      - name: Deploy to itch.io
+        if: steps.info.outputs.project_name != ''
+        run: |
+          # Dynamically builds the itch project slug (e.g., even-a-slime-can-win)
+          PROJECT=${{ steps.info.outputs.project_name }}
+          butler push ./$PROJECT/build TravelingBardStudios/$PROJECT:web
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+
+      - name: Deploy to GitHub Pages (Subdirectory)
+        if: steps.info.outputs.project_name != ''
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: ./${{ steps.info.outputs.project_name }}/build
+          target-folder: docs/${{ steps.info.outputs.project_name }} # Saves to a sub-folder on your pages branch
+          branch: gh-pages

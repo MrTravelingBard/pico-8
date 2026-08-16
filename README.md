@@ -32,8 +32,8 @@ More will be added as they're completed. Each project has its own folder and REA
 
 | Project | Description | Status |
 |---------|-------------|--------|
-| [Knights of Power - Last Light](./knights_of_power/) | Part 1 of 2 where you take the role of a knight of light to defeat a knight of darkness | 🚧 In Progress |
-| [Even a Slime Can Win](./even_a_slime_can_win/) | For a June 2026 Game Jam where the theme is "Spin to Win" | 🚧 In Progress |
+| [Knights of Power - Last Light](./knights-of-power-last-light/) | Part 1 of 2 where you take the role of a knight of light to defeat a knight of darkness | 🚧 In Progress |
+| [Even a Slime Can Win](./even-a-slime-can-win/) | For a June 2026 Game Jam where the theme is "Spin to Win" | 🚧 In Progress |
 
 ---
 
@@ -43,6 +43,7 @@ More will be added as they're completed. Each project has its own folder and REA
 - **Game loops** — update / draw cycles, delta time, input handling
 - **RPG systems** — combat, stats, dialogue, maps, saves
 - **PICO-8 constraints** — 128×128 display, 16 colors, 8KB cart limit, sprite/map/sfx tools, efficient coding
+- **CI/CD** — pushing content regularly to github pages, itch.io, and the lexaloffle bbs with devlogs
 
 ---
 
