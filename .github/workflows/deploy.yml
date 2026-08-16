@@ -7,47 +7,65 @@ on:
     paths:
       - 'even-a-slime-can-win/**'
       - 'knights-of-power-last-light/**'
+  workflow_dispatch: # allows manual re-runs from the Actions tab
 
 jobs:
-  detect-and-deploy:
+  detect:
     runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.info.outputs.projects }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 2 # Required to compare changes with the previous commit
 
-      - name: Identify Modified Project
+      - name: Identify Modified Projects
         id: info
         run: |
-          # Detect which folder changed in the last commit
-          CHANGED_DIR=$(git diff --name-only HEAD~1 | grep -E '^(even-a-slime-can-win|knights-of-power-last-light)/' | head -n 1 | cut -d'/' -f1)
-          
-          if [ -z "$CHANGED_DIR" ]; then
+          # Detect ALL supported game folders changed in the last commit (not just the first)
+          CHANGED_DIRS=$(git diff --name-only HEAD~1 | grep -E '^(even-a-slime-can-win|knights-of-power-last-light)/' | cut -d'/' -f1 | sort -u)
+
+          if [ -z "$CHANGED_DIRS" ]; then
             echo "No supported game folder modifications detected."
+            echo "projects=[]" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          
-          echo "Detected change in: $CHANGED_DIR"
-          echo "project_name=$CHANGED_DIR" >> $GITHUB_OUTPUT
+
+          echo "Detected changes in:"
+          echo "$CHANGED_DIRS"
+
+          # Convert newline-separated list into a JSON array for the matrix, e.g. ["even-a-slime-can-win","knights-of-power-last-light"]
+          JSON=$(printf '%s\n' "$CHANGED_DIRS" | jq -R . | jq -sc .)
+          echo "projects=$JSON" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: detect
+    if: needs.detect.outputs.projects != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to push to gh-pages
+    strategy:
+      fail-fast: false # one project failing shouldn't cancel the other's deploy
+      matrix:
+        project: ${{ fromJson(needs.detect.outputs.projects) }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Install Butler CLI (itch.io)
-        if: steps.info.outputs.project_name != ''
         uses: remarkablegames/setup-butler@v3
 
       - name: Deploy to itch.io
-        if: steps.info.outputs.project_name != ''
         run: |
-          # Dynamically builds the itch project slug (e.g., even-a-slime-can-win)
-          PROJECT=${{ steps.info.outputs.project_name }}
-          butler push ./$PROJECT/build TravelingBardStudios/$PROJECT:web
+          butler push ./${{ matrix.project }}/build TravelingBardStudios/${{ matrix.project }}:web
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
 
       - name: Deploy to GitHub Pages (Subdirectory)
-        if: steps.info.outputs.project_name != ''
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: ./${{ steps.info.outputs.project_name }}/build
-          target-folder: docs/${{ steps.info.outputs.project_name }} # Saves to a sub-folder on your pages branch
+          folder: ./${{ matrix.project }}/build
+          target-folder: docs/${{ matrix.project }} # Saves to a sub-folder on your pages branch
           branch: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
