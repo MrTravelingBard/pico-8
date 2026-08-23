@@ -323,26 +323,30 @@ function init_npcs()
 						and not get_flag("enemies_defeated")
 					end,
 					pages={
-						"here they come!"
+						"here they come!",
+						"*battle starts*"
 					},
 					on_end=function()
-						start_battle("east_gate_monsters", function(won)
-							if won then
-								set_flag("enemies_defeated", true)
-							else
-								-- optional: handle loss, retry, game over, etc.
-							end
-						end)
+					set_flag("enemies_defeated", true)
+					--on_end=function()
+					--	start_battle("east_gate_monsters", function(won)
+					--		if won then
+					--			set_flag("enemies_defeated", true)
+					--		else
+					--			-- optional: handle loss, retry, game over, etc.
+					--		end
+					--	end)
 					end,
 				},
 				{
 					cond=function()
 					return get_flag("enemies_defeated")
-					and not get_flag("mayor_thanked")
+					and not get_flag("elder_spoken_to")
 					end,
 					pages={
-						"you did it! the monsters\nare gone!",
-						"the mayor wants to speak\nwith you at the town\nhall."
+						"you did it! you pushed them\nback!",
+						"the elder will want to speak\nwith you.",
+						"*end of dialogue*\nfor now..."
 					},
 					on_end=nil,
 				},
