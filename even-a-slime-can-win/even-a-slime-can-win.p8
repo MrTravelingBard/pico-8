@@ -11,7 +11,7 @@ main_sel=1
 --for main menu
 slime_set_size=7
 slime_set_count=9
-slime_swap_interval = 300 --5 secs
+slime_swap_interval = 180 --3 secs
 --for status
 section_order={"skills","spells","titles"}
 --for dialogue
