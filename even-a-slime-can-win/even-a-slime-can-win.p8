@@ -16,6 +16,11 @@ slime_swap_interval = 180 --3 secs
 section_order={"skills","spells","titles"}
 --for dialogue
 flags={}
+--for battle
+battle_state = {
+    player_turn=1, player_spin=2, player_result=3,
+    enemy_turn=4, anim=5, win=6, lose=7
+}
 
 --init scenes
 function init_intro()
@@ -55,20 +60,13 @@ function init_game()
 	init_skills()
 	init_skillpools()
 	init_npcs()
+	init_enemies()
 	init_dialogue()
 	init_party()
 	init_status()
 	set_wait(30)
 	_update=update_game
 	_draw=draw_game
-end
-
-function init_battle(enemy_group_id)
-	scene="battle"
-	menu_sel=1
-	set_wait(30)
-	_update=update_battle
-	_draw=draw_battle
 end
 
 --init game data
@@ -406,13 +404,34 @@ function init_party()
 	party_set_leader()
 end
 
-function init_enemies(string_data)
-	local name,maxhp,str,dex,con,mag=unpack(split(string_data))
+function init_enemies()
+	enemy_defs = {
+		slime = {name="Slime", sprite=1, hp=10, maxhp=10, mp=0, maxmp=0, atk=3, def=1, spd=2, matk=0, mdef=1, skills={}},
+		rat   = {name="Bat", sprite=2, hp=6, maxhp=6 }
+	}
 end
 
 function init_enemy_groups()
-	--also fun, consumed by init_battle and turned into battlers
+	enemy_groups = {
+		slimes_x2   = {"slime","slime"},
+		forest_mix  = {"slime","rat","rat"},
+		cave_rats   = {"rat","rat","rat"}
+	}
 end
+
+function init_enemy(string_data)
+	local name,maxhp,str,dex,con,mag=unpack(split(string_data))
+end
+
+function init_battle_enemies(group_id)
+    local list = {}
+    for key in all(enemy_groups[group_id]) do
+        add(list, enemy_defs[key])
+    end
+    return list
+end
+
+
 
 --init window functions
 function init_dialogue()
@@ -813,17 +832,8 @@ end
 --battlesystem code
 
 function init_battle(enemy_data)
-	battle_state={
-		player_turn=1,
-		player_spin=2,
-	 	player_result=3,
-		enemy_turn=4,
-		anim=5,
-		win=6,
-		lose=7
-	}
 	battle={
-		state=1,
+		state=battle_state.player_turn,
 		active_char=1,
 		message="your turn!",
 		battle_select=1,
@@ -862,8 +872,10 @@ function init_battle(enemy_data)
 
 	--setup main functions
 	scene="battle"
-	_update = update_battle 
-	_draw = draw_battle
+	menu_sel=1
+	set_wait(30)
+	_update=update_battle
+	_draw=draw_battle
 end
 
 --init battle helpers
@@ -884,18 +896,19 @@ function init_battler(src, is_enemy)
 		spd=src.spd,
 		matk=src.matk,
 		mdef=src.mdef,
-		zones=zones,
+		temp_stats=init_temp_stats(),
 		skills=src.skills,
 		status={},
-		temp_stats=init_temp_stats(),
-		spin=init_spin(zones)
+		spin=init_spin(src.zones)
 	}
 end
 
 function start_battle(enemy_group_id, on_battle_end)
-    battle = init_battle(enemy_group_id)
+    local enemy_data = init_enemies(enemy_group_id)
+    init_battle(enemy_data)
     battle.on_end = on_battle_end
 end
+
 --update battle scene
 function update_battle()
 	battle.anim_timer-=1
