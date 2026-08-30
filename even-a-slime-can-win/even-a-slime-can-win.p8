@@ -18,8 +18,13 @@ section_order={"skills","spells","titles"}
 flags={}
 --for battle
 battle_state = {
-    player_turn=1, player_spin=2, player_result=3,
-    enemy_turn=4, anim=5, win=6, lose=7
+    player_turn=1, 
+	--player_spin=2, 
+	--player_result=3,
+    enemy_turn=4, 
+	anim=5, 
+	win=6, 
+	lose=7
 }
 
 --init scenes
@@ -61,6 +66,7 @@ function init_game()
 	init_skillpools()
 	init_npcs()
 	init_enemies()
+	init_enemy_groups()
 	init_dialogue()
 	init_party()
 	init_status()
@@ -321,19 +327,17 @@ function init_npcs()
 						and not get_flag("enemies_defeated")
 					end,
 					pages={
-						"here they come!",
-						"*battle starts*"
+						"here they come!"
 					},
 					on_end=function()
-					set_flag("enemies_defeated", true)
-					--on_end=function()
-					--	start_battle("east_gate_monsters", function(won)
-					--		if won then
-					--			set_flag("enemies_defeated", true)
-					--		else
-					--			-- optional: handle loss, retry, game over, etc.
-					--		end
-					--	end)
+					-- set_flag("enemies_defeated", true)
+						start_battle("slimes_x2", function(won)
+							if won then
+								set_flag("enemies_defeated", true)
+							else
+								-- optional: handle loss, retry, game over, etc.
+							end
+						end)
 					end,
 				},
 				{
@@ -406,8 +410,9 @@ end
 
 function init_enemies()
 	enemy_defs = {
-		slime = {name="Slime", sprite=1, hp=10, maxhp=10, mp=0, maxmp=0, atk=3, def=1, spd=2, matk=0, mdef=1, skills={}},
-		rat   = {name="Bat", sprite=2, hp=6, maxhp=6 }
+		slime    = init_enemy("slime,1,10,10,0,0,3,1,2,0,0"),
+		rat      = init_enemy("rat,7,20,20,0,0,2,2,2,0,0"),
+	    rat_king = init_enemy("rat king,8,60,60,10,10,5,5,5,2,2")
 	}
 end
 
@@ -418,20 +423,6 @@ function init_enemy_groups()
 		cave_rats   = {"rat","rat","rat"}
 	}
 end
-
-function init_enemy(string_data)
-	local name,maxhp,str,dex,con,mag=unpack(split(string_data))
-end
-
-function init_battle_enemies(group_id)
-    local list = {}
-    for key in all(enemy_groups[group_id]) do
-        add(list, enemy_defs[key])
-    end
-    return list
-end
-
-
 
 --init window functions
 function init_dialogue()
@@ -516,6 +507,32 @@ function init_member(string_data)
 	}
 	member = refresh_stats(member)
 	return member
+end
+
+function init_enemy(string_data)
+	local name,sprite,maxhp,hp,maxmp,mp,atk,def,spd,matk,mdef=unpack(split(string_data))
+	return {
+        name=name,
+        sprite=sprite,
+        maxhp=maxhp,
+		hp=hp,
+        maxmp=maxmp,
+        mp=mp,
+		atk=atk,
+        def=def,
+        spd=spd,
+        matk=matk,
+        mdef=mdef,
+        skills={}
+    }
+end
+
+function init_battle_enemies(group_id)
+    local list = {}
+    for key in all(enemy_groups[group_id]) do
+        add(list, enemy_defs[key])
+    end
+    return list
 end
 
 function init_item(string_data)
@@ -835,9 +852,15 @@ function init_battle(enemy_data)
 	battle={
 		state=battle_state.player_turn,
 		active_char=1,
+		active_enemy=1,
 		message="your turn!",
 		battle_select=1,
+		targeting=false,
+		target_side="enemy",
+		target_select=1,
 		anim_timer=0,
+		shake={target=nil, x=0},
+		heal_flash={target=nil, frame=0},
 		frames=0,
 		player_defends=false,
 		enemy_defends=false,
@@ -855,6 +878,8 @@ function init_battle(enemy_data)
 		add(battle.enemies, init_battler(e, true))
 	end
 	
+	draw_battle_layout()
+
 	--battle animations init
 	anim={
 		frames=0,
@@ -881,154 +906,308 @@ end
 --init battle helpers
 function init_battler(src, is_enemy)
 	local zones=src.active_zones or {}
+	local skills=src.skills or {}
 
 	return {
 		member=src, -- keep a reference back to the source-of-truth data
 		name=src.name,
 		is_enemy=is_enemy,
 		sprite=src.sprite,
-		hp=src.hp,
 		maxhp=src.maxhp,
-		mp=src.mp,
+		hp=src.hp,
 		maxmp=src.maxmp,
+		mp=src.mp,
 		atk=src.atk,
 		def=src.def,
 		spd=src.spd,
 		matk=src.matk,
 		mdef=src.mdef,
 		temp_stats=init_temp_stats(),
-		skills=src.skills,
-		status={},
-		spin=init_spin(src.zones)
+		skills=skills,
+		status={}
+		--spin=init_spin(zones)
 	}
 end
 
 function start_battle(enemy_group_id, on_battle_end)
-    local enemy_data = init_enemies(enemy_group_id)
+    local enemy_data = init_battle_enemies(enemy_group_id)
     init_battle(enemy_data)
     battle.on_end = on_battle_end
 end
 
 --update battle scene
 function update_battle()
-	battle.anim_timer-=1
-		
-	if battle.state==battle_state.anim then
-		anim.frames-=1
-		if anim.frames<=0 then anim.done() end
-		return
-	end		
-	if battle.state==battle_state.player_turn then
-		update_battle_menu()
-	elseif battle.state==battle_state.player_spin then
-  		update_wheel()
-  		if btnp(4) then
-   			battle.result=check_zone(wheel.angle)
-   			battle.state=battle_state.result
-  		end
- 	elseif battle.state==battle_state.player_result then
-  		apply_spin_result(battle.result)
-  		-- advance to next character or enemy turn
-	elseif battle.state==battle_state.enemy_turn then
-		--wait for animation, then enemy acts
-		if battle.anim_timer<=0 then
-			local dmg=max(battle.enemy.atk+flr(rnd(3))-p.def,1)
-			if player_defends then
-				dmg=max(flr(dmg/2),1)
-			end
-			play_anim(
-				dmg*3,
-				function()
-					local shake=flr(rnd(3))-1
-					rectfill(0,0,127,127,0)
-					spr(e_spr,59,32+shake)
-					spr(p_spr,58,52)
-				end,
-				function()
-					p.hp-=dmg
-					battle.message=battle.enemy.name.." hits for "..dmg.."!"
-					battle.anim_timer=30
-					battle.state=battle_state.player_turn
-				end
-			)
-			--check lose
-			if p.hp<=0 then
-				p.hp=0
-				battle.state=battle_state.lose
-				battle.message="you lost..."
-			end
-		end
-	else
-		--go back to the game
-		if battle.anim_timer<=0 then
-			scene="game"
-			_update=update_game 
-			_draw=draw_game					
-		end
-	end
+    battle.anim_timer -= 1
+
+    if battle.state==battle_state.anim then
+        anim.frames -= 1
+        if anim.frames<=0 then anim.done() end
+        return
+    end
+
+    if battle.state==battle_state.player_turn then
+        update_battle_menu()
+    elseif battle.state==battle_state.enemy_turn then
+        update_enemy_turn()
+    elseif battle.state==battle_state.win or battle.state==battle_state.lose then
+        if battle.anim_timer<=0 then
+            scene="game"
+            _update=update_game
+            _draw=draw_game
+        end
+    end
+end
+
+function update_battle_menu()
+    if battle.targeting then
+        if btnp(0) then cycle_target(-1) end
+        if btnp(1) then cycle_target(1) end
+        if btnp(5) then
+            battle.targeting = false
+            return
+        end
+        if btnp(4) and battle.anim_timer<=0 then
+            local actor = battle.battlers[battle.active_char]
+            local target = battle.enemies[battle.target_select]
+            if battle.battle_select==1 then
+                do_sword_attack(actor, target)
+            elseif battle.battle_select==2 then
+                do_shield_attack(actor, target)
+            end
+            battle.targeting = false
+        end
+        return
+    end
+
+    if btnp(2) then
+        battle.battle_select -= 1
+        if battle.battle_select<1 then battle.battle_select=4 end
+    end
+    if btnp(3) then
+        battle.battle_select += 1
+        if battle.battle_select>4 then battle.battle_select=1 end
+    end
+
+    if btnp(4) and battle.anim_timer<=0 then
+        if battle.battle_select==1 or battle.battle_select==2 then
+            battle.targeting = true
+            battle.target_side = "enemy"
+            battle.target_select = 1
+            if battle.enemies[1].hp<=0 then cycle_target(1) end
+        elseif battle.battle_select==3 then
+            battle.message = "no skills yet!" --placeholder
+        elseif battle.battle_select==4 then
+            battle.message = "no items yet!" --placeholder
+        end
+    end
+end
+
+--update battle helpers
+function advance_turn()
+    repeat
+        battle.active_char += 1
+        if battle.active_char > #battle.battlers then
+            battle.active_char = 1
+            battle.active_enemy = 1
+            battle.state = battle_state.enemy_turn
+            return
+        end
+    until battle.battlers[battle.active_char].hp > 0
+    battle.state = battle_state.player_turn
+    battle.battle_select = 1
+end
+
+function cycle_target(dir)
+    local side = (battle.target_side=="enemy") and battle.enemies or battle.battlers
+    local n = #side
+    repeat
+        battle.target_select += dir
+        if battle.target_select > n then battle.target_select = 1 end
+        if battle.target_select < 1 then battle.target_select = n end
+    until side[battle.target_select].hp > 0
+end
+
+function get_alive(side)
+    local out={}
+    for _,e in ipairs(side) do
+        if e.hp>0 then add(out,e) end
+    end
+    return out
+end
+
+function all_dead(side)
+    return #get_alive(side)==0
+end
+
+function pick_random_alive(side)
+    local alive=get_alive(side)
+    if #alive==0 then return nil end
+    return alive[flr(rnd(#alive))+1]
+end
+
+function calc_damage(atk, def, variance)
+    variance = variance or 3
+    return max(atk + flr(rnd(variance)) - def, 1)
+end
+
+--update battle action resolutions
+function do_sword_attack(actor, target)
+    local dmg = calc_damage(actor.atk, target.def)
+    play_anim(20,
+        function() battle.shake.target=actor; battle.shake.x=flr(rnd(3))-1 end,
+        function() resolve_damage(target, dmg, actor.name.." hits "..target.name.." for "..dmg.."!") end
+    )
+end
+
+function do_shield_attack(actor, target)
+    local dmg = calc_damage(flr(actor.atk/2)+(actor.shield_score or 0), target.def)
+    play_anim(10,
+        function() battle.shake.target=actor; battle.shake.x=flr(rnd(3))-1 end,
+        function()
+            actor.status.defending = true
+            resolve_damage(target, dmg, actor.name.." guards and hits "..target.name.." for "..dmg.."!")
+        end
+    )
+end
+
+function resolve_damage(target, dmg, msg)
+    target.hp = max(target.hp - dmg, 0)
+    battle.message = msg
+    battle.anim_timer = 30
+    battle.shake.target = nil
+
+    if all_dead(battle.enemies) then
+        battle.state = battle_state.win
+        battle.message = "you won!"
+        battle.anim_timer = 60
+    else
+        advance_turn()
+    end
+end
+
+--update battle enemy turn helpers
+function update_enemy_turn()
+    if battle.anim_timer > 0 then return end
+
+    local e = battle.enemies[battle.active_enemy]
+    if not e or e.hp<=0 then
+        advance_enemy_turn()
+        return
+    end
+
+    local target = pick_random_alive(battle.battlers)
+    if not target then return end --loss already caught below
+
+    local dmg = calc_damage(e.atk, target.def)
+    if target.status.defending then dmg = max(flr(dmg/2),1) end
+
+    play_anim(dmg*3,
+        function() battle.shake.target=e; battle.shake.x=flr(rnd(3))-1 end,
+        function()
+            target.hp = max(target.hp - dmg, 0)
+            battle.message = e.name.." hits "..target.name.." for "..dmg.."!"
+            battle.anim_timer = 30
+            battle.shake.target = nil
+
+            if all_dead(battle.battlers) then
+                battle.state = battle_state.lose
+                battle.message = "you lost..."
+            else
+                advance_enemy_turn()
+            end
+        end
+    )
+end
+
+function advance_enemy_turn()
+    battle.active_enemy += 1
+    if battle.active_enemy > #battle.enemies then
+        --round over: clear defend flags, back to player 1
+        for _,b in ipairs(battle.battlers) do b.status.defending=false end
+        battle.active_char = 1
+        while battle.battlers[battle.active_char].hp<=0 do
+            battle.active_char += 1
+        end
+        battle.state = battle_state.player_turn
+        battle.battle_select = 1
+    end
 end
 
 --draw battle scene
 function draw_battle()
-	cls()
-	--enemy info
-	print(battle.enemy.name,35,10,7)
-	draw_bar(35,17,battle.enemy.hp,battle.enemy.maxhp,8)
-	--player info
-	--draw_box(3,8,30,64)
-	print("????",35,68,7)
-	draw_bar(35,75,p.hp,p.maxhp,11)
-	draw_bar(35,82,p.mp,p_maxmp,9)
-	--sprite w/ override
-	if battle.state==battle_state.anim and anim.fn then
-		anim.fn()
-	else
-		if battle.enemy.hp>0 then
-			--enemy
-			spr(e_spr,59,32)
+    cls()
+
+    --enemy info + sprites
+    for i,e in ipairs(battle.enemies) do
+		if e.hp>0 then
+			local name_x = e.label_cx - (#e.name*2)  --rough centering, 4px/char / 2
+			print(e.name, name_x, e.y-10, 7)
+			draw_bar(e.label_cx-12, e.y-3, e.hp, e.maxhp, 8, 24)  --bar is 24 wide, so -12 centers it
+			spr(e.sprite, e.x, e.y, (e.w or 8)/8, (e.h or 8)/8)
 		end
-		--player
-		spr(p_spr,58,52)
 	end
-	--action menu (player turn only)
-	if battle.state==battle_state.player_turn then
-		print((battle.battle_select==1 and ">" or " ").."sword",4,96,7)
-		print((battle.battle_select==2 and ">" or " ").."shield",4,104,7) 
-		print((battle.battle_select==3 and ">" or " ").."skills",4,112,7)
-		print((battle.battle_select==4 and ">" or " ").."items",4,120,7)
- end
-	--win/lose overlay & battle log
-	if battle.state==battle_state.win or battle.state==battle_state.lose then
-		local col=battle.state==battle_state.win and 11 or 8
-		print(battle.message,44,44,col)
+
+    --player info + sprites
+    for i,b in ipairs(battle.battlers) do
+    	local col=(i==battle.active_char) and 10 or 7
+    	print(b.name, b.x, b.y-14, col)
+		if battle.heal_flash.target==b then
+			local flash_col=(battle.heal_flash.frame%2==0) and 11 or 7
+			draw_bar(b.x, b.y-7, b.hp, b.maxhp, flash_col, 24)
+		else
+			draw_bar(b.x, b.y-7, b.hp, b.maxhp, 11, 24)
+		end
+		spr(b.sprite, b.x, b.y, (b.w or 8)/8, (b.h or 8)/8)
+	end
+
+    --anim override draws on top, doesn't replace the base sprites
+    if battle.state==battle_state.anim and anim.fn then
+        anim.fn()
+    end
+
+	--cursor is drawn on top of the sprites
+	draw_target_cursor()
+
+    --action menu (player turn only)
+    if battle.state==battle_state.player_turn then
+        print((battle.battle_select==1 and ">" or " ").."attack",4,96,7)
+        print((battle.battle_select==2 and ">" or " ").."defend",4,104,7)
+        print((battle.battle_select==3 and ">" or " ").."skills",4,112,7)
+        print((battle.battle_select==4 and ">" or " ").."items",4,120,7)
+    end
+
+    --win/lose overlay & battle log
+    if battle.state==battle_state.win or battle.state==battle_state.lose then
+    	local col = battle.state==battle_state.win and 11 or 8
+    	print(battle.message,44,44,col)
 	else
-		print(battle.message,37,96,7)
+    	print(battle.message,4,88,7)
 	end
 end
 
-function draw_bar(x,y,val,maxval,col)
-	local w=40
-	--rect(x,y,x+w,y+4,7)
-	local fill=max(0,flr((val/maxval)*w)-1)
-	if fill>0 then rectfill(x+1,y+1,x+fill,y+3,col) end
-	print(val.."/"..maxval,x+w+2,y,7)
+function draw_bar(x,y,val,maxval,col,w)
+    w = w or 40
+    local fill=max(0,flr((val/maxval)*w)-1)
+    if fill>0 then rectfill(x+1,y+1,x+fill,y+3,col) end
+    print(val.."/"..maxval, x+w+2, y, 7)
 end
 
 function draw_enemy_row(enemies, center_x, y, padding)
- --lays out a list of entities in a horizontal row, centered on center_x
- --each entity needs an e.w (sprite width in pixels)
-	padding = padding or 4
+    padding = padding or 4
     local total_w = 0
     for i,e in ipairs(enemies) do
-        total_w += e.w
+        local label_w = #e.name * 4 + 2       --rough px width of name text
+        e.layout_w = max(e.w, 24, label_w)     --24 = hp bar width; use the widest of the three
+        total_w += e.layout_w
         if i < #enemies then total_w += padding end
     end
 
     local x = center_x - total_w/2
     for i,e in ipairs(enemies) do
-        e.x = x
+        e.x = x + (e.layout_w - e.w)/2   --center the sprite within its allotted slot
         e.y = y
-        x += e.w + padding
+        e.label_cx = x + e.layout_w/2     --center point for name/bar text
+        x += e.layout_w + padding
     end
 end
 
@@ -1054,89 +1233,33 @@ end
 
 function draw_battle_sprites()
     for i,e in ipairs(battle.enemies) do
-        spr(e.sprite, e.x, e.y, e.w/8, e.h/8 or 2)
+        if e.hp>0 then
+            local ox = (battle.shake.target==e) and battle.shake.x or 0
+            spr(e.sprite, e.x+ox, e.y, (e.w or 8)/8, (e.h or 8)/8)
+        end
     end
     for i,b in ipairs(battle.battlers) do
-        spr(b.sprite, b.x, b.y, b.w/8 or 1, b.h/8 or 1)
+        if b.hp>0 then
+            local ox = (battle.shake.target==b) and battle.shake.x or 0
+            spr(b.sprite, b.x+ox, b.y, (b.w or 8)/8, (b.h or 8)/8)
+        end
     end
 end
 
-function update_battle_menu()
-	--move select
-	if btnp(2) then 
-		battle.battle_select-=1
-		if battle.battle_select<1 then
-			battle.battle_select=4
-		end 
-	end
-	if btnp(3) then 
-		battle.battle_select+=1 
-		if battle.battle_select>4 then
-			battle.battle_select=1
-		end
-	end
-	--confirm action
-	if btnp(4) and battle.anim_timer<=0 then
-		if battle.battle_select==1 then
-			--sword attack
-			local dmg=max(p.atk+flr(rnd(3))-battle.enemy.def,1)
-			play_anim(
-				20,
-				function() 
-					local shake=flr(rnd(3))-1 
-					spr(p_spr,58+shake,52+shake)
-					spr(e_spr,59,32)
-				end,
-				function()
-					battle.enemy.hp-=dmg
-					battle.message="you hit for "..dmg.."!"
-					battle.anim_timer=30
-					--check win
-					if battle.enemy.hp<=0 then
-						battle.enemy.hp=0
-						battle.state=battle_state.win
-						battle.message="you won!"
-						--temp
-						slime_defeated=true
-						--end of temp
-						battle.anim_timer=60
-						return
-					end
-					battle.state=battle_state.enemy_turn
-				end)	
-		elseif battle.battle_select==2 then
-			--shield
-			local dmg=max(flr(p.atk/2)+flr(rnd(3))+p.shield_score-battle.enemy.def,1)
-			local stun_chance=rnd(1)<0.25 --25% chance true
-			play_anim(
-				10,
-				function() 
-					local shake=flr(rnd(3))-1 
-					spr(p_spr,58+shake,52+shake)
-					spr(e_spr,59,32)
-				end,
-				function()
-					player_defends=true
-					battle.enemy.hp-=dmg
-					battle.message="you hit for "..dmg.."!"
-					battle.anim_timer=30
-					--check win
-					if battle.enemy.hp<=0 then
-						battle.enemy.hp=0
-						battle.state=battle_state.win
-						battle.message="you won!"
-						--temp
-						slime_defeated=true
-						--end of temp
-						battle.anim_timer=60
-						return
-					end
-					battle.state=battle_state.enemy_turn
-				end
-			)	
-		end
-	end
+function draw_target_cursor()
+    if not battle.targeting then return end
+	--make sure to target correct side
+    local side = (battle.target_side=="enemy") and battle.enemies or battle.battlers
+    local t = side[battle.target_select]
+    if not t or t.hp<=0 then return end --don't draw on empty/dead slot
+
+    --cursor
+    local bob = flr(sin(time()*2)*2)
+    local w = t.w or 8
+    local cx = t.x + w/2
+    print("v", cx-2, t.y-16+bob, 10)
 end
+
 
 --battle animations
 function play_anim(maxframes,fn,done)
@@ -1147,26 +1270,28 @@ function play_anim(maxframes,fn,done)
 	battle.state=battle_state.anim
 end
 
-function heal_anim(heal)
-	--items and skills should use
-	--this by passing heal amount
-	local heal=heal or p.maxhp-p.hp
-	play_anim(
-		15,
-		function()
-			local c=anim.frames%2==0 and 11 or 7
-			draw_bar(35,75,p.hp,p.maxhp,c)
-		end,
-		function()
-			p.hp=min(p.hp+heal,p.maxhp)
-			battle.message="healed "..heal.." hp!"
-			battle.anim_timer=30
-			battle.state=battle_state.enemy_turn
-		end)
+function heal_anim(target, heal)
+    heal = heal or (target.maxhp - target.hp)
+    battle.heal_flash.target = target
+    battle.heal_flash.frame = 0
+
+    play_anim(
+        15,
+        function()
+            battle.heal_flash.frame += 1
+        end,
+        function()
+            target.hp = min(target.hp + heal, target.maxhp)
+            battle.message = target.name.." healed "..heal.." hp!"
+            battle.anim_timer = 30
+            battle.heal_flash.target = nil
+            advance_turn()
+        end
+    )
 end
 
 --wheel logic
-function init_spin()
+function init_spin(zones)
 	--I imagine setting/resetting variables...
 end
 
