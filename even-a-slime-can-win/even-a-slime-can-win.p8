@@ -979,11 +979,11 @@ function update_battle_menu()
         return
     end
 
-    if btnp(2) then
+    if btnp(0) then
         battle.battle_select -= 1
         if battle.battle_select<1 then battle.battle_select=4 end
     end
-    if btnp(3) then
+    if btnp(1) then
         battle.battle_select += 1
         if battle.battle_select>4 then battle.battle_select=1 end
     end
@@ -1143,7 +1143,7 @@ function draw_battle()
 			local name_x = e.label_cx - (#e.name*2)  --rough centering, 4px/char / 2
 			print(e.name, name_x, e.y-10, 7)
 			draw_bar(e.label_cx-12, e.y-3, e.hp, e.maxhp, 8, 24)  --bar is 24 wide, so -12 centers it
-			spr(e.sprite, e.x, e.y, (e.w or 8)/8, (e.h or 8)/8)
+			spr(e.sprite, e.x, e.y)
 		end
 	end
 
@@ -1170,10 +1170,16 @@ function draw_battle()
 
     --action menu (player turn only)
     if battle.state==battle_state.player_turn then
-        print((battle.battle_select==1 and ">" or " ").."attack",4,96,7)
-        print((battle.battle_select==2 and ">" or " ").."defend",4,104,7)
-        print((battle.battle_select==3 and ">" or " ").."skills",4,112,7)
-        print((battle.battle_select==4 and ">" or " ").."items",4,120,7)
+		local menu_icons = {180, 182, 184, 186}
+        local n = 4
+        local spacing = 12
+        local x = 64 - (n-1)*spacing/2 - 4
+
+        for i=1,n do
+            local selected = battle.battle_select==i
+            local spr_id = menu_icons[i] + (selected and 0 or 1)
+            spr(spr_id, x+(i-1)*spacing, 70)
+        end
     end
 
     --win/lose overlay & battle log
@@ -1196,38 +1202,27 @@ function draw_enemy_row(enemies, center_x, y, padding)
     padding = padding or 4
     local total_w = 0
     for i,e in ipairs(enemies) do
-        local label_w = #e.name * 4 + 2       --rough px width of name text
-        e.layout_w = max(e.w, 24, label_w)     --24 = hp bar width; use the widest of the three
+        e.layout_w = #e.name*4 + 2
         total_w += e.layout_w
         if i < #enemies then total_w += padding end
     end
 
     local x = center_x - total_w/2
     for i,e in ipairs(enemies) do
-        e.x = x + (e.layout_w - e.w)/2   --center the sprite within its allotted slot
+        e.x = x + e.layout_w/2 - 4
         e.y = y
-        e.label_cx = x + e.layout_w/2     --center point for name/bar text
+        e.label_cx = x + e.layout_w/2
         x += e.layout_w + padding
     end
 end
 
 function draw_battle_layout()
-    --enemies are centered & count-flexible
-    for i,e in ipairs(battle.enemies) do
-        e.w = e.w or 16 --default sprite width if not set per-enemy
-    end
-    draw_enemy_row(battle.enemies, 64, 40, 6) --center_x=64 (mid-screen), y=40
+	draw_enemy_row(battle.enemies, 64, 40, 6)
 
-    --battlers: always 4, so just use fixed slots instead of layout_row
-    local battler_slots = {
-        {x=68,  y=70},
-        {x=84,  y=78},
-        {x=100, y=70},
-        {x=116, y=78},
-    }
+    local col_w = 32
     for i,b in ipairs(battle.battlers) do
-        b.x = battler_slots[i].x
-        b.y = battler_slots[i].y
+        b.x = col_w*(i-1) + col_w/2 - 4
+        b.y = 96
     end
 end
 
@@ -1248,16 +1243,15 @@ end
 
 function draw_target_cursor()
     if not battle.targeting then return end
-	--make sure to target correct side
+
     local side = (battle.target_side=="enemy") and battle.enemies or battle.battlers
     local t = side[battle.target_select]
-    if not t or t.hp<=0 then return end --don't draw on empty/dead slot
+    if not t or t.hp<=0 then return end 
 
-    --cursor
     local bob = flr(sin(time()*2)*2)
     local w = t.w or 8
     local cx = t.x + w/2
-    print("v", cx-2, t.y-16+bob, 10)
+	spr(188,cx-2,t.y-16+bob)
 end
 
 
@@ -1920,14 +1914,14 @@ __gfx__
 00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00009540000000000000000004590000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000954000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000954000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000095440000000000004459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000009554400000000445590000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000995544444444559900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000009955555555990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000099999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000954000000000000000045900000d7cccccdd666666dd7cccccdd766666dd7cccccdd766666dd7cccccdd766666d00000000000000000000000000000000
+000009540000000000000000459000007ccd6ccc666776667c5555cc765555667cc55ccc766556667ccccccc76666666000dd000000000000000000000000000
+00000095440000000000004459000000cccd6ccc66677666c564465c657dd756cc5aa5cc66566566c4a44a4c6d7dd7d600077000000000000000000000000000
+00000009554400000000445590000000cccd6ccc66677666c544445c65dddd56c59a7a5c65d67656c4a44a4c6d7dd7d600077000000000000000000000000000
+00000000995544444444559900000000cccd6ccc66677666c564465c657dd756c599aa5c65dd6656caa99aac6776677607777770000000000000000000000000
+00000000009955555555990000000000cc5544cc66555566cc5445cc665dd566cc5995cc665dd566c595595c6565565600777700000000000000000000000000
+00000000000099999999000000000000ccc54ccc66655666ccc55ccc66655666ccc55ccc66655666c4a44a4c6d7dd7d600077000000000000000000000000000
+00000000000000000000000000000000dccccccdd666666ddccccccdd666666ddccccccdd666666ddccccccdd666666d00000000000000000000000000000000
 0000000dd00000000000000dd00000000000000dd00000000055555555555555555555555555555555555555555555005555555551111555d555550555555d55
 0ddd00dddd00ddd00ddd00dddd00ddd00ddd00dddd00ddd00dd55555555555555555555555555555555555dd55555dd0555555551dddd1555d5550055555d555
 0dddd5dddd5dddd55dddd5dddd5dddd55dddd5dddd5dddd00dddd55555555555555555555555d555555555dd5555ddd0555555551dd6dd1555500055d5555555
