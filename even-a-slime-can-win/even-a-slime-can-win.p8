@@ -862,6 +862,7 @@ function init_battle(enemy_data)
 		shake={target=nil, x=0},
 		heal_flash={target=nil, frame=0},
 		frames=0,
+		popups={},
 		player_defends=false,
 		enemy_defends=false,
 		result=nil,
@@ -946,7 +947,8 @@ function update_battle()
     end
 
     if battle.state==battle_state.player_turn then
-        update_battle_menu()
+        update_damage_popups()
+		update_battle_menu()
     elseif battle.state==battle_state.enemy_turn then
         update_enemy_turn()
     elseif battle.state==battle_state.win or battle.state==battle_state.lose then
@@ -1059,7 +1061,10 @@ function do_basic_attack(user, target)
     local dmg = calc_damage(user.atk, target.def)
 	attack_anim(
 		user,
-		function() resolve_damage(target, dmg, user.name.." hits "..target.name.." for "..dmg.."!") end
+		function() 
+			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
+			resolve_damage(target, dmg, user.name.." hits "..target.name.." for "..dmg.."!") 
+		end
 	)
 end
 
@@ -1069,6 +1074,7 @@ function do_shield_attack(user, target)
         function() battle.shake.target=user; battle.shake.x=flr(rnd(3))-1 end,
         function()
             user.status.defending = true
+			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
             resolve_damage(target, dmg, user.name.." guards and hits "..target.name.." for "..dmg.."!")
         end
     )
@@ -1079,7 +1085,10 @@ function do_heal_skill(user, target, heal)
 	local heal=heal or 5
 	heal_anim(
 		target, 
-		function() resolve_damage(target, -heal, user.name.." heals "..target.name.." for "..heal.."!") end
+		function()
+			spawn_damage_popup(target.x+4, target.y-4, heal, 11) 
+			resolve_damage(target, -heal, user.name.." heals "..target.name.." for "..heal.."!") 
+		end
 	)
 end
 
@@ -1113,6 +1122,7 @@ function update_enemy_turn()
 
     local dmg = calc_damage(e.atk, target.def)
     if target.status.defending then dmg = max(flr(dmg/2),1) end
+	spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
 
     play_anim(dmg*3,
         function() battle.shake.target=e; battle.shake.x=flr(rnd(3))-1 end,
@@ -1160,6 +1170,7 @@ function draw_battle()
 	end
 
 	draw_battle_sprites()
+	draw_damage_popups()
     
     --anim override draws on top
     if battle.state==battle_state.anim and anim.fn then
@@ -1265,7 +1276,7 @@ function draw_target_cursor()
 end
 
 
---battle animations
+--battle animations and popups
 function play_anim(maxframes,fn,done)
 	anim.frames=maxframes
 	anim.maxframes=maxframes
@@ -1317,6 +1328,27 @@ function heal_anim(target, on_heal)
             battle.heal_flash.target = nil
         end
     )
+end
+
+function spawn_damage_popup(x, y, amount, color)
+    add(battle.popups, {x=x, y=y, dy=0, val=amount, col=color, timer=30})
+end
+
+function update_damage_popups()
+    for p in all(battle.popups) do
+        p.y -= 0.5
+        p.timer -= 1
+        if p.timer<=0 then del(battle.popups, p) end
+    end
+end
+
+function draw_damage_popups()
+    for p in all(battle.popups) do
+        local s = tostr(p.val)
+        local w = #s*4
+        print(s, p.x-w/2+1, p.y+1, 0)
+        print(s, p.x-w/2, p.y, p.col)
+    end
 end
 
 --wheel logic
