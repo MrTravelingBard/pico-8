@@ -303,86 +303,55 @@ function init_skillpools()
 end
 
 function init_npcs()
-	--npcs
-	npcs={
-		{
-			name="guard",
-			x=12, y=8,
-			sprite=1,
-			dialogue={
-				{
-					cond=function()
-					return not get_flag("quest_started")
-					end,
-					pages={
-						"the city is under attack!\nmonsters from the east!",
-						"please, you must help us\nbefore it is too late!"
-					},
-					on_end=function()
-					set_flag("quest_started", true)
-					end
+	npcs={}
+
+	init_npc{
+		name="Rix the Guardian", x=12, y=8, sprite=1,
+		dialogue={
+			{
+				requires="!quest_started",
+				pages={
+					"the city is under attack!\nmonsters from the east!",
+					"please, you must help us\nbefore it is too late!"
 				},
-				{
-					cond=function()
-						return get_flag("quest_started") 
-						and not get_flag("enemies_defeated")
-					end,
-					pages={
-						"here they come!"
-					},
-					on_end=function()
-						start_battle("slimes_x2", function(won)
-							if won then
-								set_flag("enemies_defeated", true)
-							else
-								-- optional: handle loss, retry, game over, etc.
-							end
-						end)
-					end
-				},
-				{
-					cond=function()
-					return get_flag("enemies_defeated")
-					and not get_flag("elder_spoken_to")
-					end,
-					pages={
-						"you did it! you pushed them\nback!",
-						"the elder will want to speak\nwith you.",
-						"*end of dialogue*\nfor now..."
-					},
-					on_end=nil
-				},
-				{
-					pages={
-						"the city is safe once more\nthanks to you."
-					},
-					on_end=nil
+				sets="quest_started"
+			},
+			{
+				requires="quest_started,!enemies_defeated",
+				pages={"here they come!"},
+				action=function()
+					start_battle("slimes_x2", function(won)
+						if won then flags["enemies_defeated"]=true end
+					end)
+				end
+			},
+			{
+				requires="enemies_defeated,!elder_spoken_to",
+				pages={
+					"you did it! you pushed them\nback!",
+					"the elder will want to speak\nwith you.",
+					"*end of dialogue*\nfor now..."
 				}
+			},
+			{
+				pages={"the colony is safe once\nmore thanks to you."}
 			}
-		},
-		{
-			name="merchant",
-			x=8, y=4,
-			sprite=1,
-			dialogue={
-				{
-					cond=function()
-					return not get_flag("quest_started")
-					end,
-					pages={
-						"sorry, i'm closed right now.\ncome back later."
-					},
-					on_end=nil,
-					},
-				{
-					pages={
-						"welcome! looking for supplies\nbefore your journey?",
-						"i have potions, ropes, and \nmaps available."
-					},
-					on_end=function()
-					set_flag("merchant_visited", true)
-					end,
-				}
+		}
+	}
+
+	init_npc{
+		name="Nib the Once-Red", x=8, y=4, sprite=1,
+		dialogue={
+			{
+				requires="!quest_started",
+				pages={"sorry, i'm closed right now.\ncome back later."}
+			},
+			{
+				pages={
+					"welcome! looking for supplies\nbefore your journey?",
+					"i have potions, ropes, and \nmaps available."
+				},
+				sets="merchant_visited"
 			}
 		}
 	}
@@ -470,6 +439,18 @@ function init_skillpool(string_data)
 		add(skill_set,skills[name])
 	end
 	return skill_set
+end
+
+function init_npc(def)
+	local dlg={}
+	for _,d in ipairs(def.dialogue) do
+		add(dlg, {
+			cond=make_cond(d.requires),
+			pages=d.pages,
+			on_end=make_onend(d.sets, d.action)
+		})
+	end
+	add(npcs, {name=def.name, x=def.x, y=def.y, sprite=def.sprite, dialogue=dlg})
 end
 
 function init_member(string_data)
@@ -697,12 +678,7 @@ function draw_game()
 			draw_dialogue()
 			draw_status()
 			--==test start==
-			--print("npc: "..npcs[1].name.." x: "..npcs[1].x.." y: "..npcs[1].y,0,0,7)
-			--print("p.x: "..party.x.." p.y: "..party.y,0,8,7)
-			--print("t.x: "..(party.x+party.dx).." t.y: "..(party.y+party.dy),0,16,7)
-			--print("d.active: "..tostring(dialogue.active),0,24,7)
-			--print("dlg.page: "..tostring(dialogue.page),0,0,7)
-			--print("pages: "..tostring(dialogue.entry and dialogue.entry.pages),0,8,7)
+			--print("quest_started: "..tostring(flags["quest_started"]),0,0,7)
 			--==test end==
 		end
 	else
@@ -718,32 +694,28 @@ end
 function draw_dialogue()
 	if not dialogue.active then return end
 
-	local bx, by, bw, bh, p= dialogue.box_x, dialogue.box_y, dialogue.box_w, dialogue.box_h, dialogue.pad
-	
-	-- shadow
+	local bx,by,bw,bh,p=dialogue.box_x,dialogue.box_y,dialogue.box_w,dialogue.box_h,dialogue.pad
+
 	rectfill(bx+2,by+2,bx+bw+2,by+bh+2,0)
+	draw_panel(bx,by,bx+bw,by+bh)
 
-	-- box
-	rectfill(bx,by,bx+bw,by+bh,1)
-	rect(bx,by,bx+bw,by+bh,7)
-
-	-- speaker
 	if dialogue.npc and dialogue.npc.name then
-	local name=dialogue.npc.name
-	local nw=#name*4+p*2
-	rectfill(bx,by-dialogue.name_h,bx+nw,by,1)
-	rect(bx,by-dialogue.name_h,bx+nw,by,7)
-	print(name,bx+p,by-dialogue.name_h+2,7)
+		local name=dialogue.npc.name
+		local nw=#name*4+p*2
+		draw_panel(bx,by-dialogue.name_h,bx+nw,by)
+		print(name,bx+p,by-dialogue.name_h+2,7)
 	end
 
-	-- page text
-	local txt=dialogue.entry.pages[dialogue.page]
-	print(txt,bx+p,by+p,7)
+	print(dialogue.entry.pages[dialogue.page],bx+p,by+p,7)
 
-	-- advance prompt w/ blink
 	if (time()*4)%2<1 then
-	print("🅾️",bx+bw-8,by+bh-6,6)
+		print("🅾️",bx+bw-8,by+bh-6,6)
 	end
+end
+
+function draw_panel(x0,y0,x1,y1)
+	rectfill(x0,y0,x1,y1,1)
+	rect(x0,y0,x1,y1,7)
 end
 
 --draw misc
@@ -837,12 +809,40 @@ function dialogue_close()
 end
 
 --dialogue helper functions
-function set_flag(key,val)
-	flags[key]=val
+function parse_flags(s)
+	if not s then return nil end
+	if type(s)=="table" then return s end
+	local t={}
+	for tok in all(split(s, ",")) do
+		if sub(tok,1,1)=="!" then
+			t[sub(tok,2)]=false
+		else
+			t[tok]=true
+		end
+	end
+	return t
 end
 
-function get_flag(key)
-	return flags[key]
+function make_cond(reqs)
+	local t=parse_flags(reqs)
+	if not t then return nil end
+	return function()
+		for flag,val in pairs(t) do
+			if (flags[flag] or false) ~= val then return false end
+		end
+		return true
+	end
+end
+
+function make_onend(sets, action)
+	local t=parse_flags(sets)
+	if not t and not action then return nil end
+	return function()
+		if t then
+			for flag,val in pairs(t) do flags[flag]=val end
+		end
+		if action then action() end
+	end
 end
 
 -->8
