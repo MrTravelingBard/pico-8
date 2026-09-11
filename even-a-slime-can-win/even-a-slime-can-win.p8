@@ -24,7 +24,8 @@ battle_state = {
     enemy_turn=4, 
 	anim=5, 
 	win=6, 
-	lose=7
+	lose=7,
+	round_end=8
 }
 
 --init scenes
@@ -319,7 +320,7 @@ function init_npcs()
 					},
 					on_end=function()
 					set_flag("quest_started", true)
-					end,
+					end
 				},
 				{
 					cond=function()
@@ -330,7 +331,6 @@ function init_npcs()
 						"here they come!"
 					},
 					on_end=function()
-					-- set_flag("enemies_defeated", true)
 						start_battle("slimes_x2", function(won)
 							if won then
 								set_flag("enemies_defeated", true)
@@ -338,7 +338,7 @@ function init_npcs()
 								-- optional: handle loss, retry, game over, etc.
 							end
 						end)
-					end,
+					end
 				},
 				{
 					cond=function()
@@ -350,13 +350,13 @@ function init_npcs()
 						"the elder will want to speak\nwith you.",
 						"*end of dialogue*\nfor now..."
 					},
-					on_end=nil,
+					on_end=nil
 				},
 				{
 					pages={
 						"the city is safe once more\nthanks to you."
 					},
-					on_end=nil,
+					on_end=nil
 				}
 			}
 		},
@@ -862,6 +862,7 @@ function init_battle(enemy_data)
 		shake={target=nil, x=0},
 		heal_flash={target=nil, frame=0},
 		frames=0,
+		popups={},
 		player_defends=false,
 		enemy_defends=false,
 		result=nil,
@@ -938,22 +939,32 @@ end
 --update battle scene
 function update_battle()
     battle.anim_timer -= 1
-
-    if battle.state==battle_state.anim then
+    update_damage_popups()
+    
+	if battle.state==battle_state.anim then
         anim.frames -= 1
         if anim.frames<=0 then anim.done() end
         return
     end
 
     if battle.state==battle_state.player_turn then
-        update_battle_menu()
+		update_battle_menu()
     elseif battle.state==battle_state.enemy_turn then
         update_enemy_turn()
+	elseif battle.state==battle_state.round_end then
+        if battle.anim_timer<=0 then
+            battle.state = battle_state.player_turn
+            battle.battle_select = 1
+			battle.message = "your turn!"
+        end
     elseif battle.state==battle_state.win or battle.state==battle_state.lose then
         if battle.anim_timer<=0 then
+			local won=battle.state==battle_state.win
+			local cb=battle.on_end
             scene="game"
             _update=update_game
             _draw=draw_game
+			if cb then cb(won) end
         end
     end
 end
@@ -968,22 +979,24 @@ function update_battle_menu()
         end
         if btnp(4) and battle.anim_timer<=0 then
             local actor = battle.battlers[battle.active_char]
-            local target = battle.enemies[battle.target_select]
+            local target = battle.target_side=="enemy" and battle.enemies[battle.target_select] or battle.battlers[battle.target_select]
             if battle.battle_select==1 then
-                do_sword_attack(actor, target)
+                do_basic_attack(actor, target)
             elseif battle.battle_select==2 then
                 do_shield_attack(actor, target)
+			elseif battle.battle_select==3 then
+				do_heal_skill(actor,target)
             end
             battle.targeting = false
         end
         return
     end
 
-    if btnp(2) then
+    if btnp(0) then
         battle.battle_select -= 1
         if battle.battle_select<1 then battle.battle_select=4 end
     end
-    if btnp(3) then
+    if btnp(1) then
         battle.battle_select += 1
         if battle.battle_select>4 then battle.battle_select=1 end
     end
@@ -995,7 +1008,9 @@ function update_battle_menu()
             battle.target_select = 1
             if battle.enemies[1].hp<=0 then cycle_target(1) end
         elseif battle.battle_select==3 then
-            battle.message = "no skills yet!" --placeholder
+            battle.targeting = true
+			battle.target_side = "party"
+			battle.target_select = 1
         elseif battle.battle_select==4 then
             battle.message = "no items yet!" --placeholder
         end
@@ -1051,32 +1066,53 @@ function calc_damage(atk, def, variance)
 end
 
 --update battle action resolutions
-function do_sword_attack(actor, target)
-    local dmg = calc_damage(actor.atk, target.def)
-    play_anim(20,
-        function() battle.shake.target=actor; battle.shake.x=flr(rnd(3))-1 end,
-        function() resolve_damage(target, dmg, actor.name.." hits "..target.name.." for "..dmg.."!") end
-    )
+function do_basic_attack(user, target)
+    local dmg = calc_damage(user.atk, target.def)
+	attack_anim(
+		user,
+		function() 
+			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
+			resolve_damage(target, dmg, user.name.." hits "..target.name.." for "..dmg.."!") 
+		end,
+		finish_player_action
+	)
 end
 
-function do_shield_attack(actor, target)
-    local dmg = calc_damage(flr(actor.atk/2)+(actor.shield_score or 0), target.def)
+function do_shield_attack(user, target)
+    local dmg = calc_damage(flr(user.atk/2)+(user.shield_score or 0), target.def)
     play_anim(10,
-        function() battle.shake.target=actor; battle.shake.x=flr(rnd(3))-1 end,
+        function() battle.shake.target=user; battle.shake.x=flr(rnd(3))-1 end,
         function()
-            actor.status.defending = true
-            resolve_damage(target, dmg, actor.name.." guards and hits "..target.name.." for "..dmg.."!")
+            user.status.defending = true
+			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
+            resolve_damage(target, dmg, user.name.." guards and hits "..target.name.." for "..dmg.."!")
+			finish_player_action()
         end
     )
 end
 
+function do_heal_skill(user, target, heal)
+	local target=target or user
+	local heal=heal or 5
+	heal_anim(
+		target, 
+		function()
+			spawn_damage_popup(target.x+4, target.y-4, heal, 11) 
+			resolve_damage(target, -heal, user.name.." heals "..target.name.." for "..heal.."!") 
+			finish_player_action()
+		end
+	)
+end
+
 function resolve_damage(target, dmg, msg)
-    target.hp = max(target.hp - dmg, 0)
+    target.hp = min(max(target.hp - dmg, 0),target.maxhp)
     battle.message = msg
     battle.anim_timer = 30
     battle.shake.target = nil
+end
 
-    if all_dead(battle.enemies) then
+function finish_player_action()
+	if all_dead(battle.enemies) then
         battle.state = battle_state.win
         battle.message = "you won!"
         battle.anim_timer = 60
@@ -1095,6 +1131,8 @@ function update_enemy_turn()
         return
     end
 
+	e.acting = true
+
     local target = pick_random_alive(battle.battlers)
     if not target then return end --loss already caught below
 
@@ -1104,164 +1142,164 @@ function update_enemy_turn()
     play_anim(dmg*3,
         function() battle.shake.target=e; battle.shake.x=flr(rnd(3))-1 end,
         function()
+			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
             target.hp = max(target.hp - dmg, 0)
             battle.message = e.name.." hits "..target.name.." for "..dmg.."!"
-            battle.anim_timer = 30
+            battle.anim_timer = 45
             battle.shake.target = nil
-
-            if all_dead(battle.battlers) then
-                battle.state = battle_state.lose
-                battle.message = "you lost..."
-            else
-                advance_enemy_turn()
-            end
+			e.acting = false
+			finish_enemy_action()
         end
     )
+end
+
+function finish_enemy_action()
+    if all_dead(battle.battlers) then
+        battle.state = battle_state.lose
+        battle.message = "you lost..."
+    else
+        advance_enemy_turn()
+    end
 end
 
 function advance_enemy_turn()
     battle.active_enemy += 1
     if battle.active_enemy > #battle.enemies then
-        --round over: clear defend flags, back to player 1
         for _,b in ipairs(battle.battlers) do b.status.defending=false end
         battle.active_char = 1
         while battle.battlers[battle.active_char].hp<=0 do
             battle.active_char += 1
         end
-        battle.state = battle_state.player_turn
-        battle.battle_select = 1
+        battle.state = battle_state.round_end
+        battle.anim_timer = 45
+	else
+		battle.state = battle_state.enemy_turn
     end
 end
 
 --draw battle scene
 function draw_battle()
     cls()
-
-    --enemy info + sprites
-    for i,e in ipairs(battle.enemies) do
-		if e.hp>0 then
-			local name_x = e.label_cx - (#e.name*2)  --rough centering, 4px/char / 2
-			print(e.name, name_x, e.y-10, 7)
-			draw_bar(e.label_cx-12, e.y-3, e.hp, e.maxhp, 8, 24)  --bar is 24 wide, so -12 centers it
-			spr(e.sprite, e.x, e.y, (e.w or 8)/8, (e.h or 8)/8)
-		end
+	
+	--win/lose overlay & battle log
+    if battle.state==battle_state.win or battle.state==battle_state.lose then
+    	local col=battle.state==battle_state.win and 11 or 8
+    	print(battle.message,44,44,col)
+	else
+		local mx=64-(#battle.message*2)
+    	print(battle.message,mx,8,7)
 	end
 
-    --player info + sprites
-    for i,b in ipairs(battle.battlers) do
-    	local col=(i==battle.active_char) and 10 or 7
-    	print(b.name, b.x, b.y-14, col)
-		if battle.heal_flash.target==b then
-			local flash_col=(battle.heal_flash.frame%2==0) and 11 or 7
-			draw_bar(b.x, b.y-7, b.hp, b.maxhp, flash_col, 24)
-		else
-			draw_bar(b.x, b.y-7, b.hp, b.maxhp, 11, 24)
-		end
-		spr(b.sprite, b.x, b.y, (b.w or 8)/8, (b.h or 8)/8)
-	end
-
-    --anim override draws on top, doesn't replace the base sprites
+	draw_battle_sprites()
+	draw_damage_popups()
+    
+    --anim override draws on top
     if battle.state==battle_state.anim and anim.fn then
         anim.fn()
     end
 
-	--cursor is drawn on top of the sprites
 	draw_target_cursor()
 
     --action menu (player turn only)
     if battle.state==battle_state.player_turn then
-        print((battle.battle_select==1 and ">" or " ").."attack",4,96,7)
-        print((battle.battle_select==2 and ">" or " ").."defend",4,104,7)
-        print((battle.battle_select==3 and ">" or " ").."skills",4,112,7)
-        print((battle.battle_select==4 and ">" or " ").."items",4,120,7)
+		local menu_icons = {180, 182, 184, 186}
+        for i=1,4 do
+            local selected = battle.battle_select==i
+            local spr_id = menu_icons[i] + (selected and 0 or 1)
+            spr(spr_id, 42+(i-1)*12, 64)
+        end
     end
-
-    --win/lose overlay & battle log
-    if battle.state==battle_state.win or battle.state==battle_state.lose then
-    	local col = battle.state==battle_state.win and 11 or 8
-    	print(battle.message,44,44,col)
-	else
-    	print(battle.message,4,88,7)
-	end
 end
 
 function draw_bar(x,y,val,maxval,col,w)
     w = w or 40
     local fill=max(0,flr((val/maxval)*w)-1)
-    if fill>0 then rectfill(x+1,y+1,x+fill,y+3,col) end
-    print(val.."/"..maxval, x+w+2, y, 7)
+    if fill>0 then rectfill(x,y,x+fill,y+1,col) end
 end
 
 function draw_enemy_row(enemies, center_x, y, padding)
     padding = padding or 4
     local total_w = 0
     for i,e in ipairs(enemies) do
-        local label_w = #e.name * 4 + 2       --rough px width of name text
-        e.layout_w = max(e.w, 24, label_w)     --24 = hp bar width; use the widest of the three
+        e.layout_w = #e.name*4 + 2
         total_w += e.layout_w
         if i < #enemies then total_w += padding end
     end
 
     local x = center_x - total_w/2
     for i,e in ipairs(enemies) do
-        e.x = x + (e.layout_w - e.w)/2   --center the sprite within its allotted slot
+        e.x = x + e.layout_w/2 - 4
         e.y = y
-        e.label_cx = x + e.layout_w/2     --center point for name/bar text
+        e.label_cx = x + e.layout_w/2
         x += e.layout_w + padding
     end
 end
 
 function draw_battle_layout()
-    --enemies are centered & count-flexible
-    for i,e in ipairs(battle.enemies) do
-        e.w = e.w or 16 --default sprite width if not set per-enemy
-    end
-    draw_enemy_row(battle.enemies, 64, 40, 6) --center_x=64 (mid-screen), y=40
+	draw_enemy_row(battle.enemies, 64, 32, 6)
 
-    --battlers: always 4, so just use fixed slots instead of layout_row
-    local battler_slots = {
-        {x=68,  y=70},
-        {x=84,  y=78},
-        {x=100, y=70},
-        {x=116, y=78},
-    }
+    local col_w = 32
     for i,b in ipairs(battle.battlers) do
-        b.x = battler_slots[i].x
-        b.y = battler_slots[i].y
+        b.x = col_w*(i-1) + col_w/2 - 4
+        b.y = 94
     end
 end
 
 function draw_battle_sprites()
-    for i,e in ipairs(battle.enemies) do
-        if e.hp>0 then
-            local ox = (battle.shake.target==e) and battle.shake.x or 0
-            spr(e.sprite, e.x+ox, e.y, (e.w or 8)/8, (e.h or 8)/8)
-        end
-    end
+	for i,e in ipairs(battle.enemies) do
+		if e.hp>0 then
+			local shake_x = (battle.shake.target==e) and battle.shake.x or 0
+			local bounce_y = e.acting and 2 or 0
+			spr(e.anim_sprite or e.sprite, e.x+shake_x, e.y+bounce_y)
+			if i == battle.target_select and battle.targeting and battle.target_side=="enemy" then
+				draw_bar(e.label_cx-12, e.y-2, e.hp, e.maxhp, 8, 24)
+				local nx = e.label_cx - (#e.name*2)
+				print(e.name, nx, e.y+11, 7)
+			end
+		end
+	end
+
     for i,b in ipairs(battle.battlers) do
-        if b.hp>0 then
-            local ox = (battle.shake.target==b) and battle.shake.x or 0
-            spr(b.sprite, b.x+ox, b.y, (b.w or 8)/8, (b.h or 8)/8)
-        end
-    end
+		local active = (battle.state==battle_state.player_turn and i==battle.active_char)
+		local c=7
+		if flr((b.hp/b.maxhp)*100)<=33 then
+			c=b.hp<=0 and 8 or 10
+		end
+		local col_start=b.x-8
+		if battle.heal_flash.target==b then
+			local flash_c=(battle.heal_flash.frame%2==0) and 11 or 7
+			draw_bar(col_start, b.y-2, b.hp, b.maxhp, flash_c, 24)
+		else
+			if active or (i==battle.target_select and battle.target_side=="party") then
+            	draw_bar(col_start, b.y-2, b.hp, b.maxhp, 11, 24)
+        	end
+		end
+		local s = b.anim_sprite or (active and b.sprite or b.sprite+1)
+		if b.hp<=0 then	
+			s=b.sprite+6 
+		end
+		spr(s, b.x, b.y)
+		print(b.name, col_start, b.y+11, c)
+		print("hp:"..b.hp, col_start, b.y+18, c)
+		print("mp:"..b.mp, col_start, b.y+25, c)
+	end
 end
 
 function draw_target_cursor()
     if not battle.targeting then return end
-	--make sure to target correct side
+
     local side = (battle.target_side=="enemy") and battle.enemies or battle.battlers
     local t = side[battle.target_select]
-    if not t or t.hp<=0 then return end --don't draw on empty/dead slot
+    if not t or t.hp<=0 then return end 
 
-    --cursor
     local bob = flr(sin(time()*2)*2)
     local w = t.w or 8
     local cx = t.x + w/2
-    print("v", cx-2, t.y-16+bob, 10)
+	spr(188,cx-2,t.y-16+bob)
 end
 
 
---battle animations
+--battle animations and popups
 function play_anim(maxframes,fn,done)
 	anim.frames=maxframes
 	anim.maxframes=maxframes
@@ -1270,24 +1308,71 @@ function play_anim(maxframes,fn,done)
 	battle.state=battle_state.anim
 end
 
-function heal_anim(target, heal)
-    heal = heal or (target.maxhp - target.hp)
+function attack_anim(user, on_hit, done)
+    local base_sprite = user.sprite+1
+	local frames = {base_sprite,base_sprite+2,base_sprite+3,base_sprite+4,base_sprite+5,base_sprite}
+    local ticks_per_frame = 4
+    local seq_len = #frames
+    local t = 0
+
+    user.anim_sprite = frames[1]
+
+    play_anim(
+        seq_len * ticks_per_frame,
+        function()
+            t += 1
+            local idx = min(flr((t-1)/ticks_per_frame)+1, seq_len)
+            user.anim_sprite = frames[idx]
+            if idx==seq_len and on_hit and not user.anim_hit_done then
+                on_hit()
+                user.anim_hit_done = true
+            end
+        end,
+        function()
+			battle.anim_timer = 30
+            user.anim_sprite = nil
+            user.anim_hit_done = nil
+            if done then done() end
+        end
+    )
+end
+
+function heal_anim(target, on_heal)
     battle.heal_flash.target = target
     battle.heal_flash.frame = 0
 
     play_anim(
-        15,
+        30,
         function()
             battle.heal_flash.frame += 1
         end,
         function()
-            target.hp = min(target.hp + heal, target.maxhp)
-            battle.message = target.name.." healed "..heal.." hp!"
             battle.anim_timer = 30
+			on_heal()
             battle.heal_flash.target = nil
-            advance_turn()
         end
     )
+end
+
+function spawn_damage_popup(x, y, amount, color)
+	add(battle.popups, {x=x+flr(rnd(5))-2, y=y, dy=0, val=amount, col=color, timer=30})
+end
+
+function update_damage_popups()
+    for p in all(battle.popups) do
+        p.y -= 0.5
+        p.timer -= 1
+        if p.timer<=0 then del(battle.popups, p) end
+    end
+end
+
+function draw_damage_popups()
+    for p in all(battle.popups) do
+        local s = tostr(p.val)
+        local w = #s*4
+        print(s, p.x-w/2+1, p.y+1, 0)
+        print(s, p.x-w/2, p.y, p.col)
+    end
 end
 
 --wheel logic
@@ -1920,14 +2005,14 @@ __gfx__
 00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00009540000000000000000004590000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000954000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000954000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000095440000000000004459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000009554400000000445590000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000995544444444559900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000009955555555990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000099999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000954000000000000000045900000d7cccccdd666666dd7cccccdd766666dd7cccccdd766666dd7cccccdd766666d00000000000000000000000000000000
+000009540000000000000000459000007ccd6ccc666776667c5555cc765555667cc55ccc766556667ccccccc76666666000dd000000000000000000000000000
+00000095440000000000004459000000cccd6ccc66677666c564465c657dd756cc5aa5cc66566566c4a44a4c6d7dd7d600077000000000000000000000000000
+00000009554400000000445590000000cccd6ccc66677666c544445c65dddd56c59a7a5c65d67656c4a44a4c6d7dd7d600077000000000000000000000000000
+00000000995544444444559900000000cccd6ccc66677666c564465c657dd756c599aa5c65dd6656caa99aac6776677607777770000000000000000000000000
+00000000009955555555990000000000cc5544cc66555566cc5445cc665dd566cc5995cc665dd566c595595c6565565600777700000000000000000000000000
+00000000000099999999000000000000ccc54ccc66655666ccc55ccc66655666ccc55ccc66655666c4a44a4c6d7dd7d600077000000000000000000000000000
+00000000000000000000000000000000dccccccdd666666ddccccccdd666666ddccccccdd666666ddccccccdd666666d00000000000000000000000000000000
 0000000dd00000000000000dd00000000000000dd00000000055555555555555555555555555555555555555555555005555555551111555d555550555555d55
 0ddd00dddd00ddd00ddd00dddd00ddd00ddd00dddd00ddd00dd55555555555555555555555555555555555dd55555dd0555555551dddd1555d5550055555d555
 0dddd5dddd5dddd55dddd5dddd5dddd55dddd5dddd5dddd00dddd55555555555555555555555d555555555dd5555ddd0555555551dd6dd1555500055d5555555
