@@ -11,7 +11,7 @@ main_sel=1
 --for main menu
 slime_set_size=7
 slime_set_count=9
-slime_swap_interval = 180 --3 secs
+slime_swap_interval = 180
 --for status
 section_order={"skills","spells","titles"}
 --for dialogue
@@ -19,13 +19,11 @@ flags={}
 --for battle
 battle_state = {
     player_turn=1, 
-	--player_spin=2, 
-	--player_result=3,
-    enemy_turn=4, 
-	anim=5, 
-	win=6, 
-	lose=7,
-	round_end=8
+    enemy_turn=2, 
+	anim=3, 
+	win=4, 
+	lose=5,
+	round_end=6
 }
 
 --init scenes
@@ -61,7 +59,7 @@ function init_game()
 	menu_active=false
 	bbeg_defeated=false
 	--setup calls
-	init_map() --in map code
+	init_map()
 	init_titles()
 	init_skills()
 	init_skillpools()
@@ -79,149 +77,19 @@ end
 --init game data
 function init_titles()
 	titles={
-		immortal={
-			name="the immortal",
-			sprite=8,
-			arrow=133,
-			zones={
-				{label="miss",  zone_start=0,   zone_stop=90,  result="miss"},
-				{label="block", zone_start=90,  zone_stop=200, result="block"},
-				{label="hit",   zone_start=200, zone_stop=330, result="hit"},
-				{label="taunt",  zone_start=330, zone_stop=360, result="taunt"}
-			}
-		},
-		quick_blow={
-			name="the quick blow",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="fumble", zone_start=270, zone_stop=310, result="miss"},
-				{label="crit",   zone_start=310, zone_stop=360, result="crit"}
-			}
-		},
-		eldest={
-			name="the eldest's legacy",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=60,  result="miss"},
-				{label="bonus",  zone_start=60,  zone_stop=140, result="bonus"},
-				{label="hit",    zone_start=140, zone_stop=330, result="hit"},
-				{label="crit",   zone_start=330, zone_stop=360, result="crit"}
-			}
-		},
-		slip_master={
-			name="the slip naster",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="fumble", zone_start=270, zone_stop=310, result="miss"},
-				{label="dodge",   zone_start=310, zone_stop=360, result="dodge"}
-			}
-		},
-		coiled={
-			name="the coiled one",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="delay", zone_start=270, zone_stop=310, result="delay"},
-				{label="miss",   zone_start=310, zone_stop=360, result="miss"}
-			}
-		},
-		constrictor={
-			name="the constrictor",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="constrict", zone_start=270, zone_stop=310, result="constrict"},
-				{label="miss",   zone_start=310, zone_stop=360, result="miss"}
-			}
-		},
-		red={
-			name="the red",
-			sprite=15,
-			arrow=134,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		once_red={
-			name="the once red",
-			sprite=29,
-			arrow=136,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		green={
-			name="the green",
-			sprite=22,
-			arrow=135,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		metal_sworn={
-			name="the metalsworn",
-			sprite=57,
-			arrow=140,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		metal={
-			name="the metal",
-			sprite=50,
-			arrow=139,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		creeping_death={
-			name="the creeping death",
-			sprite=43,
-			arrow=138,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		kingslayer={
-			name="the kingslayer",
-			sprite=36,
-			arrow=137,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		}
+		immortal={name="the immortal", sprite=8},
+		quick_blow={name="the quick blow", sprite=1},
+		eldest={name="the eldest's legacy", sprite=1},
+		slip_master={name="the slip naster", sprite=1},
+		coiled={name="the coiled one", sprite=1},
+		constrictor={name="the constrictor", sprite=1},
+		red={name="the red", sprite=15},
+		once_red={name="the once red", sprite=29},
+		green={name="the green", sprite=22},
+		metal_sworn={name="the metalsworn", sprite=57},
+		metal={name="the metal", sprite=50},
+		creeping_death={name="the creeping death", sprite=43},
+		kingslayer={name="the kingslayer", sprite=36}
 	}
 end
 
@@ -306,7 +174,7 @@ function init_npcs()
 	npcs={}
 
 	init_npc{
-		name="Rix the Guardian", x=12, y=8, sprite=1,
+		name="rix the guardian", x=12, y=8, sprite=1,
 		dialogue={
 			{
 				requires="!quest_started",
@@ -340,7 +208,7 @@ function init_npcs()
 	}
 
 	init_npc{
-		name="Nib the Once-Red", x=8, y=4, sprite=1,
+		name="nib the once-red", x=8, y=4, sprite=29,
 		dialogue={
 			{
 				requires="!quest_started",
@@ -461,7 +329,6 @@ function init_member(string_data)
 		title_pretty=titles[title].name,
 		sprite=titles[title].sprite,
 		mastered_titles={},
-		active_zones=titles[title].zones,
 		maxhp=5,
 		hp=5,
 		maxmp=0,
@@ -836,12 +703,12 @@ end
 
 function make_onend(sets, action)
 	local t=parse_flags(sets)
-	if not t and not action then return nil end
+	if not t and not action then return nil	end
 	return function()
 		if t then
 			for flag,val in pairs(t) do flags[flag]=val end
 		end
-		if action then action() end
+		if action then action()	end
 	end
 end
 
@@ -888,13 +755,6 @@ function init_battle(enemy_data)
 		fn=nil,
 		done=nil
 	}
-	
-	--wheel init
-	wheel={
-  		angle=0,
-  		speed=2,
-  		spinning=false
-	}
 
 	--setup main functions
 	scene="battle"
@@ -906,11 +766,10 @@ end
 
 --init battle helpers
 function init_battler(src, is_enemy)
-	local zones=src.active_zones or {}
 	local skills=src.skills or {}
 
 	return {
-		member=src, -- keep a reference back to the source-of-truth data
+		member=src, -- keep a reference
 		name=src.name,
 		is_enemy=is_enemy,
 		sprite=src.sprite,
@@ -926,7 +785,6 @@ function init_battler(src, is_enemy)
 		temp_stats=init_temp_stats(),
 		skills=skills,
 		status={}
-		--spin=init_spin(zones)
 	}
 end
 
@@ -1065,14 +923,19 @@ function calc_damage(atk, def, variance)
     return max(atk + flr(rnd(variance)) - def, 1)
 end
 
+function land_hit(target, dmg, msg, color, timer)
+	spawn_damage_popup(target.x+4, target.y-4, dmg<0 and -dmg or dmg, color or 8)
+	resolve_damage(target, dmg, msg)
+	if timer then battle.anim_timer = timer end
+end
+
 --update battle action resolutions
 function do_basic_attack(user, target)
     local dmg = calc_damage(user.atk, target.def)
 	attack_anim(
 		user,
 		function() 
-			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
-			resolve_damage(target, dmg, user.name.." hits "..target.name.." for "..dmg.."!") 
+			land_hit(target, dmg, user.name.." hits "..target.name.." for "..dmg.."!", 8) 
 		end,
 		finish_player_action
 	)
@@ -1084,8 +947,7 @@ function do_shield_attack(user, target)
         function() battle.shake.target=user; battle.shake.x=flr(rnd(3))-1 end,
         function()
             user.status.defending = true
-			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
-            resolve_damage(target, dmg, user.name.." guards and hits "..target.name.." for "..dmg.."!")
+			land_hit(target, dmg, user.name.." guards and hits "..target.name.." for "..dmg.."!", 8) 
 			finish_player_action()
         end
     )
@@ -1097,8 +959,7 @@ function do_heal_skill(user, target, heal)
 	heal_anim(
 		target, 
 		function()
-			spawn_damage_popup(target.x+4, target.y-4, heal, 11) 
-			resolve_damage(target, -heal, user.name.." heals "..target.name.." for "..heal.."!") 
+			land_hit(target, -heal, user.name.." heals "..target.name.." for "..heal.."!", 11) 
 			finish_player_action()
 		end
 	)
@@ -1134,7 +995,7 @@ function update_enemy_turn()
 	e.acting = true
 
     local target = pick_random_alive(battle.battlers)
-    if not target then return end --loss already caught below
+    if not target then return end
 
     local dmg = calc_damage(e.atk, target.def)
     if target.status.defending then dmg = max(flr(dmg/2),1) end
@@ -1142,11 +1003,7 @@ function update_enemy_turn()
     play_anim(dmg*3,
         function() battle.shake.target=e; battle.shake.x=flr(rnd(3))-1 end,
         function()
-			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
-            target.hp = max(target.hp - dmg, 0)
-            battle.message = e.name.." hits "..target.name.." for "..dmg.."!"
-            battle.anim_timer = 45
-            battle.shake.target = nil
+            land_hit(target, dmg, e.name.." hits "..target.name.." for "..dmg.."!", 8, 45)
 			e.acting = false
 			finish_enemy_action()
         end
@@ -1298,7 +1155,6 @@ function draw_target_cursor()
 	spr(188,cx-2,t.y-16+bob)
 end
 
-
 --battle animations and popups
 function play_anim(maxframes,fn,done)
 	anim.frames=maxframes
@@ -1375,46 +1231,6 @@ function draw_damage_popups()
     end
 end
 
---wheel logic
-function init_spin(zones)
-	--I imagine setting/resetting variables...
-end
-
-function update_wheel()
-	if wheel.spinning then
-		wheel.angle=(wheel.angle+wheel.speed)%360
- 	end
-end
-
-function check_zone(angle)
-	for _,z in ipairs(zones) do
-		if angle>=z.deg_start and angle<z.deg_stop then
-   			return z.result
-  		end
- 	end
-end
-
-function draw_wheel(cx,cy,r)
-	-- draw zone arcs
- 	for _, z in ipairs(zones) do
-  		for deg = z.deg_start, z.deg_stop do
-   			local t = deg / 360  
-   			local x = cx + cos(t) * r
-   			local y = cy - sin(t) * r 
-   			line(cx, cy, x, y, z.color)
-  		end
- 	end
- 	-- draw needle
- 	local t=wheel.angle/360
- 	local nx=cx+cos(t)*r
- 	local ny=cy+sin(t)*r
- 	line(cx,cy,nx,ny,7)
-end
-
-function apply_spin_result()
-	--the idea would be to apply the result of the spin to the battle. Basically kick off skills or effects
-end
-
 -->8
 --map code
 
@@ -1470,13 +1286,11 @@ function is_tile(tile_type,x,y)
 end
 
 function can_move(x,y)
-	--check if an npc is there
 	for npc in all(npcs) do
 		if x==npc.x and y==npc.y then
 			return false
 		end
 	end
-	--if no npc, is it a wall?
 	return not is_tile(wall,x,y)
 end
 
@@ -1509,9 +1323,6 @@ end
 function party_interact(x,y)
 	targetx=party.x+party.dx
 	targety=party.y+party.dy
-	--check for text
-		--active_text=get_text(x,y)
-	--check for fight
 	
 	--check for npc dialogue
 	if btnp(4) and dialogue.active==false then 
@@ -1677,7 +1488,7 @@ end
 function draw_status_list()
 	cls(0)
 	print("party status",4,2,7)
-	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
+	draw_gold()
 	line(0,9,127,9,5)
 
 	for i,m in pairs(party.members) do
@@ -1772,7 +1583,7 @@ end
 function draw_status_inventory()
 	cls(0)
 	print("party inventory",4,2,7)
-	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
+	draw_gold()
 	line(0,9,127,9,5)
 
 	for i,item in pairs(party.inventory) do
@@ -1811,6 +1622,10 @@ function next_section(sec,dir)
 	end
 	idx=((idx-1+dir)%#section_order)+1
 	return section_order[idx]
+end
+
+function draw_gold()
+	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
 end
 
 -->8
