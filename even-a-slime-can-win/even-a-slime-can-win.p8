@@ -11,7 +11,7 @@ main_sel=1
 --for main menu
 slime_set_size=7
 slime_set_count=9
-slime_swap_interval = 180 --3 secs
+slime_swap_interval = 180
 --for status
 section_order={"skills","spells","titles"}
 --for dialogue
@@ -19,13 +19,11 @@ flags={}
 --for battle
 battle_state = {
     player_turn=1, 
-	--player_spin=2, 
-	--player_result=3,
-    enemy_turn=4, 
-	anim=5, 
-	win=6, 
-	lose=7,
-	round_end=8
+    enemy_turn=2, 
+	anim=3, 
+	win=4, 
+	lose=5,
+	round_end=6
 }
 
 --init scenes
@@ -61,7 +59,7 @@ function init_game()
 	menu_active=false
 	bbeg_defeated=false
 	--setup calls
-	init_map() --in map code
+	init_map()
 	init_titles()
 	init_skills()
 	init_skillpools()
@@ -79,149 +77,19 @@ end
 --init game data
 function init_titles()
 	titles={
-		immortal={
-			name="the immortal",
-			sprite=8,
-			arrow=133,
-			zones={
-				{label="miss",  zone_start=0,   zone_stop=90,  result="miss"},
-				{label="block", zone_start=90,  zone_stop=200, result="block"},
-				{label="hit",   zone_start=200, zone_stop=330, result="hit"},
-				{label="taunt",  zone_start=330, zone_stop=360, result="taunt"}
-			}
-		},
-		quick_blow={
-			name="the quick blow",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="fumble", zone_start=270, zone_stop=310, result="miss"},
-				{label="crit",   zone_start=310, zone_stop=360, result="crit"}
-			}
-		},
-		eldest={
-			name="the eldest's legacy",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=60,  result="miss"},
-				{label="bonus",  zone_start=60,  zone_stop=140, result="bonus"},
-				{label="hit",    zone_start=140, zone_stop=330, result="hit"},
-				{label="crit",   zone_start=330, zone_stop=360, result="crit"}
-			}
-		},
-		slip_master={
-			name="the slip naster",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="fumble", zone_start=270, zone_stop=310, result="miss"},
-				{label="dodge",   zone_start=310, zone_stop=360, result="dodge"}
-			}
-		},
-		coiled={
-			name="the coiled one",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="delay", zone_start=270, zone_stop=310, result="delay"},
-				{label="miss",   zone_start=310, zone_stop=360, result="miss"}
-			}
-		},
-		constrictor={
-			name="the constrictor",
-			sprite=1,
-			arrow=132,
-			zones={
-				{label="miss",   zone_start=0,   zone_stop=100, result="miss"},
-				{label="hit",    zone_start=100, zone_stop=270, result="hit"},
-				{label="constrict", zone_start=270, zone_stop=310, result="constrict"},
-				{label="miss",   zone_start=310, zone_stop=360, result="miss"}
-			}
-		},
-		red={
-			name="the red",
-			sprite=15,
-			arrow=134,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		once_red={
-			name="the once red",
-			sprite=29,
-			arrow=136,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		green={
-			name="the green",
-			sprite=22,
-			arrow=135,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		metal_sworn={
-			name="the metalsworn",
-			sprite=57,
-			arrow=140,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		metal={
-			name="the metal",
-			sprite=50,
-			arrow=139,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		creeping_death={
-			name="the creeping death",
-			sprite=43,
-			arrow=138,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		},
-		kingslayer={
-			name="the kingslayer",
-			sprite=36,
-			arrow=137,
-			zones={
-				{label="miss", zone_start=0,   zone_stop=160, result="miss"},
-				{label="hit",  zone_start=160, zone_stop=300, result="hit"},
-				{label="crit", zone_start=300, zone_stop=340, result="crit"},
-				{label="free", zone_start=340, zone_stop=360, result="free"}
-			}
-		}
+		immortal={name="the immortal", sprite=8},
+		quick_blow={name="the quick blow", sprite=1},
+		eldest={name="the eldest's legacy", sprite=1},
+		slip_master={name="the slip naster", sprite=1},
+		coiled={name="the coiled one", sprite=1},
+		constrictor={name="the constrictor", sprite=1},
+		red={name="the red", sprite=15},
+		once_red={name="the once red", sprite=29},
+		green={name="the green", sprite=22},
+		metal_sworn={name="the metalsworn", sprite=57},
+		metal={name="the metal", sprite=50},
+		creeping_death={name="the creeping death", sprite=43},
+		kingslayer={name="the kingslayer", sprite=36}
 	}
 end
 
@@ -303,85 +171,204 @@ function init_skillpools()
 end
 
 function init_npcs()
-	--npcs
-	npcs={
-		{
-			name="guard",
-			x=12, y=8,
-			sprite=1,
-			dialogue={
-				{
-					cond=function()
-					return not get_flag("quest_started")
-					end,
-					pages={
-						"the city is under attack!\nmonsters from the east!",
-						"please, you must help us\nbefore it is too late!"
-					},
-					on_end=function()
-					set_flag("quest_started", true)
-					end
+	npcs={}
+	init_npc{
+		name="rix the guardian", x=12, y=8, sprite=3,
+		dialogue={
+			{
+				requires="!quest_started",
+				pages={
+					"the colony is under attack! monsters from the east!",
+					"please, you must help us before it is too late!"
 				},
-				{
-					cond=function()
-						return get_flag("quest_started") 
-						and not get_flag("enemies_defeated")
-					end,
-					pages={
-						"here they come!"
-					},
-					on_end=function()
-						start_battle("slimes_x2", function(won)
-							if won then
-								set_flag("enemies_defeated", true)
-							else
-								-- optional: handle loss, retry, game over, etc.
-							end
-						end)
-					end
-				},
-				{
-					cond=function()
-					return get_flag("enemies_defeated")
-					and not get_flag("elder_spoken_to")
-					end,
-					pages={
-						"you did it! you pushed them\nback!",
-						"the elder will want to speak\nwith you.",
-						"*end of dialogue*\nfor now..."
-					},
-					on_end=nil
-				},
-				{
-					pages={
-						"the city is safe once more\nthanks to you."
-					},
-					on_end=nil
+				sets="quest_started"
+			},
+			{
+				requires="quest_started,!enemies_defeated",
+				pages={"here they come!"},
+				action=function()
+					start_battle("slimes_x2", function(won)
+						if won then flags["enemies_defeated"]=true end
+					end)
+				end
+			},
+			{
+				requires="enemies_defeated,!elder_spoken_to",
+				pages={
+					"you did it! you pushed them back!",
+					"the elder will want to speak with you."
+				}
+			},
+			{
+				pages={"the colony is safe once more thanks to you."}
+			}
+		}
+	}
+
+	init_npc{
+		name="nib the once-red", x=6, y=1, sprite=29,
+		dialogue={
+			{
+				requires="!enemies_defeated",
+				pages={"sorry, i'm busy right now collecting my mana for spells if you fail."}
+			},
+			{
+				requires="enemies_defeated",
+				pages={
+					"good, you defeated them. i thought a static bolt would be needed.",
+					"you have potential. perhaps i can teach you true power in the future."
 				}
 			}
-		},
-		{
-			name="merchant",
-			x=8, y=4,
-			sprite=1,
-			dialogue={
-				{
-					cond=function()
-					return not get_flag("quest_started")
-					end,
-					pages={
-						"sorry, i'm closed right now.\ncome back later."
-					},
-					on_end=nil,
-					},
-				{
-					pages={
-						"welcome! looking for supplies\nbefore your journey?",
-						"i have potions, ropes, and \nmaps available."
-					},
-					on_end=function()
-					set_flag("merchant_visited", true)
-					end,
+		}
+	}
+
+	init_npc{
+		name="lib the metalsworn", x=2, y=8, sprite=57,
+		dialogue={
+			{
+				pages={
+					"sorry, i'm focused on absorbing this metal. it takes a lot of effort", 
+					"but it will be worth it to become a metal slime. all that power.",
+					"though it's been many years since we've seen any..."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="zig the hero", x=4, y=1, sprite=8,
+		dialogue={
+			{
+				requires="!enemies_defeated",
+				pages={
+					"use the skills i taught you to defeat the enemies at the gate.",
+					"i believe in you."
+				}
+			},
+			{
+				requires="enemies_defeated",
+				pages={
+					"well done! but don't get sloppy. you still have much to learn.",
+					"i will teach you all that i know soon enough. you'll need every advantage you can get for the battles to come."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="gab the guardian", x=12, y=7, sprite=3,
+		dialogue={
+			{
+				pages={
+					"another fight is coming. i'd rather skip it if i'm being honest.",
+					"i want to protect our people of course, but not dying is also nice."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="rax the guardian", x=2, y=3, sprite=10,
+		dialogue={
+			{
+				requires="!rax_intro",
+				pages={
+					"i guard the sacred spawning pool of our people.",
+					"it is truly an honor but also a great responsibility."
+				},
+				sets="rax_intro"
+			},
+			{
+				pages={
+					"if you venture to the rat tunnels, take care not to get lost in its turns.",
+					"some tunnels lead nowhere merely traps they will use to close in on you."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="bab", x=8, y=7, sprite=3, flip_x=true,
+		dialogue={
+			{
+				requires="!herb_collected",
+				pages={
+					"see that green herb? eventually you'll be able to collect them.",
+					"they are healing items and may even unlock some interesting powers."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="gog", x=10, y=3, sprite=3,
+		dialogue={
+			{
+				pages={
+					"zig is much older than he looks. which one? they used to be one in the same.",
+					"that was back before they divided. zig has been a legend since before i spawned."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="mub", x=4, y=8, sprite=2,
+		dialogue={
+			{
+				pages={
+					"we haven't heard from the southern colony in awhile.", 
+					"we sent them our gold to fuel their defenses after all their losses during the last war with the rats.",
+					"of the five slime colonies only we two remain. i hope they are safe. eldest preserve us."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="nax", x=8, y=2, sprite=1,
+		dialogue={
+			{
+				pages={
+					"nib and zig are powerful enough to drive off the rats. in their prime, they could even ward off humans.",
+					"i worry though for the cost of using power has it's toll.",
+					"even greats like nib and zig must eventually retire to the spawning pool."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="fin", x=2, y=4, sprite=3,
+		dialogue={
+			{
+				pages={
+					"zig the elder has been sharing the lore of our people with me.",
+					"he was once known as the loremaster before he divided.",
+					"i wonder if he means to pass the title..."
+				}
+			}
+		}
+	}
+
+	init_npc{
+		name="zig the elder", x=5, y=1, sprite=1,
+		dialogue={
+			{
+				requires="!enemies_defeated,!elder_spoken_to",
+				pages={"our survival relies on you four. such a burden despite your youth..."}
+			},
+			{
+				requires="enemies_defeated,!elder_spoken_to",
+				pages={"thank you for dealing with those assailants. your bravery and strength will take you far."},
+				sets="elder_spoken_to"
+			},
+			{
+				requires="elder_spoken_to",
+				pages={
+					"would you like to hear the old stories of our people?",
+					"the eldest, the dragon, the garuda, the hero, or the lost kings?",
+					"no? maybe next time then."
 				}
 			}
 		}
@@ -390,17 +377,17 @@ end
 
 function init_party()
 	party={
-		x=3,
-		y=3,
+		x=5,
+		y=5,
 		dx=0, --x facing: -1 (left), 0, 1 (right)
 		dy=-1, --y facing: -1 (up), 0, 1 (down)
 		sprite=1,
 		sprite_offset=0,
 		members={
-			init_member("nib,immortal,1,1,1,1"),
+			init_member("mab,red,1,1,1,1"),
+			init_member("ziz,immortal,1,1,1,1"),
 			init_member("gig,quick_blow,1,1,1,1"),
-			init_member("mub,eldest,1,1,1,1"),
-			init_member("mab,red,1,1,1,1")
+			init_member("bib,eldest,1,1,1,1")
 		},
 		inventory={},
 		gold=0
@@ -411,8 +398,8 @@ end
 function init_enemies()
 	enemy_defs = {
 		slime    = init_enemy("slime,1,10,10,0,0,3,1,2,0,0"),
-		rat      = init_enemy("rat,7,20,20,0,0,2,2,2,0,0"),
-	    rat_king = init_enemy("rat king,8,60,60,10,10,5,5,5,2,2")
+		rat      = init_enemy("rat,66,20,20,0,0,2,2,2,0,0"),
+	    rat_king = init_enemy("rat king,69,60,60,10,10,5,5,5,2,2")
 	}
 end
 
@@ -472,6 +459,19 @@ function init_skillpool(string_data)
 	return skill_set
 end
 
+function init_npc(def)
+	local dlg={}
+	local flip_x=def.flip_x or false
+	for _,d in ipairs(def.dialogue) do
+		add(dlg, {
+			cond=make_cond(d.requires),
+			pages=d.pages,
+			on_end=make_onend(d.sets, d.action)
+		})
+	end
+	add(npcs, {name=def.name, x=def.x, y=def.y, sprite=def.sprite, flip_x=flip_x, dialogue=dlg})
+end
+
 function init_member(string_data)
 	local name,title,str,dex,con,mag=unpack(split(string_data))
 	local member = {
@@ -480,7 +480,6 @@ function init_member(string_data)
 		title_pretty=titles[title].name,
 		sprite=titles[title].sprite,
 		mastered_titles={},
-		active_zones=titles[title].zones,
 		maxhp=5,
 		hp=5,
 		maxmp=0,
@@ -656,12 +655,11 @@ end
 --draw scenes
 function draw_intro()
 	cls()
-	print("a mr traveling bard production",0,60,7)
+	draw_centered("a mr traveling bard production")
 end
 
 function draw_mainmenu()
-	cls()
-	local title = "even a slime can win"
+	cls() 
 
 	draw_mainmenu_slime()
 	spr(slime_spr, slime_x, slime_y, 1, 1, slime_flip)
@@ -671,11 +669,12 @@ function draw_mainmenu()
 		set_wait(60)
 	end
 	if wait_cnt>=1 then
-		print(title, 64 - (#title*4)/2, 60, 7)
+		draw_centered("even a slime can win")
 	end
 	if wait_cnt==2 then
 		for n=1,#menu_options do
-			print((menu_sel==n and ">" or " ")..menu_options[n],40,88+(n*8),7)
+			if menu_sel==n then	spr(127,40,86+(n*8)) end
+			print(menu_options[n],48,88+(n*8),7)
 		end
 	end
 end
@@ -697,12 +696,7 @@ function draw_game()
 			draw_dialogue()
 			draw_status()
 			--==test start==
-			--print("npc: "..npcs[1].name.." x: "..npcs[1].x.." y: "..npcs[1].y,0,0,7)
-			--print("p.x: "..party.x.." p.y: "..party.y,0,8,7)
-			--print("t.x: "..(party.x+party.dx).." t.y: "..(party.y+party.dy),0,16,7)
-			--print("d.active: "..tostring(dialogue.active),0,24,7)
-			--print("dlg.page: "..tostring(dialogue.page),0,0,7)
-			--print("pages: "..tostring(dialogue.entry and dialogue.entry.pages),0,8,7)
+			--print("quest_started: "..tostring(flags["quest_started"]),0,0,7)
 			--==test end==
 		end
 	else
@@ -718,32 +712,29 @@ end
 function draw_dialogue()
 	if not dialogue.active then return end
 
-	local bx, by, bw, bh, p= dialogue.box_x, dialogue.box_y, dialogue.box_w, dialogue.box_h, dialogue.pad
-	
-	-- shadow
+	local bx,by,bw,bh,p=dialogue.box_x,dialogue.box_y,dialogue.box_w,dialogue.box_h,dialogue.pad
+
 	rectfill(bx+2,by+2,bx+bw+2,by+bh+2,0)
+	draw_panel(bx,by,bx+bw,by+bh)
 
-	-- box
-	rectfill(bx,by,bx+bw,by+bh,1)
-	rect(bx,by,bx+bw,by+bh,7)
-
-	-- speaker
 	if dialogue.npc and dialogue.npc.name then
-	local name=dialogue.npc.name
-	local nw=#name*4+p*2
-	rectfill(bx,by-dialogue.name_h,bx+nw,by,1)
-	rect(bx,by-dialogue.name_h,bx+nw,by,7)
-	print(name,bx+p,by-dialogue.name_h+2,7)
+		local name=dialogue.npc.name
+		local nw=#name*4+p*2
+		draw_panel(bx,by-dialogue.name_h,bx+nw,by)
+		print(name,bx+p,by-dialogue.name_h+2,7)
 	end
 
-	-- page text
-	local txt=dialogue.entry.pages[dialogue.page]
-	print(txt,bx+p,by+p,7)
+	local text = wrap_string(dialogue.entry.pages[dialogue.page],true)
+	print(text,bx+p,by+p,7)
 
-	-- advance prompt w/ blink
 	if (time()*4)%2<1 then
-	print("🅾️",bx+bw-8,by+bh-6,6)
+		print("🅾️",bx+bw-8,by+bh-6,6)
 	end
+end
+
+function draw_panel(x0,y0,x1,y1)
+	rectfill(x0,y0,x1,y1,1)
+	rect(x0,y0,x1,y1,7)
 end
 
 --draw misc
@@ -794,6 +785,9 @@ function draw_mainmenu_slime()
 	end
 end
 
+function draw_centered(text)
+	print(text, 64 - (#text*4)/2, 60, 7)
+end
 -->8
 --dialogue code
 
@@ -837,12 +831,40 @@ function dialogue_close()
 end
 
 --dialogue helper functions
-function set_flag(key,val)
-	flags[key]=val
+function parse_flags(s)
+	if not s then return nil end
+	if type(s)=="table" then return s end
+	local t={}
+	for tok in all(split(s, ",")) do
+		if sub(tok,1,1)=="!" then
+			t[sub(tok,2)]=false
+		else
+			t[tok]=true
+		end
+	end
+	return t
 end
 
-function get_flag(key)
-	return flags[key]
+function make_cond(reqs)
+	local t=parse_flags(reqs)
+	if not t then return nil end
+	return function()
+		for flag,val in pairs(t) do
+			if (flags[flag] or false) ~= val then return false end
+		end
+		return true
+	end
+end
+
+function make_onend(sets, action)
+	local t=parse_flags(sets)
+	if not t and not action then return nil	end
+	return function()
+		if t then
+			for flag,val in pairs(t) do flags[flag]=val end
+		end
+		if action then action()	end
+	end
 end
 
 -->8
@@ -888,13 +910,6 @@ function init_battle(enemy_data)
 		fn=nil,
 		done=nil
 	}
-	
-	--wheel init
-	wheel={
-  		angle=0,
-  		speed=2,
-  		spinning=false
-	}
 
 	--setup main functions
 	scene="battle"
@@ -906,11 +921,10 @@ end
 
 --init battle helpers
 function init_battler(src, is_enemy)
-	local zones=src.active_zones or {}
 	local skills=src.skills or {}
 
 	return {
-		member=src, -- keep a reference back to the source-of-truth data
+		member=src, -- keep a reference
 		name=src.name,
 		is_enemy=is_enemy,
 		sprite=src.sprite,
@@ -926,7 +940,6 @@ function init_battler(src, is_enemy)
 		temp_stats=init_temp_stats(),
 		skills=skills,
 		status={}
-		--spin=init_spin(zones)
 	}
 end
 
@@ -1065,14 +1078,19 @@ function calc_damage(atk, def, variance)
     return max(atk + flr(rnd(variance)) - def, 1)
 end
 
+function land_hit(target, dmg, msg, color, timer)
+	spawn_damage_popup(target.x+4, target.y-4, dmg<0 and -dmg or dmg, color or 8)
+	resolve_damage(target, dmg, msg)
+	if timer then battle.anim_timer = timer end
+end
+
 --update battle action resolutions
 function do_basic_attack(user, target)
     local dmg = calc_damage(user.atk, target.def)
 	attack_anim(
 		user,
 		function() 
-			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
-			resolve_damage(target, dmg, user.name.." hits "..target.name.." for "..dmg.."!") 
+			land_hit(target, dmg, user.name.." hits "..target.name.." for "..dmg.."!", 8) 
 		end,
 		finish_player_action
 	)
@@ -1084,8 +1102,7 @@ function do_shield_attack(user, target)
         function() battle.shake.target=user; battle.shake.x=flr(rnd(3))-1 end,
         function()
             user.status.defending = true
-			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
-            resolve_damage(target, dmg, user.name.." guards and hits "..target.name.." for "..dmg.."!")
+			land_hit(target, dmg, user.name.." guards and hits "..target.name.." for "..dmg.."!", 8) 
 			finish_player_action()
         end
     )
@@ -1097,8 +1114,7 @@ function do_heal_skill(user, target, heal)
 	heal_anim(
 		target, 
 		function()
-			spawn_damage_popup(target.x+4, target.y-4, heal, 11) 
-			resolve_damage(target, -heal, user.name.." heals "..target.name.." for "..heal.."!") 
+			land_hit(target, -heal, user.name.." heals "..target.name.." for "..heal.."!", 11) 
 			finish_player_action()
 		end
 	)
@@ -1134,7 +1150,7 @@ function update_enemy_turn()
 	e.acting = true
 
     local target = pick_random_alive(battle.battlers)
-    if not target then return end --loss already caught below
+    if not target then return end
 
     local dmg = calc_damage(e.atk, target.def)
     if target.status.defending then dmg = max(flr(dmg/2),1) end
@@ -1142,11 +1158,7 @@ function update_enemy_turn()
     play_anim(dmg*3,
         function() battle.shake.target=e; battle.shake.x=flr(rnd(3))-1 end,
         function()
-			spawn_damage_popup(target.x+4, target.y-4, dmg, 8)
-            target.hp = max(target.hp - dmg, 0)
-            battle.message = e.name.." hits "..target.name.." for "..dmg.."!"
-            battle.anim_timer = 45
-            battle.shake.target = nil
+            land_hit(target, dmg, e.name.." hits "..target.name.." for "..dmg.."!", 8, 45)
 			e.acting = false
 			finish_enemy_action()
         end
@@ -1202,7 +1214,7 @@ function draw_battle()
 
     --action menu (player turn only)
     if battle.state==battle_state.player_turn then
-		local menu_icons = {180, 182, 184, 186}
+		local menu_icons = {118, 120, 122, 124}
         for i=1,4 do
             local selected = battle.battle_select==i
             local spr_id = menu_icons[i] + (selected and 0 or 1)
@@ -1295,9 +1307,8 @@ function draw_target_cursor()
     local bob = flr(sin(time()*2)*2)
     local w = t.w or 8
     local cx = t.x + w/2
-	spr(188,cx-2,t.y-16+bob)
+	spr(126,cx-2,t.y-16+bob)
 end
-
 
 --battle animations and popups
 function play_anim(maxframes,fn,done)
@@ -1375,46 +1386,6 @@ function draw_damage_popups()
     end
 end
 
---wheel logic
-function init_spin(zones)
-	--I imagine setting/resetting variables...
-end
-
-function update_wheel()
-	if wheel.spinning then
-		wheel.angle=(wheel.angle+wheel.speed)%360
- 	end
-end
-
-function check_zone(angle)
-	for _,z in ipairs(zones) do
-		if angle>=z.deg_start and angle<z.deg_stop then
-   			return z.result
-  		end
- 	end
-end
-
-function draw_wheel(cx,cy,r)
-	-- draw zone arcs
- 	for _, z in ipairs(zones) do
-  		for deg = z.deg_start, z.deg_stop do
-   			local t = deg / 360  
-   			local x = cx + cos(t) * r
-   			local y = cy - sin(t) * r 
-   			line(cx, cy, x, y, z.color)
-  		end
- 	end
- 	-- draw needle
- 	local t=wheel.angle/360
- 	local nx=cx+cos(t)*r
- 	local ny=cy+sin(t)*r
- 	line(cx,cy,nx,ny,7)
-end
-
-function apply_spin_result()
-	--the idea would be to apply the result of the spin to the battle. Basically kick off skills or effects
-end
-
 -->8
 --map code
 
@@ -1425,9 +1396,9 @@ function init_map()
 
 	--map tile settings
 	wall=split([[192,193,194,195
-	,196,197,198,203,205,206,207
-	,213,214,215,216,217,218,219
-	,224,229,238,239,240,245]])
+	,196,197,198,203,205,206,213
+	,214,215,216,217,218,219,224
+	,229,238,239,240,245]])
 	anim1=split("238,254")
 	anim2=split("239,255")
 	herbs=split("220,221,222")
@@ -1453,12 +1424,12 @@ end
 
 function draw_npcs()
 	for npc in all(npcs) do
-  		draw_npc(npc.sprite,npc.x,npc.y)
+  		draw_npc(npc.sprite,npc.x,npc.y,npc.flip_x)
  	end
 end
 
-function draw_npc(sprite,x,y)
-	spr(sprite,x*8,y*8)
+function draw_npc(sprite,x,y,flip_x)
+	spr(sprite,x*8,y*8,1,1,flip_x)
 end
 
 function is_tile(tile_type,x,y)
@@ -1470,13 +1441,11 @@ function is_tile(tile_type,x,y)
 end
 
 function can_move(x,y)
-	--check if an npc is there
 	for npc in all(npcs) do
 		if x==npc.x and y==npc.y then
 			return false
 		end
 	end
-	--if no npc, is it a wall?
 	return not is_tile(wall,x,y)
 end
 
@@ -1509,9 +1478,6 @@ end
 function party_interact(x,y)
 	targetx=party.x+party.dx
 	targety=party.y+party.dy
-	--check for text
-		--active_text=get_text(x,y)
-	--check for fight
 	
 	--check for npc dialogue
 	if btnp(4) and dialogue.active==false then 
@@ -1677,7 +1643,7 @@ end
 function draw_status_list()
 	cls(0)
 	print("party status",4,2,7)
-	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
+	draw_gold()
 	line(0,9,127,9,5)
 
 	for i,m in pairs(party.members) do
@@ -1772,7 +1738,7 @@ end
 function draw_status_inventory()
 	cls(0)
 	print("party inventory",4,2,7)
-	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
+	draw_gold()
 	line(0,9,127,9,5)
 
 	for i,item in pairs(party.inventory) do
@@ -1811,6 +1777,10 @@ function next_section(sec,dir)
 	end
 	idx=((idx-1+dir)%#section_order)+1
 	return section_order[idx]
+end
+
+function draw_gold()
+	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
 end
 
 -->8
@@ -1887,8 +1857,9 @@ function party_wiped()
  	return true
 end
 
-function wrap_string(str)
-	local limit,result,cur_line,word=31,"","",""
+function wrap_string(str,is_dialogue)
+	local is_d = is_dialogue or false
+	local limit,result,cur_line,word=is_d and 29 or 31,"","",""
 
 	local function add_break()
 		if word == "" then return end
@@ -1973,46 +1944,46 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000000000000000000000000000000000c00000001000000080000000b0000000e00000009000000020000000600000001000000000000000000000000000
-00000000000000000000000000000000000d7c00000d1100000d7800000d7b00000d7e00000d7900000d7200000d760000011100000000000000000000000000
-0000000000009999999900000000000000d7ccc000d1111000d7888000d7bbb000d7eee000d7999000d7222000d7666000d7ccc0000000000000000000000000
-0000000000995555555599000000000000ccccc0001111100088888000bbbbb000eeeee000999990002222200066666000ccccc0000000000000000000000000
-0000000099554444444455990000000000d060d000d060d000d060d000d060d000d060d000d060d000d060d000d060d000d060d0000000000000000000000000
-00000009554400000000445590000000000060000000600000006000000060000000600000006000000060000000600000006000000000000000000000000000
-00000095440000000000004459000000000060000000600000006000000060000000600000006000000060000000600000006000000000000000000000000000
-00000954000000000000000045900000000060000000600000006000000060000000600000006000000060000000600000006000000000000000000000000000
-00000954000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00009540000000000000000004590000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00954000000000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00954000000000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00954000000000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00954000000000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00954000000000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00954000000000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00954000000000000000000000045900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00095400000000000000000000459000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00009540000000000000000004590000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00000954000000000000000045900000d7cccccdd666666dd7cccccdd766666dd7cccccdd766666dd7cccccdd766666d00000000000000000000000000000000
-000009540000000000000000459000007ccd6ccc666776667c5555cc765555667cc55ccc766556667ccccccc76666666000dd000000000000000000000000000
-00000095440000000000004459000000cccd6ccc66677666c564465c657dd756cc5aa5cc66566566c4a44a4c6d7dd7d600077000000000000000000000000000
-00000009554400000000445590000000cccd6ccc66677666c544445c65dddd56c59a7a5c65d67656c4a44a4c6d7dd7d600077000000000000000000000000000
-00000000995544444444559900000000cccd6ccc66677666c564465c657dd756c599aa5c65dd6656caa99aac6776677607777770000000000000000000000000
-00000000009955555555990000000000cc5544cc66555566cc5445cc665dd566cc5995cc665dd566c595595c6565565600777700000000000000000000000000
-00000000000099999999000000000000ccc54ccc66655666ccc55ccc66655666ccc55ccc66655666c4a44a4c6d7dd7d600077000000000000000000000000000
-00000000000000000000000000000000dccccccdd666666ddccccccdd666666ddccccccdd666666ddccccccdd666666d00000000000000000000000000000000
+000000000000000000000000000000000000000000000000aaccccaa77666677aaccccaa77666677aaccccaa77666677aaccccaa776666770000000000000000
+000000000000000000000000000000000000000000000000accd6cca76677667ac5555ca76555567acc55cca76655667acccccca76666667000dd00000007000
+000000000000000000000000000000000000000000000000cccd6ccc66677666c564465c657dd756cc5aa5cc66566566c4a44a4c6d7dd7d60007700000007700
+000000000000000000000000000000000000000000000000cccd6ccc66677666c544445c65dddd56c59a7a5c65d67656c4a44a4c6d7dd7d6000770000d777770
+000000000000000000000000000000000000000000000000cccd6ccc66677666c564465c657dd756c599aa5c65dd6656caa99aac67766776077777700d777770
+000000000000000000000000000000000000000000000000cc5544cc66555566cc5445cc665dd566cc5995cc665dd566c595595c656556560077770000007700
+000000000000000000000000000000000000000000000000acc54cca76655667acc55cca76655667acc55cca76655667a4a44a4a7d7dd7d70007700000007000
+000000000000000000000000000000000000000000000000aaccccaa77666677aaccccaa77666677aaccccaa77666677aaccccaa776666770000000000000000
+00000004400000000000000440000000000000044000000000555555555555555555555555555555555555555555550055555555511115554555550555555455
+04440044440044400444004444004440044400444400444004455555555555555555555555555555555555445555544055555555144441555455500555554555
+04444544445444455444454444544445544445444454444004444555555555555555555555554555555555445555444055555555144644155550005545555555
+04444554445444555544455444544455554445544454444004444555554555555555555555555555555555555554444055555555144464155500005455555555
+00445554455544555544555445554455554455544555440000445554555555555555554555555555555455555555440055555555124444415500005555555545
+00555555555555555555555555555555555555555555550000555544555555555555555555555555555555555555550055555555124464414000055455555555
+04445555544555555555555555455555555555555555544004445544555554455455555555555445555555554555544055555555512244155000545555455555
+44444555544455555555554555445555555555455554444444444555555554455555445555555445555555555554444455555555551111550055555555555545
+44444555555555555445555555445555544555555554444444444555545555555555445554555555555544455554444455555555555554555555555555555555
+04455554555555555445555555555545544555544555444004455555555555555555545555555555555554455555444055555555555545555b5b555555555555
+005555555555555555555555555555555555555445555500005555555555555555555555555555555555555555555500555555554555555555b5555555555555
+004455555555455555555555545555555555555455554400004455544555445555445554455544555544555445554400555b5b55555b5b555b5b555555555555
+0444455555555555555555555555555555555555555444400444454445544455544445444554445554444544455444405555b5555555b54555555b5b5555a555
+044445554455555555545555555555555555455555544440044445444454444554444544445444455444454444544440555b5b55555b5b55b5b555b555559555
+04455555445555555555555555555555555555555555544004440044440044400444004444004440044400444400444055555555554555555b555b5b55555555
+0055555555555555555555555555555555555555555555000000000440000000000000044000000000000004400000005555555555555545b5b5555555555555
+005555555555555555555555555555555555554455555500555544445555555500000000000000000000000000000000555555555a5555a55555555555445555
+04445555554555555555555555555555555555445555444055555544555555550000000000000000000000000000000055555555595555955555555555554555
+044445555555555555555555555555555455555555544440555555555555555500000000000000000000000000000000555555555555aa555555555555554555
+044445555555555555555555555555555555555555544440555555555555555500000000000000000000000000000000555555a555a5995a4555544555555455
+004455544555555555555555555555555555555555554400554555555555555500000000000000000000000000000000555555955595aa595455455455554555
+0055554445555555555555555555555555555555555555005555555555555555000000000000000000000000000000005a55a5a555a5995a5544555555554555
+04445555555555555555555555555555555555555455544055555455555555550000000000000000000000000000000059559595a59555595555555555545455
+44444555555545555555555555555555555555555554444455555555555555550000000000000000000000000000000055555555955555555555555555455545
+44444555555555555555555555555555555555555554444455555555555555550000000000000000000000000000000055555555000000005555555555555555
+04455554555555555555555555555555555455555555444055555555555555550000000000000000000000000000000055040555000000005222555558885555
+00555555555555555555555555555555555555444555550055555555555555550000000000000000000000000000000054444455000000005555225555558855
+00445555555555555555555555555555555555445555440055555555555555550000000000000000000000000000000040404045000000005555552555555585
+04444555555554555555555555555555555555555554444055555555555555550000000000000000000000000000000054444455000000002552252585588585
+04444555445555555555555555555555555555555554444055555555555555550000000000000000000000000000000055111555000000002552552585585585
+04455555445555555555555555555555555554555555544055555555555555550000000000000000000000000000000055111555000000005255225558558855
+00555555555555555555555555555555555555555555550055555555555555550000000000000000000000000000000055555555000000005525555555855555
 0000000dd00000000000000dd00000000000000dd00000000055555555555555555555555555555555555555555555005555555551111555d555550555555d55
 0ddd00dddd00ddd00ddd00dddd00ddd00ddd00dddd00ddd00dd55555555555555555555555555555555555dd55555dd0555555551dddd1555d5550055555d555
 0dddd5dddd5dddd55dddd5dddd5dddd55dddd5dddd5dddd00dddd55555555555555555555555d555555555dd5555ddd0555555551dd6dd1555500055d5555555
@@ -2037,14 +2008,14 @@ ddddd555555555555dd5555555dd55555dd55555555dddddddddd5555d5555555555dd555d555555
 005555ddd5555555555555555555555555555555555555005555555555555555000000000000000000000000000000005a55a5a555a5995adcc77ccddcccc7cd
 0ddd5555555555555555555555555555555555555d555dd055555d55555555550000000000000000000000000000000059559595a59555595dccccd55dcc7cd5
 ddddd5555555d555555555555555555555555555555ddddd555555555555555500000000000000000000000000000000555555559555555555dddd5555dddd55
-ddddd55555555555555555555555555555555555555ddddd55555555555555550000000000000000000000000000000055555555000000005555555555555555
-0dd5555d555555555555555555555555555d55555555ddd055555555555555550000000000000000000000000000000055040555000000005222555558885555
-00555555555555555555555555555555555555ddd555550055555555555555550000000000000000000000000000000054444455000000005555225555558855
-00dd5555555555555555555555555555555555dd5555dd0055555555555555550000000000000000000000000000000040404045000000005555552555555585
-0dddd55555555d55555555555555555555555555555dddd055555555555555550000000000000000000000000000000054444455000000002552252585588585
-0dddd555dd555555555555555555555555555555555dddd055555555555555550000000000000000000000000000000055111555000000002552552585585585
-0dd55555dd555555555555555555555555555d5555555dd055555555555555550000000000000000000000000000000055111555000000005255225558558855
-00555555555555555555555555555555555555555555550055555555555555550000000000000000000000000000000055555555000000005525555555855555
+ddddd55555555555555555555555555555555555555ddddd55555555555555550000000000000000000000000000000000000000000000000000000000000000
+0dd5555d555555555555555555555555555d55555555ddd055555555555555550000000000000000000000000000000000000000000000000000000000000000
+00555555555555555555555555555555555555ddd555550055555555555555550000000000000000000000000000000000000000000000000000000000000000
+00dd5555555555555555555555555555555555dd5555dd0055555555555555550000000000000000000000000000000000000000000000000000000000000000
+0dddd55555555d55555555555555555555555555555dddd055555555555555550000000000000000000000000000000000000000000000000000000000000000
+0dddd555dd555555555555555555555555555555555dddd055555555555555550000000000000000000000000000000000000000000000000000000000000000
+0dd55555dd555555555555555555555555555d5555555dd055555555555555550000000000000000000000000000000000000000000000000000000000000000
+00555555555555555555555555555555555555555555550055555555555555550000000000000000000000000000000000000000000000000000000000000000
 __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
