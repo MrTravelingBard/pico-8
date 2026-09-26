@@ -77,21 +77,11 @@ end
 
 --init game data
 function init_titles()
-	titles={
-		immortal={name="the immortal", sprite=8},
-		quick_blow={name="the quick blow", sprite=1},
-		eldest={name="the eldest's legacy", sprite=1},
-		slip_master={name="the slip naster", sprite=1},
-		coiled={name="the coiled one", sprite=1},
-		constrictor={name="the constrictor", sprite=1},
-		red={name="the red", sprite=15},
-		once_red={name="the once red", sprite=29},
-		green={name="the green", sprite=22},
-		metal_sworn={name="the metalsworn", sprite=57},
-		metal={name="the metal", sprite=50},
-		creeping_death={name="the creeping death", sprite=43},
-		kingslayer={name="the kingslayer", sprite=36}
-	}
+	titles={}
+	for t in all(split([[immortal,the immortal,8;quick_blow,the quick blow,1;eldest,the eldest's legacy,1;slip_master,the slip naster,1;coiled,the coiled one,1;constrictor,the constrictor,1;red,the red,15;once_red,the once red,29;green,the green,22;metal_sworn,the metalsworn,57;metal,the metal,50;creeping_death,the creeping death,43;kingslayer,the kingslayer,36]],";")) do
+		local k,n,s=unpack(split(t))
+		titles[k]={name=n, sprite=s}
+	end
 end
 
 function init_skills()
@@ -173,216 +163,91 @@ end
 
 function init_npcs()
 	npcs={}
-	init_npc{
-		name="rix the guardian", x=12, y=8, sprite=1, facing="r",
-		moves={
-			{requires="elder_spoken_to", steps="r,r,r,r,r,r,r,d,f_r", speed=0.5}
+	init_npc_data("rix the guardian,12,8,1,r",
+		{
+			init_dlg("!quest_started|the colony is under attack! monsters from the east!;please, you must help us before it is too late!|quest_started"),
+			init_dlg("quest_started,!enemies_defeated|here they come!", function()
+				start_battle("rats_x2", function(won)
+					if won then flags["enemies_defeated"]=true end
+				end)
+			end),
+			init_dlg("enemies_defeated,!elder_spoken_to|you did it! you pushed them back!;the elder will want to speak with you."),
+			init_dlg("|the colony is safe once more thanks to you.")
 		},
-		dialogue={
-			{
-				requires="!quest_started",
-				pages={
-					"the colony is under attack! monsters from the east!",
-					"please, you must help us before it is too late!"
-				},
-				sets="quest_started"
-			},
-			{
-				requires="quest_started,!enemies_defeated",
-				pages={"here they come!"},
-				action=function()
-					start_battle("rats_x2", function(won)
-						if won then flags["enemies_defeated"]=true end
-					end)
-				end
-			},
-			{
-				requires="enemies_defeated,!elder_spoken_to",
-				pages={
-					"you did it! you pushed them back!",
-					"the elder will want to speak with you."
-				}
-			},
-			{
-				pages={"the colony is safe once more thanks to you."}
-			}
-		}
-	}
+		{ init_move("elder_spoken_to|r,r,r,r,r,r,r,d,f_r|0.5") }
+	)
 
-	init_npc{
-		name="nib the once-red", x=6, y=1, sprite=29,
-		dialogue={
-			{
-				requires="!enemies_defeated",
-				pages={"sorry, i'm busy right now collecting my mana for spells if you fail."}
-			},
-			{
-				requires="enemies_defeated",
-				pages={
-					"good, you defeated them. i thought a static bolt would be needed.",
-					"you have potential. perhaps i can teach you true power in the future."
-				}
-			}
+	init_npc_data("nib the once-red,6,1,29",
+		{
+			init_dlg("!enemies_defeated|sorry, i'm busy right now collecting my mana for spells if you fail."),
+			init_dlg("enemies_defeated|good, you defeated them. i thought a static bolt would be needed.;you have potential. perhaps i can teach you true power in the future.")
 		}
-	}
-	
-	init_npc{
-		name="lib the metalsworn", x=2, y=11, sprite=57,
-		dialogue={
-			{
-				pages={
-					"sorry, i'm focused on absorbing this metal. it takes a lot of effort", 
-					"but it will be worth it to become a metal slime. all that power.",
-					"though it's been many years since we've seen any..."
-				}
-			}
-		}
-	}
+	)
 
-	init_npc{
-		name="zig the hero", x=4, y=1, sprite=8,
-		dialogue={
-			{
-				requires="!enemies_defeated",
-				pages={
-					"use the skills i taught you to defeat the enemies at the gate.",
-					"i believe in you."
-				}
-			},
-			{
-				requires="enemies_defeated",
-				pages={
-					"well done! but don't get sloppy. you still have much to learn.",
-					"i will teach you all that i know soon enough. you'll need every advantage you can get for the battles to come."
-				}
-			}
+	init_npc_data("lib the metalsworn,2,11,57",
+		{
+			init_dlg("|sorry, i'm focused on absorbing this metal. it takes a lot of effort;but it will be worth it to become a metal slime. all that power.;though it's been many years since we've seen any...")
 		}
-	}
+	)
 
-	init_npc{
-		name="gab the guardian", x=10, y=6, sprite=1,
-		moves={
-			{requires="elder_spoken_to", steps="d,d,r,r,r,r,r,r,r,r,r,u,u,f_r", speed=0.6}
+	init_npc_data("zig the hero,4,1,8",
+		{
+			init_dlg("!enemies_defeated|use the skills i taught you to defeat the enemies at the gate.;i believe in you."),
+			init_dlg("enemies_defeated|well done! but don't get sloppy. you still have much to learn.;i will teach you all that i know soon enough. you'll need every advantage you can get for the battles to come.")
+		}
+	)
+
+	init_npc_data("gab the guardian,10,6,1",
+		{
+			init_dlg("|another fight is coming. i'd rather skip it if i'm being honest.;i want to protect our people of course, but not dying is also nice.")
 		},
-		dialogue={
-			{
-				pages={
-					"another fight is coming. i'd rather skip it if i'm being honest.",
-					"i want to protect our people of course, but not dying is also nice."
-				}
-			}
-		}
-	}
+		{ init_move("elder_spoken_to|d,d,r,r,r,r,r,r,r,r,r,u,u,f_r|0.6") }
+	)
 
-	init_npc{
-		name="rax the guardian", x=2, y=3, sprite=8, facing="r",
-		dialogue={
-			{
-				requires="!rax_intro",
-				pages={
-					"i guard the sacred spawning pool of our people.",
-					"it is truly an honor but also a great responsibility."
-				},
-				sets="rax_intro"
-			},
-			{
-				pages={
-					"if you venture to the rat tunnels, take care not to get lost in its turns.",
-					"some tunnels lead nowhere merely traps they will use to close in on you."
-				}
-			}
+	init_npc_data("rax the guardian,2,3,8,r",
+		{
+			init_dlg("!rax_intro|i guard the sacred spawning pool of our people.;it is truly an honor but also a great responsibility.|rax_intro"),
+			init_dlg("|if you venture to the rat tunnels, take care not to get lost in its turns.;some tunnels lead nowhere merely traps they will use to close in on you.")
 		}
-	}
+	)
 
-	init_npc{
-		name="bab", x=8, y=7, sprite=1, facing="l",
-		dialogue={
-			{
-				requires="!herb_collected",
-				pages={
-					"see that green herb? eventually you'll be able to collect them.",
-					"they are healing items and may even unlock some interesting powers."
-				}
-			}
+	init_npc_data("bab,8,7,1,l",
+		{
+			init_dlg("!herb_collected|see that green herb? eventually you'll be able to collect them.;they are healing items and may even unlock some interesting powers.")
 		}
-	}
+	)
 
-	init_npc{
-		name="gog", x=10, y=3, sprite=1, facing="r",
-		dialogue={
-			{
-				pages={
-					"zig is much older than he looks. which one? they used to be one in the same.",
-					"that was back before they divided. zig has been a legend since before i spawned."
-				}
-			}
+	init_npc_data("gog,10,3,1,r",
+		{
+			init_dlg("|zig is much older than he looks. which one? they used to be one in the same.;that was back before they divided. zig has been a legend since before i spawned.")
 		}
-	}
+	)
 
-	init_npc{
-		name="mub", x=5, y=11, sprite=1, facing="u",
-		dialogue={
-			{
-				pages={
-					"we haven't heard from the southern colony in awhile.", 
-					"we sent them our gold to fuel their defenses after all their losses during the last war with the rats.",
-					"of the five slime colonies only we two remain. i hope they are safe. eldest preserve us."
-				}
-			}
+	init_npc_data("mub,5,11,1,u",
+		{
+			init_dlg("|we haven't heard from the southern colony in awhile.;we sent them our gold to fuel their defenses after all their losses during the last war with the rats.;of the five slime colonies only we two remain. i hope they are safe. eldest preserve us.")
 		}
-	}
+	)
 
-	init_npc{
-		name="nax", x=8, y=2, sprite=1,
-		dialogue={
-			{
-				pages={
-					"nib and zig are powerful enough to drive off the rats. in their prime, they could even ward off humans.",
-					"i worry though for the cost of using power has it's toll.",
-					"even greats like nib and zig must eventually retire to the spawning pool."
-				}
-			}
+	init_npc_data("nax,8,2,1",
+		{
+			init_dlg("|nib and zig are powerful enough to drive off the rats. in their prime, they could even ward off humans.;i worry though for the cost of using power has it's toll.;even greats like nib and zig must eventually retire to the spawning pool.")
 		}
-	}
+	)
 
-	init_npc{
-		name="fin", x=2, y=4, sprite=1, facing="r",
-		dialogue={
-			{
-				pages={
-					"zig the elder has been sharing the lore of our people with me.",
-					"he was once known as the loremaster before he divided.",
-					"i wonder if he means to pass the title..."
-				}
-			}
+	init_npc_data("fin,2,4,1,r",
+		{
+			init_dlg("|zig the elder has been sharing the lore of our people with me.;he was once known as the loremaster before he divided.;i wonder if he means to pass the title...")
 		}
-	}
+	)
 
-	init_npc{
-		name="zig the elder", x=5, y=1, sprite=1,
-		dialogue={
-			{
-				requires="!enemies_defeated,!elder_spoken_to",
-				pages={"our survival relies on you four. such a burden despite your youth..."}
-			},
-			{
-				requires="enemies_defeated,!elder_spoken_to",
-				pages={
-					"thank you for dealing with those assailants.",
-					"your bravery and strength will take you far."
-				},
-				sets="elder_spoken_to"
-			},
-			{
-				requires="elder_spoken_to",
-				pages={
-					"would you like to hear the old stories of our people?",
-					"the eldest, the dragon, the garuda, the hero, or the lost kings?",
-					"no? maybe next time then."
-				}
-			}
+	init_npc_data("zig the elder,5,1,1",
+		{
+			init_dlg("!enemies_defeated,!elder_spoken_to|our survival relies on you four. such a burden despite your youth..."),
+			init_dlg("enemies_defeated,!elder_spoken_to|thank you for dealing with those assailants.;your bravery and strength will take you far.|elder_spoken_to"),
+			init_dlg("elder_spoken_to|would you like to hear the old stories of our people?;the eldest, the dragon, the garuda, the hero, or the lost kings?;no? maybe next time then.")
 		}
-	}
+	)
 end
 
 function init_party()
@@ -470,39 +335,26 @@ function init_skillpool(string_data)
 	return skill_set
 end
 
-function init_npc(def)
-	local dlg={}
-	for _,d in ipairs(def.dialogue) do
-		add(dlg, {
-			cond=make_cond(d.requires),
-			pages=d.pages,
-			on_end=make_onend(d.sets, d.action)
-		})
-	end
-
-	local mv={}
-	if def.moves then
-		for _,m in ipairs(def.moves) do
-			add(mv, {
-				cond=make_cond(m.requires),
-				steps=m.steps,
-				speed=m.speed or 1
-			})
-		end
-	end
-
-	local npc = {name=def.name, x=def.x, y=def.y, sprite=def.sprite, flip_x=def.flip_x or false,
-		dialogue=dlg, moves=mv,
-		px=def.x*8, py=def.y*8,
+function init_npc_data(s, dlg, mv)
+	local name,x,y,sprite,facing=unpack(split(s))
+	local npc={name=name, x=x, y=y, sprite=sprite,
+		dialogue=dlg, moves=mv or {},
+		px=x*8, py=y*8,
 		sprite_offset=0,
-		path={}, walk_speed=1,
-		face_hold=def.face_hold or 20, face_timer=nil}
-
+		path={}}
 	add(npcs, npc)
+	if facing then apply_facing(npc, facing) end
+	return npc
+end
 
-	if def.facing then
-		apply_facing(npc, def.facing)
-	end
+function init_dlg(s, action)
+	local req,pages,sets=unpack(split(s,"|"))
+	return {cond=make_cond(req), pages=split(pages,";",false), on_end=make_onend(sets,action)}
+end
+
+function init_move(s)
+	local req,steps,speed=unpack(split(s,"|"))
+	return {cond=make_cond(req), steps=steps, speed=speed or 1}
 end
 
 function init_member(string_data)
@@ -999,7 +851,7 @@ end
 
 --dialogue helper functions
 function parse_flags(s)
-	if not s then return nil end
+	if not s or s=="" then return nil end
 	if type(s)=="table" then return s end
 	local t={}
 	for tok in all(split(s, ",")) do
