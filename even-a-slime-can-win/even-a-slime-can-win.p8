@@ -5,14 +5,7 @@ __lua__
 --by mrtravelingbard
 
 --==global variables==
-version="V0.1.0"
-wait=0
-wait_cnt=0
-main_sel=1
---for main menu
-slime_set_size=7
-slime_set_count=9
-slime_swap_interval = 180
+version,wait,wait_cnt,main_sel,slime_set_size,slime_set_count,slime_swap_interval="V0.1.0",0,0,1,7,9,180
 --for status
 section_order={"skills","spells","titles"}
 --for dialogue
@@ -38,20 +31,20 @@ end
 function init_mainmenu()
 	scene="mainmenu"
 	menu_sel=1
-	menu_options={"new game","continue"}
+	menu_options={"new game"} --continue
 	init_mainmenu_slime()
 	set_wait(30)
 	_update=update_mainmenu
 	_draw=draw_mainmenu
 end
 
-function init_savemenu()
-	scene="savemenu"
-	menu_sel=1
-	set_wait(30)
-	_update=update_savemenu
-	_draw=draw_savemenu
-end
+--function init_savemenu()
+--	scene="savemenu"
+--	menu_sel=1
+--	set_wait(30)
+--	_update=update_savemenu
+--	_draw=draw_savemenu
+--end
 
 function init_game()
 	scene="game"
@@ -61,9 +54,6 @@ function init_game()
 	bbeg_defeated=false
 	--setup calls
 	init_map()
-	init_titles()
-	init_skills()
-	init_skillpools()
 	init_npcs()
 	init_enemies()
 	init_enemy_groups()
@@ -78,7 +68,7 @@ end
 --init game data
 function init_titles()
 	titles={}
-	for t in all(split([[immortal,the immortal,8;quick_blow,the quick blow,1;eldest,the eldest's legacy,1;slip_master,the slip naster,1;coiled,the coiled one,1;constrictor,the constrictor,1;red,the red,15;once_red,the once red,29;green,the green,22;metal_sworn,the metalsworn,57;metal,the metal,50;creeping_death,the creeping death,43;kingslayer,the kingslayer,36]],";")) do
+	for t in all(split([[immortal,the immortal,8;quick_blow,the quick blow,1;eldest,the eldest's legacy,1;slip_master,the slip naster,1;coiled,the coiled one,1;red,the red,15;once_red,the once red,29;metal_sworn,the metalsworn,57;metal,the metal,50;kingslayer,the kingslayer,36]],";")) do
 		local k,n,s=unpack(split(t))
 		titles[k]={name=n, sprite=s}
 	end
@@ -87,56 +77,56 @@ end
 function init_skills()
 	skills={
 		--immortal
-		immortal=init_skill("immortal,passive,0,resurrect at the beginning of the round with 50% hp."),
-		revenge=init_skill("revenge,active,0,deals damage based on the number of deaths suffered since last use."),
+		immortal=init_skill("immortal,passive,0,resurrect at the beginning of the round with 50% hp"),
+		revenge=init_skill("revenge,active,0,deals damage based on the number of deaths suffered since last use"),
 		--quick_blow
-		stunning=init_skill("stunning,passive,0,all attacks have a 25% chance to stun."),
-		quick_blow=init_skill("quick blow,active,0,deals damage to single target with higher spd priority."),
+		stunning=init_skill("stunning,passive,0,all attacks have a 25% chance to stun"),
+		quick_blow=init_skill("quick blow,active,0,deals damage to single target with higher spd priority"),
 		--eldest
-		legacy=init_skill("eldest's legacy,passive,0,increased max hp by 300%."),
-		gift=init_skill("eldest's gift,active,0,gift a portion of your hp to others as healing with a 1:3 ratio."),
+		legacy=init_skill("eldest's legacy,passive,0,increased max hp by 300%"),
+		gift=init_skill("eldest's gift,active,0,gift a portion of your hp to others as healing with a 1:3 ratio"),
 		--slip_master
-		slippery=init_skill("slippery,passive,0,upon dodging an attack inflict prone on attacker."),
-		slip_stance=init_skill("slip stance,active,0,take a slippery stance which dodges all physical attacks."),
+		slippery=init_skill("slippery,passive,0,upon dodging an attack inflict prone on attacker"),
+		slip_stance=init_skill("slip stance,active,0,take a slippery stance which dodges all physical attacks"),
 		--coiled
-		capitalize=init_skill("capitalize,passive,0,deals double damage to stunned, proned, or constricted enemies."),
-		coil=init_skill("coil,active,0,charges a powerful attack for x turns and deals x * damage."),
+		capitalize=init_skill("capitalize,passive,0,deals 2x damage to stunned or proned or constricted enemies"),
+		coil=init_skill("coil,active,0,charges a powerful attack for x turns and deals x * damage"),
 		--constrictor
-		lingering=init_skill("lingering impact,passive,0,when a debuff caused directly by you is removed add new debuffs in it's place."),
-		constrict=init_skill("constrict,active,0,constrict a single target which prevents them from acting. constrict holds based on strength vs target strength."),
+		--lingering=init_skill("lingering impact,passive,0,when a debuff caused directly by you is removed add new debuffs in it's place"),
+		--constrict=init_skill("constrict,active,0,constrict a single target which prevents them from acting based on strength vs target strength"),
 		--red
-		red=init_skill("red,passive,0,gains access to spells and gains mp based on mag stat with a 5:1 ratio"),
+		red=init_skill("red,passive,0,gains access to spells and gains mp based on mag stat 5:1"),
 		gold_burn=init_skill("gold burn,passive,0,each coin used to regain mp reduces maxhp by 1"),
 		recover_mp=init_skill("recover mp,active,1,use a coin to recover all mp & increase max mp by 3"),
 		--once_red
 		once_red=init_skill("once red,passive,0,retains access to spells and mp from being red"),
 		mana_dart=init_skill("mana dart,active,1,magical damage based on remaining mana"),
 		--green
-		green=init_skill("green,passive,0,can absorb herbs as charges to be used in healing skills"),
-		healing_poultice=init_skill("healing poultice,active,0,use 1 charge to heal a single target"),
-		the_green=init_skill("the green,active,0,use 3 charges to heal the whole party"),
+		--green=init_skill("green,passive,0,can absorb herbs as charges to be used in healing skills"),
+		--healing_poultice=init_skill("healing poultice,active,0,use 1 charge to heal a single target"),
+		--the_green=init_skill("the green,active,0,use 3 charges to heal the whole party"),
 		--metal_sworn
-		metal_sworn=init_skill("metal_sworn,passive,0,once the metal is absorbed a new power will be born"),
+		metal_sworn=init_skill("metal sworn,passive,0,once the metal is absorbed a new power will be born"),
 		absorb=init_skill("absorb,active,0,absorbs some of the metal and restores a low amount of hp to self"),
 		--metal
 		metal=init_skill("metal,passive,0,all damage taken reduced by 50%"),
 		sword=init_skill("sword,active,0,deals double damage & can inflict bleeding on a single target"),
 		shield=init_skill("shield,active,0,acts as a shield by taking the hits for the party for a turn"),
 		--creeping_death
-		purple=init_skill("purple,passive,0,physical attacks dealt or taken can inflict poison"),
-		poison_impact=init_skill("poison impact,active,0,deals damage based on number of poison stacks on target"),
+		--purple=init_skill("purple,passive,0,physical attacks dealt or taken can inflict poison"),
+		--poison_impact=init_skill("poison impact,active,0,deals damage based on number of poison stacks on target"),
 		--kingslayer
 		kingslayer=init_skill("kingslayer,passive,0,deal 2x total damage to boss enemies or 3x if they are bleeding"),
 		sharpen=init_skill("sharpen,active,0,increases a single target's atk stat by 4 (stacks up to 3 times)"),
 		--spells
 		fire_dart=init_skill("fire dart,active,1,deals minor fire damage to a single target"),
-		lesser_fireball=init_skill("lesser fireball,active,1,deals moderate fire damage to a single target with a 50% chance to inflict burn"),
-		lesser_heat=init_skill("lesser heat,active,1,if wearing metal a single target takes major fire damage and is inflicted with a def debuff"),
+		--lesser_fireball=init_skill("lesser fireball,active,1,deals moderate fire damage to a single target with a 50% chance to inflict burn"),
+		--lesser_heat=init_skill("lesser heat,active,1,if wearing metal a single target takes major fire damage and is inflicted with a def debuff"),
 		cold_breeze=init_skill("cold breeze,active,1,deals minor ice damage to a single target"),
-		lesser_frost=init_skill("lesser frost,active,1,deals moderate ice damage to a single target with a 50% chance to inflict slow"),
+		--lesser_frost=init_skill("lesser frost,active,1,deals moderate ice damage to a single target with a 50% chance to inflict slow"),
 		static_bolt=init_skill("static bolt,active,1,deals moderate lightning damage to a random target"),
-		lesser_lightning=init_skill("lesser lightning,active,1,deals major lightning damage to a random target with a 50% chance to inflict stun"),
-		minor_shielding=init_skill("minor shielding,active,1,increases a single target's def by 4 (stacks up to 3 times)"),
+		--lesser_lightning=init_skill("lesser lightning,active,1,deals major lightning damage to a random target with a 50% chance to inflict stun"),
+		--minor_shielding=init_skill("minor shielding,active,1,increases a single target's def by 4 (stacks up to 3 times)"),
 		minor_bulwark=init_skill("minor bulwark,active,1,increases the whole party's def by 4 (stacks up to 3 times)")
 	}
 end
@@ -148,16 +138,16 @@ function init_skillpools()
 		eldest=init_skillpool("legacy,gift"),
 		slip_master=init_skillpool("slippery,slip_stance"),
 		coiled=init_skillpool("capitalize,coil"),
-		constrictor=init_skillpool("lingering,constrict"),
+		--constrictor=init_skillpool("lingering,constrict"),
 		red=init_skillpool("red,gold_burn,recover_mp"),
 		once_red=init_skillpool("once_red,mana_dart"),
-		green=init_skillpool("green,healing_poultice,the_green"),
+		--green=init_skillpool("green,healing_poultice,the_green"),
 		metal_sworn=init_skillpool("metal_sworn,absorb"),
 		metal=init_skillpool("metal,sword,shield"),
-		creeping_death=init_skillpool("purple,poison_impact"),
+		--creeping_death=init_skillpool("purple,poison_impact"),
 		kingslayer=init_skillpool("kingslayer,sharpen"),
-		shop_1=init_skillpool("fire_dart,cold_breeze,static_bolt,minor_shielding"),
-		shop_2=init_skillpool("lesser_fireball,lesser_heat,lesser_frost,lesser_lightning,minor_bulwark")
+		shop_1=init_skillpool("fire_dart,cold_breeze,static_bolt,minor_bulwark"),
+		--shop_2=init_skillpool("lesser_fireball,lesser_heat,lesser_frost,lesser_lightning,minor_bulwark")
 	}
 end
 
@@ -259,13 +249,8 @@ function init_party()
 		sprite=1,
 		sprite_offset=0,
 		flip_x=false,
-		members={
-			init_member("mab,red,1,1,1,1"),
-			init_member("ziz,immortal,1,1,1,1"),
-			init_member("gig,quick_blow,4,1,1,1"),
-			init_member("bib,eldest,1,1,1,1")
-		},
-		inventory={},
+		members=build_party_members,
+		herb=0,
 		gold=0
 	}
 	party_set_leader()
@@ -281,9 +266,9 @@ end
 
 function init_enemy_groups()
 	enemy_groups = {
-		slimes_x2   = {"slime","slime"},
-		forest_mix  = {"slime","rat","rat"},
-		rats_x2     = {"rat","rat"}
+		--slimes_x2   = {"slime","slime"},
+		rats_x2     = {"rat","rat"},
+		--rat_king    = {"rat_king"}
 	}
 end
 
@@ -291,10 +276,7 @@ end
 function init_dialogue()
 	dialogue={
 		active=false,
-		npc=nil,     
-		entry=nil,   
 		page=1,      
-		on_end=nil,  
 		--text box config
 		box_x=4,
 		box_y=88,
@@ -386,9 +368,9 @@ function init_member(string_data)
 		maxmp_total=0,
 		status={},
 		temp_stats=init_temp_stats(),
-		skills=skill_pools[title],
-		spells={} --for now
+		skills=skill_pools[title]
 	}
+	if (title=="red") member.mastered_titles={[title]=true}
 	member = refresh_stats(member)
 	return member
 end
@@ -419,15 +401,6 @@ function init_battle_enemies(group_id)
     return list
 end
 
-function init_item(string_data)
-	local name,desc,quantity=unpack(split(string_data))
-	return {
-		name=name,
-		desc=desc,
-		quantity=quantity
-	}
-end
-
 function init_mainmenu_slime()
 	waypoints = {
 		{20,15},{95,15},{95,27},{20,27},{20,39},{95,39},{95,27},{20,27},{20,15}
@@ -449,28 +422,25 @@ _init = init_intro
 
 --update scenes
 function update_intro()
-	if btnp(4) or wait_check() then
-		init_mainmenu()
-	end
+	if (btnp(4) or wait_check()) init_mainmenu()
 end
 
 function update_mainmenu()
-	local option_cnt=#menu_options
 	if wait_cnt==2 then
 		if menu_control(#menu_options) then
-			if menu_sel==1 then init_game() end
-			if menu_sel==2 then init_savemenu() end
+			if menu_sel==1 then init_builder() end
+			--if menu_sel==2 then init_savemenu() end
 		end
 	end
 end
 
-function update_savemenu()
-	if wait_check() then
-		if btnp(4) then
-			init_mainmenu()
-		end
-	end
-end
+--function update_savemenu()
+--	if wait_check() then
+--		if btnp(4) then
+--			init_mainmenu()
+--		end
+--	end
+--end
 
 function update_game()
 	if wait_check() then
@@ -529,15 +499,14 @@ function update_party()
 		
 	if can_move(newx,newy) then
 		party.x,party.y=mid(0,newx,127),mid(0,newy,63)
-	else
-		sfx(0)
+	--else
+		--sfx(0)
 	end
 end
 
 function update_dialogue()
-	if not dialogue.active then return end
-
-	if btnp(4) then dialogue_advance() end
+	if (not dialogue.active) return
+	if (btnp(4)) dialogue_advance()
 end
 
 --update helpers
@@ -665,18 +634,18 @@ function draw_mainmenu()
 	if wait_cnt==2 then
 		print(version,0,120,1)
 		for n=1,#menu_options do
-			if menu_sel==n then	spr(127,40,86+(n*8)) end
+			if (menu_sel==n) spr(127,40,86+(n*8))
 			print(menu_options[n],48,88+(n*8),7)
 		end
 	end
 end
 
-function draw_savemenu()
-	cls()
-	if wait_check() then
-		print("placeholder for save menu",0,0,7)
-	end
-end
+--function draw_savemenu()
+--	cls()
+--	if wait_check() then
+--		print("placeholder for save menu",0,0,7)
+--	end
+--end
 
 function draw_game()
 	cls()
@@ -744,8 +713,9 @@ function draw_dialogue()
 	end
 end
 
-function draw_panel(x0,y0,x1,y1)
-	rectfill(x0,y0,x1,y1,1)
+function draw_panel(x0,y0,x1,y1,c)
+	local c=c or 1
+	rectfill(x0,y0,x1,y1,c)
 	rect(x0,y0,x1,y1,7)
 end
 
@@ -778,8 +748,7 @@ function draw_mainmenu_slime()
 	local tx,ty=target[1],target[2]
 	local dx,dy=tx-slime_x,ty-slime_y
 	if ease_toward(_ENV,"slime_x","slime_y",tx,ty,0.5) then
-		wp_index=wp_index%#waypoints+1
-		slime_pause=6
+		wp_index,slime_pause=wp_index%#waypoints+1,6
 	else
 		if abs(dx)>abs(dy) then
 			slime_spr=slime_base+2
@@ -790,8 +759,10 @@ function draw_mainmenu_slime()
 	end
 end
 
-function draw_centered(text)
-	print(text, 64 - (#text*4)/2, 60, 7)
+function draw_centered(text,y,c)
+	local y=y or 60
+	local c=c or 7
+	print(text, 64 - (#text*4)/2, y, c)
 end
 
 -->8
@@ -868,7 +839,7 @@ function make_cond(reqs)
 	local t=parse_flags(reqs)
 	if not t then return nil end
 	return function()
-		for flag,val in pairs(t) do
+		for flag,val in next,t do
 			if (flags[flag] or false) ~= val then return false end
 		end
 		return true
@@ -880,7 +851,7 @@ function make_onend(sets, action)
 	if not t and not action then return nil	end
 	return function()
 		if t then
-			for flag,val in pairs(t) do flags[flag]=val end
+			for flag,val in next,t do flags[flag]=val end
 		end
 		if action then action()	end
 	end
@@ -900,13 +871,12 @@ function init_battle(enemy_data)
 		target_side="enemy",
 		target_select=1,
 		anim_timer=0,
-		shake={target=nil, x=0},
-		heal_flash={target=nil, frame=0},
+		shake={x=0},
+		heal_flash={frame=0},
 		frames=0,
 		popups={},
 		player_defends=false,
 		enemy_defends=false,
-		result=nil,
 		enemies={},
 		battlers={}
 	}
@@ -925,9 +895,7 @@ function init_battle(enemy_data)
 	--battle animations init
 	anim={
 		frames=0,
-		maxframes=0,
-		fn=nil,
-		done=nil
+		maxframes=0
 	}
 
 	--setup main functions
@@ -968,6 +936,17 @@ function start_battle(enemy_group_id, on_battle_end)
     battle.on_end = on_battle_end
 end
 
+--function start_rat_king_fight()
+--	start_battle("rat_king", function(won)
+--		if won then flags["rat_king_defeated"]=true end
+--	end)
+--end
+
+--function use_skill(m,skill_key)
+--	m.skill_uses=m.skill_uses or {}
+--	m.skill_uses[skill_key]=(m.skill_uses[skill_key] or 0)+1
+--end
+
 --update battle scene
 function update_battle()
     battle.anim_timer -= 1
@@ -975,7 +954,7 @@ function update_battle()
     
 	if battle.state==battle_state.anim then
         anim.frames -= 1
-        if anim.frames<=0 then anim.done() end
+        if (anim.frames<=0) anim.done()
         return
     end
 
@@ -1004,8 +983,8 @@ end
 
 function update_battle_menu()
     if battle.targeting then
-        if btnp(0) then cycle_target(-1) end
-        if btnp(1) then cycle_target(1) end
+        if (btnp(0)) cycle_target(-1)
+        if (btnp(1)) cycle_target(1)
         if btnp(5) then
             battle.targeting = false
             return
@@ -1027,11 +1006,11 @@ function update_battle_menu()
 
     if btnp(0) then
         battle.battle_select -= 1
-        if battle.battle_select<1 then battle.battle_select=4 end
+        if (battle.battle_select<1) battle.battle_select=4
     end
     if btnp(1) then
         battle.battle_select += 1
-        if battle.battle_select>4 then battle.battle_select=1 end
+        if (battle.battle_select>4) battle.battle_select=1
     end
 
     if btnp(4) and battle.anim_timer<=0 then
@@ -1039,7 +1018,7 @@ function update_battle_menu()
             battle.targeting = true
             battle.target_side = "enemy"
             battle.target_select = 1
-            if battle.enemies[1].hp<=0 then cycle_target(1) end
+            if (battle.enemies[1].hp<=0) cycle_target(1)
         elseif battle.battle_select==3 then
             battle.targeting = true
 			battle.target_side = "party"
@@ -1077,7 +1056,7 @@ end
 
 function get_alive(side)
     local out={}
-    for _,e in ipairs(side) do
+    for _,e in inext,side do
         if e.hp>0 then add(out,e) end
     end
     return out
@@ -1105,7 +1084,7 @@ function land_hit(target, dmg, msg, color, timer)
 end
 
 function sync_battle_to_party()
-    for _,b in ipairs(battle.battlers) do
+    for _,b in inext,battle.battlers do
         b.member.hp = b.hp
         b.member.mp = b.mp
     end
@@ -1204,7 +1183,7 @@ end
 function advance_enemy_turn()
     battle.active_enemy += 1
     if battle.active_enemy > #battle.enemies then
-        for _,b in ipairs(battle.battlers) do b.status.defending=false end
+        for _,b in inext,battle.battlers do b.status.defending=false end
         battle.active_char = 1
         while battle.battlers[battle.active_char].hp<=0 do
             battle.active_char += 1
@@ -1259,14 +1238,14 @@ end
 function draw_enemy_row(enemies, center_x, y, padding)
     padding = padding or 4
     local total_w = 0
-    for i,e in ipairs(enemies) do
+    for i,e in inext,enemies do
         e.layout_w = #e.name*4 + 2
         total_w += e.layout_w
         if i < #enemies then total_w += padding end
     end
 
     local x = center_x - total_w/2
-    for i,e in ipairs(enemies) do
+    for i,e in inext,enemies do
         e.x = x + e.layout_w/2 - 4
         e.y = y
         e.label_cx = x + e.layout_w/2
@@ -1278,14 +1257,14 @@ function draw_battle_layout()
 	draw_enemy_row(battle.enemies, 64, 32, 6)
 
     local col_w = 32
-    for i,b in ipairs(battle.battlers) do
+    for i,b in inext,battle.battlers do
         b.x = col_w*(i-1) + col_w/2 - 4
         b.y = 94
     end
 end
 
 function draw_battle_sprites()
-	for i,e in ipairs(battle.enemies) do
+	for i,e in inext,battle.enemies do
 		if e.hp>0 then
 			local shake_x = (battle.shake.target==e) and battle.shake.x or 0
 			local bounce_y = e.acting and 2 or 0
@@ -1298,7 +1277,7 @@ function draw_battle_sprites()
 		end
 	end
 
-    for i,b in ipairs(battle.battlers) do
+    for i,b in inext,battle.battlers do
 		local active = (battle.state==battle_state.player_turn and i==battle.active_char)
 		local c=7
 		if flr((b.hp/b.maxhp)*100)<=33 then
@@ -1472,14 +1451,10 @@ end
 function can_move(x,y)
 	local no_move={wall,herbs,gold}
 	for npc in all(npcs) do
-		if x==npc.x and y==npc.y then
-			return false
-		end
+		if (x==npc.x and y==npc.y) return false
 	end
 	for t in all(no_move) do
-		if is_tile(t,x,y) then
-			return false
-		end
+		if (is_tile(t,x,y)) return false
 	end
 	return true
 end
@@ -1527,14 +1502,14 @@ function party_interact(x,y)
 		if is_tile(recover,targetx,targety) then
 			heal_party_full()
 			recover_anim=24
-			sfx(1)
+			--sfx(1)
 		elseif is_tile(herbs,targetx,targety) then
 			local tile=mget(targetx,targety)
 			local amt=(tile==222) and 3 or 1
-			add_item("herb","a healing herb. can be used to restore hp.",amt)
+			party.herb+=amt
 			mset(targetx,targety,204)
 			herb_anim=24
-			sfx(1)
+			--sfx(1)
 		elseif is_tile(gold,targetx,targety) then
 			local tile=mget(targetx,targety)
 			local amt=1
@@ -1546,7 +1521,7 @@ function party_interact(x,y)
 			party.gold+=amt
 			mset(targetx,targety,204)
 			gold_anim=24
-			sfx(1)
+			--sfx(1)
 		end
  	end
 
@@ -1576,6 +1551,15 @@ function refresh_stats(member,refresh)
 	member.maxhp_total=max(1,(max(1,member.con_total) * 5) + temp_maxhp)
 	member.maxmp_total=max(0,member.maxmp + temp_maxmp)
 	
+	for i,s in inext,member.skills do
+		if s.name=="red" or s.name=="once red" then
+			member.maxmp_total = (max(1,member.mag_total) * 5) + temp_maxmp
+		end
+		if s.name=="eldest's legacy" then 
+			member.maxhp_total*=3
+		end
+	end
+	
 	if refresh then
 		--if maxhp increases hp increases
 		local hpdiff,mpdiff=member.maxhp_total-maxhp_start,member.maxmp_total-maxmp_start
@@ -1597,15 +1581,6 @@ function refresh_stats(member,refresh)
 			member.mp=member.maxmp_total
 		end
 		return member
-	end
-	
-	for i,s in ipairs(member.skills) do
-		if s.name=="red" or s.name=="once red" then
-			member.maxmp_total = (max(1,member.mag_total) * 5) + temp_maxmp
-		end
-		if s.name=="eldest's legacy" then 
-			member.maxhp_total*=3
-		end
 	end
 	
 	member.maxhp, member.maxmp = member.maxhp_total, member.maxmp_total
@@ -1632,8 +1607,6 @@ function update_status()
 	local mode=status.mode
 
 	if mode=="list" then
-		if(btnp(0) or btnp(1)) status.mode="inventory"
-
 		local d=btnp(2) and -1 or (btnp(3) and 1 or 0)
 		if d!=0 then
 			status.cursor=(status.cursor+d-1)%#party.members+1
@@ -1643,16 +1616,6 @@ function update_status()
 			status.mode="detail"
 			status.detail_section="skills"
 		end
-		if(btnp(5)) status.active=false
-
-	elseif mode=="inventory" then
-		if(btnp(0) or btnp(1)) status.mode="list"
-
-		local d=btnp(2) and -1 or (btnp(3) and 1 or 0)
-		if d!=0 then
-			status.item_cursor=(status.item_cursor+d-1)%#party.inventory+1
-		end
-
 		if(btnp(5)) status.active=false
 
 	elseif mode=="detail" then
@@ -1674,12 +1637,91 @@ function update_status()
 			status[key]=(status[key]+d-1)%#list+1
 		end
 
-		if(btnp(4)) status.mode=sub(sec,1,-2).."_detail" -- "skill_detail"/"spell_detail"/"title_detail"
+		if btnp(4) then
+			if sec=="titles" then
+				status.mode="title_swap"
+				local keys=available_title_keys(m)
+				status.swap_idx=1
+				for i,k in inext,keys do
+					if k==m.title then status.swap_idx=i end
+				end
+			else
+				status.mode=sub(sec,1,-2).."_detail" -- "skill_detail"/"spell_detail"
+			end
+		end
 		if(btnp(5)) status.mode="list"
 
-	else -- skill_detail / spell_detail / title_detail
+	elseif mode=="title_swap" then
+		local m=party.members[status.cursor]
+		local keys=available_title_keys(m)
+		if (btnp(0)) status.swap_idx=(status.swap_idx-2)%#keys+1
+		if (btnp(1)) status.swap_idx=status.swap_idx%#keys+1
+		if btnp(4) then
+			apply_title_swap(m, keys[status.swap_idx])
+			status.mode="detail"
+		end
+		if (btnp(5)) status.mode="detail"
+
+	else -- skill_detail / spell_detail
 		if(btnp(5) or btnp(4)) status.mode="detail"
 	end
+end
+
+--shared title helpers (also used by the party builder)
+function all_title_keys()
+	if not cached_title_keys then
+		cached_title_keys={}
+		for k in next,titles do add(cached_title_keys,k) end
+	end
+	return cached_title_keys
+end
+
+--conditions gating which titles a member can swap into.
+--a title with no entry here is always available.
+title_unlock_conditions = {
+	--must have been red before to become once_red
+	once_red = function(m)
+		return m.mastered_titles and m.mastered_titles["red"]
+	end,
+	--must have mastered metal_sworn and used absorb 10+ times
+	metal = function(m)
+		return m.mastered_titles and m.mastered_titles["metal_sworn"]
+			and ((m.skill_uses and m.skill_uses["absorb"]) or 0) >= 10
+	end,
+	--must have defeated the rat king
+	kingslayer = function(m)
+		return flags["rat_king_defeated"]==true
+	end
+}
+
+function is_title_unlocked(m,key)
+	local cond=title_unlock_conditions[key]
+	if not cond then return true end
+	return cond(m) and true or false
+end
+
+--titles a given member is currently allowed to swap into
+--(always includes their current title, even if a condition
+--somehow no longer holds, so they're never stuck with no options)
+function available_title_keys(m)
+	m=m or {}
+	local out={}
+	for k in all(all_title_keys()) do
+		if k==m.title or is_title_unlocked(m,k) then
+			add(out,k)
+		end
+	end
+	return out
+end
+
+function apply_title_swap(m,new_title)
+	m.mastered_titles=m.mastered_titles or {}
+	m.mastered_titles[m.title]=true
+	m.title=new_title
+	m.title_pretty=titles[new_title].name
+	m.sprite=titles[new_title].sprite
+	m.skills=skill_pools[new_title]
+	refresh_stats(m,true)
 end
 
 function draw_status()
@@ -1687,24 +1729,47 @@ function draw_status()
 
 	if status.mode=="list" then
 		draw_status_list()
-	elseif status.mode=="inventory" then
-		draw_status_inventory()
 	elseif status.mode=="detail" then
 		draw_status_detail(party.members[status.cursor])
 	elseif status.mode=="skill_detail" then
 		draw_ability_detail(skill_pools[party.members[status.cursor].title][status.skill_cursor])
-	else --spell_detail
+	elseif status.mode=="title_swap" then
+		draw_status_title_swap(party.members[status.cursor])
+	--else --spell_detail
 		--draw_ability_detail(spell_pools[party.members[status.cursor].title][status.spell_cursor])
 	end
+end
+
+function draw_status_title_swap(m)
+	local tkey=available_title_keys(m)[status.swap_idx]
+	cls(0)
+	print("swap title",4,2,7)
+	line(0,9,127,9,5)
+
+	spr(titles[tkey].sprite,10,15)
+	print(m.name.." "..titles[tkey].name,32,18,7)
+	
+	line(0,31,127,31,5)
+	print("skills",4,34,7)
+	local list=skill_pools[tkey]
+	for i,s in inext,list do
+		local y=42+(i-1)*24
+		print(s.name,4,y,s.type=="active" and 7 or 15)
+		print(wrap_string(s.desc),4,y+6,7)
+	end
+
+	line(0,120,127,120,5)
+	print("⬅️➡️ title  🅾️ confirm  ❎ back",4,122,6)
 end
 
 function draw_status_list()
 	cls(0)
 	print("party status",4,2,7)
+	draw_herb()
 	draw_gold()
 	line(0,9,127,9,5)
 
-	for i,m in pairs(party.members) do
+	for i,m in next,party.members do
 		local y=12+(i-1)*28
 
 		if i==status.cursor then
@@ -1721,7 +1786,7 @@ function draw_status_list()
 
 		line(0,y+24,127,y+24,5)
 	end
-	print("⬅️➡️ inventory  🅾️ back",4,122,6)
+	print("🅾️ back",4,122,6)
 end
 
 function draw_status_detail(m)
@@ -1756,10 +1821,10 @@ function draw_status_detail(m)
 	local cursor=status[cursor_key]
 	local list=get_section_list(sec,m)
 
-	for i,s in pairs(list) do
+	for i,s in next,list do
 		local y=73+(i-1)*7
 
-		if(i==cursor) rectfill(0,y-1,127,y+5,1)
+		if(i==cursor and sec~="titles") rectfill(0,y-1,127,y+5,1)
 
 		print(s.name,4,y,s.type=="active" and 7 or 15)
 
@@ -1771,8 +1836,8 @@ function draw_status_detail(m)
 	end
 
 	line(0,120,127,120,5)
-
-	print("⬅️➡️ toggle  🅾️ view  ❎ back",4,122,6)
+	local opt=sec=="titles" and "swap" or "view"
+	print("⬅️➡️ toggle  🅾️ "..opt.."  ❎ back",4,122,6)
 end
 
 function draw_ability_detail(s)
@@ -1793,30 +1858,6 @@ function draw_ability_detail(s)
 	print("🅾️/❎ back",4,122,6)
 end
 
-function draw_status_inventory()
-	cls(0)
-	print("party inventory",4,2,7)
-	draw_gold()
-	line(0,9,127,9,5)
-
-	for i,item in pairs(party.inventory) do
-		local y=12+(i-1)*10
-		if i==status.item_cursor then
-			rectfill(0,y-1,127,y+7,1)
-		end
-		print(item.name,4,y,7)
-		print("x"..item.quantity,100,y,10)
-	end
-
-	line(0,120,127,120,5)
-	if party.inventory[status.item_cursor] then
-		local desc_wrap = wrap_string(party.inventory[status.item_cursor].desc)
-		print(desc_wrap,4,106,6)
-	end
-
-	print("⬅️➡️ party  🅾️ back",4,122,6)
-end
-
 --helpers for party and status
 function get_section_list(sec,m)
 	if sec=="skills" then
@@ -1824,13 +1865,17 @@ function get_section_list(sec,m)
 	elseif sec=="spells" then
 		return (spell_pools and spell_pools[m.title]) or {}
 	else -- titles
-		return m.mastered_titles or {}
+		local list={}
+		for k in next,m.mastered_titles or {} do
+			add(list,{name=titles[k].name})
+		end
+		return list
 	end
 end
 
 function next_section(sec,dir)
 	local idx=1
-	for i,v in ipairs(section_order) do
+	for i,v in inext,section_order do
 		if v==sec then idx=i break end
 	end
 	idx=((idx-1+dir)%#section_order)+1
@@ -1838,7 +1883,11 @@ function next_section(sec,dir)
 end
 
 function draw_gold()
-	print(party.gold.." coin"..(party.gold>1 and "s" or ""),90,2,9)
+	print(party.gold.." coin"..(party.gold>1 and "s" or ""),100,2,9)
+end
+
+function draw_herb()
+	print(party.herb.." herb"..(party.herb>1 and "s" or ""),70,2,3)
 end
 
 -->8
@@ -1855,24 +1904,6 @@ end
 
 function set_wait(num)
 	wait=num
-end
-
-function nearest_npc(px,py,range)
-	--Might not use this, delete if not
-	local best=nil
-	local best_dst=range*range
-
-	for _,npc in pairs(npcs) do
-  		local dx=npc.x-px
-  		local dy=npc.y-py
-  		local dst=dx*dx+dy*dy
-  		if dst<=best_dst then
-   			best=npc
-   			best_dst=dst
-  		end
- 	end
-
- 	return best
 end
 
 function menu_control(option_cnt)
@@ -1898,19 +1929,15 @@ end
 
 function check_win_lose()
 	if bbeg_defeated then
-		game_win=true
-		game_over=true
+		game_win,game_over=true,true
 	elseif party_wiped() then
-		game_win=false
-		game_over=true
+		game_win,game_over=false,true
 	end
 end
 
 function party_wiped()
 	for i=1,#party.members do
-  		if party.members[i].hp>0 then
-   			return false
-  		end
+  		if (party.members[i].hp>0) return false
  	end
  	return true
 end
@@ -1946,21 +1973,176 @@ function wrap_string(str,is_dialogue)
 end
 
 function heal_party_full()
-    for _,m in ipairs(party.members) do
+    for _,m in inext,party.members do
         m.hp = m.maxhp
         m.mp = m.maxmp
     end
 end
 
-function add_item(name,desc,amount)
-    amount = amount or 1
-    for item in all(party.inventory) do
-        if item.name==name then
-            item.quantity += amount
-            return
-        end
-    end
-    add(party.inventory, {name=name, desc=desc, quantity=amount})
+--party builder
+name_chars="abcdefghijklmnopqrstuvwxyz"
+def_names=split"zag,gig,mab,bib,gaz,nim,pib"
+
+function set_char(s,pos,ch)
+	return sub(s,1,pos-1)..ch..sub(s,pos+1)
+end
+
+function pick(t)
+	local n=rnd(t)
+	del(t,n)
+	return n
+end
+
+function cycle_char(c,dir)
+	local i=1
+	for j=1,#name_chars do
+		if sub(name_chars,j,j)==c then i=j end
+	end
+	i=(i-1+dir)%#name_chars+1
+	return sub(name_chars,i,i)
+end
+
+function init_builder()
+	scene="builder"
+	init_titles()
+	init_skills()
+	init_skillpools()
+	builder_party={}
+	for i=1,4 do
+		add(builder_party,{name="",title=1})
+	end
+	builder_cursor=1
+	builder_mode="main"
+	builder_char_pos=1
+	builder_skill_cursor=1
+	set_wait(10)
+	_update=update_builder
+	_draw=draw_builder
+end
+
+function builder_member(i)
+	local b=builder_party[i]
+	local tkey=available_title_keys()[b.title]
+	local nm=b.name~="" and b.name or "???"
+	return init_member(nm..","..tkey..",1,1,1,1"),tkey
+end
+
+function start_from_builder()
+	build_party_members={}
+	for i=1,4 do
+		local b=builder_party[i]
+		if b.name=="" then b.name=pick(def_names) end
+		add(build_party_members,(builder_member(i)))
+	end
+	init_game()
+end
+
+function update_builder()
+	if not wait_check() then return end
+
+	if builder_mode=="main" then
+		if (btnp(2)) builder_cursor=(builder_cursor-2)%5+1
+		if (btnp(3)) builder_cursor=builder_cursor%5+1
+
+		if builder_cursor==5 then
+			if (btnp(4)) start_from_builder()
+			return
+		end
+
+		local b=builder_party[builder_cursor]
+		local nkeys=#available_title_keys()
+		if (btnp(0)) b.title=(b.title-2)%nkeys+1
+		if (btnp(1)) b.title=b.title%nkeys+1
+		if btnp(4) then
+			builder_mode="name"
+			builder_char_pos=1
+			if (b.name=="") b.name="aaa"
+		end
+		if (btnp(5)) builder_mode,builder_skill_cursor="skills",1
+
+
+	elseif builder_mode=="name" then
+		local b=builder_party[builder_cursor]
+		if (btnp(1)) builder_char_pos=builder_char_pos%3+1
+		if (btnp(0)) builder_char_pos=(builder_char_pos-2)%3+1
+		local c=sub(b.name,builder_char_pos,builder_char_pos)
+		if (c=="") c="a"
+		if (btnp(2)) b.name=set_char(b.name,builder_char_pos,cycle_char(c,-1))
+		if (btnp(3)) b.name=set_char(b.name,builder_char_pos,cycle_char(c,1))
+		if (btnp(4) or btnp(5)) builder_mode="main"
+
+	elseif builder_mode=="skills" then
+		local _,tkey=builder_member(builder_cursor)
+		local list=skill_pools[tkey]
+		if (btnp(2)) builder_skill_cursor=(builder_skill_cursor-2)%#list+1
+		if (btnp(3)) builder_skill_cursor=builder_skill_cursor%#list+1
+		if (btnp(4)) builder_mode="skill_detail"
+		if (btnp(5)) builder_mode="main"
+
+	else --skill_detail
+		if (btnp(4) or btnp(5)) builder_mode="skills"
+	end
+end
+
+function draw_builder()
+	cls()
+	print("build your party",4,2,7)
+	line(0,9,127,9,5)
+
+	for i=1,4 do
+		local b=builder_party[i]
+		local y=12+(i-1)*23
+		if i==builder_cursor then rectfill(0,y-1,127,y+19,1) end
+		local mem,tkey=builder_member(i)
+		spr(mem.sprite,4,y)
+		local nm=b.name~="" and b.name or "???"
+		print(nm.." "..titles[tkey].name,14,y,7)
+		print("str"..mem.str.." dex"..mem.dex.." con"..mem.con.." mag"..mem.mag,14,y+7,13)
+		print("hp"..mem.maxhp.." mp"..mem.maxmp.." atk"..mem.atk.." def"..mem.def,14,y+14,6)
+	end
+
+	if builder_cursor==5 then rectfill(0,106,127,114,1) end
+	draw_centered("> start game <",108,10)
+
+	print("⬅️➡️ title 🅾️ name ❎ skills",4,122,6)
+
+	if builder_mode=="name" then draw_builder_name() end
+	if builder_mode=="skills" then draw_builder_skills() end
+	if builder_mode=="skill_detail" then draw_builder_skill_detail() end
+end
+
+function draw_builder_name()
+	local b=builder_party[builder_cursor]
+	draw_panel(28,50,99,70,0)
+	print("enter name",32,53,7)
+	for i=1,3 do
+		local c=sub(b.name,i,i)
+		local blink=(i==builder_char_pos) and (time()*4)%2<1
+		print(c,48+(i-1)*8,62,blink and 5 or 7)
+	end
+end
+
+function draw_builder_skills()
+	local _,tkey=builder_member(builder_cursor)
+	local list=skill_pools[tkey]
+	draw_panel(18,16,109,104,0)
+	print("skills",21,19,7)
+	for i,s in inext,list do
+		local y=28+(i-1)*8
+		if i==builder_skill_cursor then rectfill(19,y-2,108,y+6,1) end
+		print(s.name,21,y,s.type=="active" and 7 or 15)
+	end
+	print("🅾️ view ❎ back",21,98,6)
+end
+
+function draw_builder_skill_detail()
+	local _,tkey=builder_member(builder_cursor)
+	local s=skill_pools[tkey][builder_skill_cursor]
+	draw_panel(0,28,127,92,0)
+	print(s.name,3,31,7)
+	print(s.type,3,38,6)
+	print(wrap_string(s.desc),3,46,7)
+	print("🅾️/❎ back",3,86,6)
 end
 
 __gfx__
