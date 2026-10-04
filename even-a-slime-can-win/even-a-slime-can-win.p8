@@ -6,7 +6,6 @@ __lua__
 
 --==global variables==
 version,wait,wait_cnt,main_sel="V0.1.1",0,0,1
---slime_set_size,slime_set_count,slime_swap_interval=7,9,180
 --for status
 section_order={"skills","spells","titles"}
 --for dialogue
@@ -34,7 +33,6 @@ function init_mainmenu()
 	scene="mainmenu"
 	menu_sel=1
 	menu_options={"new game"} --continue
-	--init_mainmenu_slime()
 	set_wait(30)
 	_update=update_mainmenu
 	_draw=draw_mainmenu
@@ -403,20 +401,6 @@ function init_battle_enemies(group_id)
     return list
 end
 
---function init_mainmenu_slime()
---	waypoints = {
---		{20,15},{95,15},{95,27},{20,27},{20,39},{95,39},{95,27},{20,27},{20,15}
---	}
---	wp_index = 1
---	slime_x, slime_y = waypoints[1][1], waypoints[1][2]
---	slime_set = 1
---	slime_base = 1
---	slime_pause = 0
---	slime_color_timer = slime_swap_interval
---	slime_spr = slime_base
---	slime_flip = false
---end
-
 --main config
 _init = init_intro
 -->8
@@ -739,35 +723,6 @@ function draw_win_lose()
  	end
 	print("press ❎ to play again",20,72,5)
 end
-
---function draw_mainmenu_slime()
---	slime_color_timer -= 1
---	if slime_color_timer <= 0 then
---		slime_set = slime_set % slime_set_count + 1
---		slime_base = 1 + (slime_set-1) * slime_set_size
---		slime_color_timer = slime_swap_interval
---		slime_pause = 6
---	end
---
---	if slime_pause > 0 then
---		slime_pause -= 1
---		return
---	end
---
---	local target=waypoints[wp_index]
---	local tx,ty=target[1],target[2]
---	local dx,dy=tx-slime_x,ty-slime_y
---	if ease_toward(_ENV,"slime_x","slime_y",tx,ty,0.5) then
---		wp_index,slime_pause=wp_index%#waypoints+1,6
---	else
---		if abs(dx)>abs(dy) then
---			slime_spr=slime_base+2
---			slime_flip=dx<0
---		else
---			slime_spr=(dy>0) and slime_base or slime_base+1
---		end
---	end
---end
 
 function draw_centered(text,y,c)
 	local y=y or 60
