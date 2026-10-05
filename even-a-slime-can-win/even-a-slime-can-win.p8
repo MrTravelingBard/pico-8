@@ -68,7 +68,7 @@ end
 --init game data
 function init_titles()
 	titles={}
-	for t in all(split([[immortal,the immortal,8;quick_blow,the quick blow,1;eldest,the eldest's legacy,1;slip_master,the slip naster,1;coiled,the coiled one,1;constrictor,the constrictor,1;red,the red,15;once_red,the once red,29;metal_sworn,the metalsworn,57;metal,the metal,50;kingslayer,the kingslayer,36]],";")) do
+	for t in all(split([[immortal,the immortal,8;quick_blow,the quick blow,1;eldest,the eldest's legacy,1;slip_master,the slip naster,1;coiled,the coiled one,1;red,the red,15;once_red,the once red,29;metal_sworn,the metalsworn,57;metal,the metal,50;kingslayer,the kingslayer,36]],";")) do
 		local k,n,s=unpack(split(t))
 		titles[k]={name=n, sprite=s}
 	end
@@ -91,9 +91,6 @@ function init_skills()
 		--coiled
 		capitalize=init_skill("capitalize,passive,0,deals 2x damage to stunned or proned or constricted enemies"),
 		coil=init_skill("coil,active,0,charges a powerful attack for x turns and deals x * damage"),
-		--constrictor
-		lingering=init_skill("lingering impact,passive,0,when a debuff caused directly by you is removed add new debuffs in it's place"),
-		constrict=init_skill("constrict,active,0,constrict a single target which prevents them from acting based on strength vs target strength"),
 		--red
 		red=init_skill("red,passive,0,gains access to spells and gains mp based on mag stat 5:1"),
 		gold_burn=init_skill("gold burn,passive,0,each coin used to regain mp reduces maxhp by 1"),
@@ -101,10 +98,6 @@ function init_skills()
 		--once_red
 		once_red=init_skill("once red,passive,0,retains access to spells and mp from being red"),
 		mana_dart=init_skill("mana dart,active,1,magical damage based on remaining mana"),
-		--green
-		--green=init_skill("green,passive,0,can absorb herbs as charges to be used in healing skills"),
-		--healing_poultice=init_skill("healing poultice,active,0,use 1 charge to heal a single target"),
-		--the_green=init_skill("the green,active,0,use 3 charges to heal the whole party"),
 		--metal_sworn
 		metal_sworn=init_skill("metal sworn,passive,0,once the metal is absorbed a new power will be born"),
 		absorb=init_skill("absorb,active,0,absorbs some of the metal and restores a low amount of hp to self"),
@@ -112,21 +105,13 @@ function init_skills()
 		metal=init_skill("metal,passive,0,all damage taken reduced by 50%"),
 		sword=init_skill("sword,active,0,deals double damage & can inflict bleeding on a single target"),
 		shield=init_skill("shield,active,0,acts as a shield by taking the hits for the party for a turn"),
-		--creeping_death
-		--purple=init_skill("purple,passive,0,physical attacks dealt or taken can inflict poison"),
-		--poison_impact=init_skill("poison impact,active,0,deals damage based on number of poison stacks on target"),
 		--kingslayer
 		kingslayer=init_skill("kingslayer,passive,0,deal 2x total damage to boss enemies or 3x if they are bleeding"),
 		sharpen=init_skill("sharpen,active,0,increases a single target's atk stat by 4 (stacks up to 3 times)"),
 		--spells
 		fire_dart=init_skill("fire dart,active,1,deals minor fire damage to a single target"),
-		--lesser_fireball=init_skill("lesser fireball,active,1,deals moderate fire damage to a single target with a 50% chance to inflict burn"),
-		--lesser_heat=init_skill("lesser heat,active,1,if wearing metal a single target takes major fire damage and is inflicted with a def debuff"),
 		cold_breeze=init_skill("cold breeze,active,1,deals minor ice damage to a single target"),
-		--lesser_frost=init_skill("lesser frost,active,1,deals moderate ice damage to a single target with a 50% chance to inflict slow"),
 		static_bolt=init_skill("static bolt,active,1,deals moderate lightning damage to a random target"),
-		--lesser_lightning=init_skill("lesser lightning,active,1,deals major lightning damage to a random target with a 50% chance to inflict stun"),
-		--minor_shielding=init_skill("minor shielding,active,1,increases a single target's def by 4 (stacks up to 3 times)"),
 		minor_bulwark=init_skill("minor bulwark,active,1,increases the whole party's def by 4 (stacks up to 3 times)")
 	}
 end
@@ -141,13 +126,10 @@ function init_skillpools()
 		constrictor=init_skillpool("lingering,constrict"),
 		red=init_skillpool("red,gold_burn,recover_mp"),
 		once_red=init_skillpool("once_red,mana_dart"),
-		--green=init_skillpool("green,healing_poultice,the_green"),
 		metal_sworn=init_skillpool("metal_sworn,absorb"),
 		metal=init_skillpool("metal,sword,shield"),
-		--creeping_death=init_skillpool("purple,poison_impact"),
 		kingslayer=init_skillpool("kingslayer,sharpen"),
-		shop_1=init_skillpool("fire_dart,cold_breeze,static_bolt,minor_bulwark"),
-		--shop_2=init_skillpool("lesser_fireball,lesser_heat,lesser_frost,lesser_lightning,minor_bulwark")
+		shop_1=init_skillpool("fire_dart,cold_breeze,static_bolt,minor_bulwark")
 	}
 end
 
@@ -244,8 +226,8 @@ function init_party()
 	party={
 		x=5,
 		y=5,
-		dx=0, --x facing: -1 (left), 0, 1 (right)
-		dy=-1, --y facing: -1 (up), 0, 1 (down)
+		dx=0, 
+		dy=-1,
 		sprite=1,
 		sprite_offset=0,
 		flip_x=false,
@@ -266,9 +248,7 @@ end
 
 function init_enemy_groups()
 	enemy_groups = {
-		--slimes_x2   = {"slime","slime"},
-		rats_x2     = {"rat","rat"},
-		--rat_king    = {"rat_king"}
+		rats_x2     = {"rat","rat"}
 	}
 end
 
@@ -277,7 +257,6 @@ function init_dialogue()
 	dialogue={
 		active=false,
 		page=1,      
-		--text box config
 		box_x=4,
 		box_y=88,
 		box_w=120,
@@ -289,9 +268,6 @@ end
 
 --init helper functions
 function init_temp_stats()
-	--1=str 2=dex 3=con 4=mag
-	--5=atk 6=def 7=spd 8=matk 
-	--9=mdef 10=maxhp 11=maxmp
 	temp_stats={}
 	for i=1,11 do
 		add(temp_stats,0)
@@ -418,18 +394,9 @@ function update_mainmenu()
 				pal() 
 				init_builder() 
 			end
-			--if menu_sel==2 then init_savemenu() end
 		end
 	end
 end
-
---function update_savemenu()
---	if wait_check() then
---		if btnp(4) then
---			init_mainmenu()
---		end
---	end
---end
 
 function update_game()
 	if wait_check() then
@@ -488,8 +455,6 @@ function update_party()
 		
 	if can_move(newx,newy) then
 		party.x,party.y=mid(0,newx,127),mid(0,newy,63)
-	--else
-		--sfx(0)
 	end
 end
 
@@ -633,13 +598,6 @@ function draw_mainmenu()
 		print(version,0,120,5)
 	end
 end
-
---function draw_savemenu()
---	cls()
---	if wait_check() then
---		print("placeholder for save menu",0,0,7)
---	end
---end
 
 function draw_game()
 	cls()
@@ -876,7 +834,7 @@ function init_battler(src, is_enemy)
 	local skills=src.skills or {}
 
 	return {
-		member=src, -- keep a reference
+		member=src, 
 		name=src.name,
 		is_enemy=is_enemy,
 		sprite=src.sprite,
@@ -900,17 +858,6 @@ function start_battle(enemy_group_id, on_battle_end)
     init_battle(enemy_data)
     battle.on_end = on_battle_end
 end
-
---function start_rat_king_fight()
---	start_battle("rat_king", function(won)
---		if won then flags["rat_king_defeated"]=true end
---	end)
---end
-
---function use_skill(m,skill_key)
---	m.skill_uses=m.skill_uses or {}
---	m.skill_uses[skill_key]=(m.skill_uses[skill_key] or 0)+1
---end
 
 --update battle scene
 function update_battle()
@@ -1446,10 +1393,8 @@ function update_tiles()
 		for y=mapy,mapy+15 do
 			if (is_tile(anim1,x,y)) then
 				swap_tile(x,y)
-				--sfx(3)
 			elseif (is_tile(anim2,x,y)) then
 				unswap_tile(x,y)
-				--sfx(3)
 			end
 		end
 	end
@@ -1533,7 +1478,6 @@ function refresh_stats(member,refresh)
 	end
 	
 	if refresh then
-		--if maxhp increases hp increases
 		local hpdiff,mpdiff=member.maxhp_total-maxhp_start,member.maxmp_total-maxmp_start
 		if hpdiff>0 then
 			member.maxhp+=hpdiff
@@ -1543,7 +1487,6 @@ function refresh_stats(member,refresh)
 			member.maxmp+=mpdiff
 			member.mp+=mpdiff
 		end
-		--if maxhp decreases hp decreases to match maxhp if over it
 		if member.hp>member.maxhp_total then
 			member.maxhp=member.maxhp_total
 			member.hp=member.maxhp_total
@@ -1618,7 +1561,7 @@ function update_status()
 					if k==m.title then status.swap_idx=i end
 				end
 			else
-				status.mode=sub(sec,1,-2).."_detail" -- "skill_detail"/"spell_detail"
+				status.mode=sub(sec,1,-2).."_detail"
 			end
 		end
 		if(btnp(5)) status.mode="list"
@@ -1634,7 +1577,7 @@ function update_status()
 		end
 		if (btnp(5)) status.mode="detail"
 
-	else -- skill_detail / spell_detail
+	else 
 		if(btnp(5) or btnp(4)) status.mode="detail"
 	end
 end
@@ -1647,20 +1590,14 @@ function all_title_keys()
 	end
 	return cached_title_keys
 end
-
---conditions gating which titles a member can swap into.
---a title with no entry here is always available.
 title_unlock_conditions = {
-	--must have been red before to become once_red
 	once_red = function(m)
 		return m.mastered_titles and m.mastered_titles["red"]
 	end,
-	--must have mastered metal_sworn and used absorb 10+ times
 	metal = function(m)
 		return m.mastered_titles and m.mastered_titles["metal_sworn"]
 			and ((m.skill_uses and m.skill_uses["absorb"]) or 0) >= 10
 	end,
-	--must have defeated the rat king
 	kingslayer = function(m)
 		return flags["rat_king_defeated"]==true
 	end
@@ -1672,9 +1609,6 @@ function is_title_unlocked(m,key)
 	return cond(m) and true or false
 end
 
---titles a given member is currently allowed to swap into
---(always includes their current title, even if a condition
---somehow no longer holds, so they're never stuck with no options)
 function available_title_keys(m)
 	m=m or {}
 	local out={}
@@ -1707,8 +1641,6 @@ function draw_status()
 		draw_ability_detail(skill_pools[party.members[status.cursor].title][status.skill_cursor])
 	elseif status.mode=="title_swap" then
 		draw_status_title_swap(party.members[status.cursor])
-	--else --spell_detail
-		--draw_ability_detail(spell_pools[party.members[status.cursor].title][status.spell_cursor])
 	end
 end
 
@@ -2051,7 +1983,7 @@ function update_builder()
 		if (btnp(4)) builder_mode="skill_detail"
 		if (btnp(5)) builder_mode="main"
 
-	else --skill_detail
+	else 
 		if (btnp(4) or btnp(5)) builder_mode="skills"
 	end
 end
@@ -2166,14 +2098,14 @@ __gfx__
 0bdd630003b3d0dd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 07b333003333d0660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 3b3dd600333360660000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000aaccccaa776666770000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000acccccca766666670000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c4a44a4c6d7dd7d60000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c4a44a4c6d7dd7d60000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000caa99aac677667760000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c595595c656556560000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4a44a4a7d7dd7d70000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000aaccccaa776666770000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000000000000000000000000000000000000000000000000aaccccaa77666677aaccccaa77666677aaccccaa77666677aaccccaa776666770000000000000000
 000000000000000000000000000000000000000000000000accd6cca76677667ac5555ca76555567acc55cca76655667accc3cca76665667000dd00000007000
 000000000000000000000000000000000000000000000000cccd6ccc66677666c564465c657dd756cc5aa5cc66566566ccc3b3cc666565660007700000007700
