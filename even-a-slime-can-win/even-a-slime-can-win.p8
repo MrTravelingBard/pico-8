@@ -68,7 +68,7 @@ end
 --init game data
 function init_titles()
 	titles={}
-	for t in all(split([[immortal,the immortal,8;quick_blow,the quick blow,1;eldest,the eldest's legacy,1;slip_master,the slip naster,1;coiled,the coiled one,1;red,the red,15;once_red,the once red,29;metal_sworn,the metalsworn,57;metal,the metal,50;kingslayer,the kingslayer,36]],";")) do
+	for t in all(split([[immortal,the immortal,8;quick_blow,the quick blow,1;eldest,the eldest's legacy,1;slip_master,the slip naster,1;coiled,the coiled one,1;constrictor,the constrictor,1;red,the red,15;once_red,the once red,29;metal_sworn,the metalsworn,57;metal,the metal,50;kingslayer,the kingslayer,36]],";")) do
 		local k,n,s=unpack(split(t))
 		titles[k]={name=n, sprite=s}
 	end
@@ -92,8 +92,8 @@ function init_skills()
 		capitalize=init_skill("capitalize,passive,0,deals 2x damage to stunned or proned or constricted enemies"),
 		coil=init_skill("coil,active,0,charges a powerful attack for x turns and deals x * damage"),
 		--constrictor
-		--lingering=init_skill("lingering impact,passive,0,when a debuff caused directly by you is removed add new debuffs in it's place"),
-		--constrict=init_skill("constrict,active,0,constrict a single target which prevents them from acting based on strength vs target strength"),
+		lingering=init_skill("lingering impact,passive,0,when a debuff caused directly by you is removed add new debuffs in it's place"),
+		constrict=init_skill("constrict,active,0,constrict a single target which prevents them from acting based on strength vs target strength"),
 		--red
 		red=init_skill("red,passive,0,gains access to spells and gains mp based on mag stat 5:1"),
 		gold_burn=init_skill("gold burn,passive,0,each coin used to regain mp reduces maxhp by 1"),
@@ -138,7 +138,7 @@ function init_skillpools()
 		eldest=init_skillpool("legacy,gift"),
 		slip_master=init_skillpool("slippery,slip_stance"),
 		coiled=init_skillpool("capitalize,coil"),
-		--constrictor=init_skillpool("lingering,constrict"),
+		constrictor=init_skillpool("lingering,constrict"),
 		red=init_skillpool("red,gold_burn,recover_mp"),
 		once_red=init_skillpool("once_red,mana_dart"),
 		--green=init_skillpool("green,healing_poultice,the_green"),
