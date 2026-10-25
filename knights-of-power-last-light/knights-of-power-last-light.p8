@@ -6,10 +6,10 @@ __lua__
 
 --global variables
 version,wait,wait_cnt,main_sel="V0.1.0",0,0,1
-routines={}
---for dialogue
-flags={}
-faces={["^"]=66,["~"]=69}
+--for menus
+menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main"}
+--for cutscenes
+dirs={r={1,0},l={-1,0},u={0,-1},d={0,1}}
 --for battle
 battle_state={menu=1,target=2,anim=3,enemy=4,win=5,lose=6,idle=7,skill=8}
 
@@ -43,11 +43,7 @@ end
 
 function init_game()
 	--variables
-	scene="game"
-	game_win=false
-	game_over=false
-	menu_active=false
-	bbeg_defeated=false
+	scene,game_win,game_over,cutscene_on,bbeg_defeated,routines="game",false,false,false,false,{}
 	--setup calls
 	init_map()
 	init_dialogue()
@@ -58,6 +54,7 @@ function init_game()
 	init_status()
 	init_player()
 	init_npcs()
+	init_scenes()
 	set_wait(30)
 	--setup main functions
 	_update = update_game 
@@ -65,23 +62,16 @@ function init_game()
 end
 
 --init menus/windows
-function init_menu()
-	--setup variables
-	menuselect=1
-end
-
 function init_use_menu()
-	use_menu=false
 	useselect=1
-	usestep=false
 end
 
 --init game data
 function init_npcs()
-	npc_data={}
+	npc_data,who={},{}
 
 	--elder
-	npc("136,3,10",
+	npc("136,3,10,elder",
 		run_once(1,"in our most dire need, where are the gnomes, the wild men, and the wizards of the spiral;tower? will they stand by & watch us burn?! or...are they already dead?"))
 
 	--kids
@@ -91,7 +81,7 @@ function init_npcs()
 		run_once(3,"what are those at the gate yelling about? what's going on?"))
 	--kid + hero conversation, then a repeat line
 	npc("132,6,8",
-		run_once(4,"my grandma said you shouldn't show monsters fear. it only makes them stronger.;i'm still scared though...;^you don't have to be afraid. i won't let them inside these walls. the light will prevail.;but...aren't you scared too?;^of course. but sometimes we have to fight what is in front of us, even if we're scared.;^because the cost of not doing so is too high. stay strong. the light will win this day."),
+		run_once(4,"my grandma said you shouldn't show monsters fear. it only makes them stronger.;i'm still scared though...;hero:you don't have to be afraid. i won't let them inside these walls. the light will prevail.;but...aren't you scared too?;hero:of course. but sometimes we have to fight what is in front of us, even if we're scared.;hero:because the cost of not doing so is too high. stay strong. the light will win this day."),
 		init_dlg("|i'm staying strong, mister."))
 	--repeatable
 	npc("135,7,8",
@@ -106,13 +96,13 @@ function init_npcs()
 	--guards
 	npc("142,13,3",
 		run_once(10,"i know it's just beyond this wall. will it climb or...is it strong enough to bust through?"))
-	npc("141,7,13",
+	npc("141,7,13,gl",
 		run_once(11,"this is bad. we simply don't have the numbers to hold this many back!"))
-	npc("139,9,13",
+	npc("139,9,13,gr",
 		run_once(12,"we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?"))
 
-	--no dialogue: 2 villagers + monsters
-	for r in all(split("130,11,10;131,9,10;163,15,3;166,8,14;164,7,15;166,8,15;164,9,15;162,3,14;167,2,15;162,12,14;167,13,15",";")) do
+	--no dialogue: 2 villagers + monsters idx13-21
+	for r in all(split("130,11,10;131,9,10;163,15,3,chest_guardian;166,8,14,tag:gate_scene;164,7,15,tag:gate_scene;166,8,15,tag:gate_scene;164,9,15,tag:gate_scene;162,3,14,tag:gate_scene;167,2,15,tag:gate_scene;162,12,14,tag:gate_scene;167,13,15,tag:gate_scene",";")) do
 		npc(r)
 	end
 end
@@ -120,7 +110,6 @@ end
 function init_inventory()
 	--setup variables
 	invselect=1
-	invstep=false
 	--add inventory
 	--format:item_num,name,quick desc,full desc,
 	--q heal amount,q status effect to add, q se to remove,
@@ -136,7 +125,7 @@ function init_inventory()
 end
 
 function init_skills()
-	skiselect,skistep=1,false
+	skiselect=1
 	if (skill_defs) return
 	--name,desc1,desc2,mp,menu-usable,target
 	--target: e=one enemy s=self a=all enemies
@@ -205,8 +194,17 @@ end
 function npc(s,...)
 	--npc("sprite,x,y", dlg1, dlg2, ...)
 	--first dialogue whose conditions pass wins
-	local sprite,x,y=unpack(split(s))
-	add(npc_data,{sprite=sprite,x=x,y=y,dialogue={...}})
+	local sprite,x,y,key=unpack(split(s))
+	local n={sprite=sprite,x=x,y=y,dialogue={...}}
+	if key then
+		if sub(key,1,4)=="tag:" then
+			--just to group together for scenes as needed
+			n.tag=sub(key,5)
+		else
+			who[key]=n
+		end
+	end
+	add(npc_data,n)
 end
 
 function run_once(id,pages,action)
@@ -253,34 +251,82 @@ end
 
 function update_game()
 	if wait_check() then
-		if (not game_over) then
-			if dialogue.active then 
+		if not game_over then
+			run_async()
+			if dialogue.active then
 				update_dialogue()
-			elseif (not active_text) and (not menu_active) then
+			elseif menu_mode then
+				update_menus()
+			else
 				update_map()
-				move_player()
+				if not cutscene_on then
+					if btnp(5) then
+						menu_mode,menuselect="main",1
+					else
+						move_player()
+					end
+				end
 				check_win_lose()
-			elseif menu_active then
-				if inventory_menu then
-					if use_menu then
-						update_use_menu()
-					else
-						update_inventory()
-					end
-				elseif skills_menu then
-					if use_menu then
-						update_use_menu()
-					else
-						update_skills()
-					end
-				elseif status_menu then 
-					--lock select for main menu
-				else
-					update_menu()
+			end
+		elseif btnp(5) then
+			extcmd("reset")
+		end
+	end
+end
+
+--update menus
+function update_menus()
+	local m=menu_mode
+
+	--a message box cycles input until dismissed
+	if active_text then
+		if (btnp(4)) active_text=nil
+		return
+	end
+
+	local d=(btnp(3) and 1 or 0)-(btnp(2) and 1 or 0) --down/up
+	local h=(btnp(1) and 1 or 0)-(btnp(0) and 1 or 0) --right/left
+
+	if btnp(5) then
+		menu_mode=menu_back[m]
+
+	elseif m=="main" then
+		menuselect=(menuselect+h-1)%4+1
+		if btnp(4) then
+			if menuselect==1 then
+				init_inventory()
+				menu_mode="items"
+			elseif menuselect==2 then
+				init_skills()
+				menu_mode="skills"
+			elseif menuselect==3 then
+				menu_mode="status"
+			end
+		end
+
+	elseif m=="items" then
+		local n=#p_inventory
+		if n>0 then
+			invselect=(invselect+d-1)%n+1
+			if (btnp(4)) menu_mode,useselect="item_use",1
+		end
+
+	elseif m=="skills" then
+		skiselect=(skiselect+d-1)%#p_skills+1
+		if (btnp(4)) menu_mode,useselect="skill_use",1
+
+	elseif m=="item_use" or m=="skill_use" then
+		if (d!=0) useselect=3-useselect
+		if btnp(4) then
+			local item=m=="item_use"
+			menu_mode=item and "items" or "skills"
+			if useselect==1 then
+				if item and check_can_use_item() then
+					use_item()
+				elseif not item and check_can_use_skill() then
+					use_skill()
 				end
 			end
-		else
-			if (btnp(❎))	extcmd("reset")
 		end
 	end
 end
@@ -300,73 +346,9 @@ function update_tiles()
 	end
 end
 
-function update_menu()
---todo: consolidate all these
---update menus into single func
---since they are very similar
-	if btnp(➡️) then
-		if menuselect<4 then
-			menuselect+=1
-		else
-			menuselect=1
-		end
-	elseif btnp(⬅️) then
-		if menuselect>1 then
-			menuselect-=1
-		else
-			menuselect=4
-		end
-	end
-end
-
-function update_inventory() 
-	if btnp(⬇️) and p_inventory then
-		if invselect<#p_inventory then
-			invselect+=1
-		else
-			invselect=1
-		end
-	elseif btnp(⬆️) and p_inventory then
-		if invselect>1 then
-			invselect-=1
-		else
-			invselect=#p_inventory
-		end
-	end
-end
-
-function update_skills() 
-	if btnp(⬇️) then
-		if skiselect<#p_skills then
-			skiselect+=1
-		else
-			skiselect=1
-		end
-	elseif btnp(⬆️) then
-		if skiselect>1 then
-			skiselect-=1
-		else
-			skiselect=#p_skills
-		end
-	end
-end
-
-function update_use_menu() 
-	if btnp(⬇️) or btnp(⬆️) then
-		if useselect==1 then
-			useselect=2
-		else
-			useselect=1
-		end
-	end
-end
-
 function check_can_use_item()
-	local value=p_inventory[invselect][1]
-	
-	if value==4 and p.hp==p.maxhp then
+	if p_inventory[invselect][1]==4 and p.hp==p.maxhp then
 		active_text="\n\n     your health is full"
-		draw_text()
 		return false
 	end
 	return true
@@ -383,7 +365,6 @@ function check_can_use_skill()
 	end
 	if m then
 		active_text=m
-		draw_text()
 		return false
 	end
 	return true
@@ -405,12 +386,6 @@ function async(func)
 	add(routines,cocreate(func))
 end
 
-function pause(frames)
-	for i=1,frames do
-		yield()
-	end
-end
-
 function run_async()
 	for r in all(routines) do
 		if costatus(r) == "dead" then
@@ -421,33 +396,8 @@ function run_async()
 	end
 end
 
-function move(obj,key,dest,frames,expr)
-	local init=obj[key]
-	frames=frames or 30
-	expr=expr or linear
-	
-	for i=1,frames do
-		obj[key]=lerp(init,dest,expr(i/frames))
-		yield()
-	end
-end
-
-function lerp(a,b,t)
-	return a+(b-a)*t
-end
-
-function linear(t)
-	return t
-end
-
-function easeinelastic(t)
-	if(t==0) return 0
-	return 2^(10*t-10)*cos(2*t-2)
-end
-
 function is_empty(t)
---checks if a table is empty
-
+	--checks if a table is empty
 	for _,_ in pairs(t) do
 		return false
 	end
@@ -513,6 +463,7 @@ function draw_mainmenu()
 		for n=1,#menu_options do
 			print((menu_sel==n and ">" or " ")..menu_options[n],40,88+(n*8),7)
 		end
+		print(version,0,120,5)
 	end
 end
 
@@ -526,127 +477,37 @@ end
 function draw_game()
 	cls()
 	if game_over==false then
-		if wait_check() then
+		if wait==0 then
 			draw_map()
 			draw_npcs()
 			draw_player()
-			if (not active_text) then
-				if dialogue.active then
-					draw_dialogue()
-				else
-					--x button checks
-					if (btnp(❎) and (not menu_active)) then
-						init_menu()
-						menu_active=true
-				elseif (btnp(❎) and menu_active) then
-					if not (inventory_menu or use_menu or skills_menu or status_menu) then
-						menu_active=false
-					else
-						if (btnp(❎) and inventory_menu) then
-							if (not use_menu) then
-								inventory_menu=false
-							else
-								init_use_menu()
-							end
-						elseif (btnp(❎) and skills_menu) then
-							if (not use_menu) then
-								skills_menu=false
-							else
-								init_use_menu()
-							end
-						elseif (btnp(❎) and status_menu) then
-							status_menu=false
-						end
-					end
-				end
-			end
-			--draw active menus
-			if menu_active then
-				check_hp_color()
-				draw_menu()
-				draw_mini_status(66)
-				--main menu options
-				if (btnp(🅾️) and menuselect==1) then 
-					if (not inventory_menu) init_inventory()
-						inventory_menu=true 
-					elseif (btnp(🅾️) and menuselect==2) then
-						if (not skills_menu) init_skills()
-						skills_menu=true
-					elseif (btnp(🅾️) and menuselect==3) then 
-						status_menu=true 
-					end
-					--items
-					if inventory_menu then 
-						draw_inventory()
-						--use
-						if (btnp(🅾️) and p_inventory and #p_inventory>0) then
-							if invstep and (not usestep) then
-								init_use_menu()
-								use_menu=true 
-							else
-								invstep=true
-							end
-						end
-						if use_menu then
-							draw_use_menu()
-							if (btnp(🅾️) and useselect==1) then
-								if usestep then 
-									if check_can_use_item() then
-										use_item()
-									else
-										init_use_menu()
-									end
-								else
-									usestep=true
-								end
-							elseif (btnp(🅾️) and useselect==2) then
-								init_use_menu()
-							end
-						end
-					end
-					--skills
-					if skills_menu then 
-						draw_skills()
-						--use
-						if (btnp(🅾️) and skistep and (not usestep)) then
-								init_use_menu()
-								use_menu=true 
-						else
-								skistep=true
-						end
-						if use_menu then
-							draw_use_menu()
-							if (btnp(🅾️) and useselect==1) then
-								if usestep then 
-									if check_can_use_skill() then
-										use_skill()
-									else
-										init_use_menu()
-									end
-								else
-									usestep=true
-								end
-							elseif (btnp(🅾️) and useselect==2) then
-								init_use_menu()
-							end
-						end
-					end
-					--status
-					if status_menu then 
-						draw_status()
-					end
-					--options
-				end
-			else
-				draw_text()
-			end
-			--==testing area==
-			
-			--==end of testing area==
+			camera()
+			if (dialogue.active) draw_dialogue()
+			draw_menus()
+			--==debug start==
+
+			--==debug end==
 		end
 	else
 		draw_win_lose()
 	end
+end
+
+--draw menus
+function draw_menus()
+	local m=menu_mode
+	if (not m) return
+
+	check_hp_color()
+	draw_menu()
+	draw_mini_status(faces.hero)
+
+	if m=="items" or m=="item_use" then draw_inventory() end
+	if m=="skills" or m=="skill_use" then draw_skills() end
+	if m=="status" then draw_status() end
+	if (m=="item_use" or m=="skill_use") draw_use_menu()
+
+	draw_text()
 end
 
 --draw helper functions
@@ -846,83 +707,47 @@ function draw_print(split_string,x,y,color_flag)
 	end
 end
 
-function draw_text(rows,col,x,y)
-	--local iterate=iterate or false
-	--local text_index=text_index or 0
-	local rows=rows or 3
-	local col=col or 14
-	local x=x or 4
-	local y=y or 52
-	 
-	if active_text then
-		if scene=="game" then
-			textx=mapx*8+x
-			texty=mapy*8+y
-		else
-			textx=x
-			texty=y
-		end
-	
-		draw_box(rows,col,x,y)
-		print(active_text,textx+4,texty+4,7)
-		if (flr(time()*4)%2==0) then
-			spr(100,textx+(col*8-4),texty+(rows*8-4))
-		end
-	end
-	
-	if (btnp(🅾️) and read) then
-		active_text=nil
-		read=false	
-	else
-		read=true
-	end	
+function draw_text()
+	--message box only (input is in update_menus)
+	if (not active_text) return
+	local x,y=mapx*8+4,mapy*8+52
+	draw_box(3,14,4,52)
+	print(active_text,x+4,y+4,7)
+	if (flr(time()*4)%2==0) spr(100,x+108,y+20)
 end
 
 function draw_box(rows,columns,x,y,face)
 	--face is the sprite or default box
-	face=face or 64
-	if (scene=="game") then
-		boxx=mapx*8+x
-		boxy=mapy*8+y
-	else
-		boxx=x
-		boxy=y
+	local c,h,v,f=unpack(box_styles[face] or box_styles[64])
+	f=f or 81
+	local bx,by=x,y
+	if scene=="game" then
+		bx+=mapx*8
+		by+=mapy*8
 	end
-	--default box
-	fill=81
-	top_left=64
-	v_border=80
-	h_border=65
-	--conditional updates
-	if (face==66) then 
-		top_left=68
-		v_border=82
-		h_border=67		
-	elseif (face==69) then
-		top_left=84
-		v_border=85
-		h_border=70
+	local r,w=rows*8,columns*8
+
+	--corners (face corner has the portrait)
+	spr(face or c,bx,by)
+	spr(c,bx+w,by,1,1,true)
+	spr(c,bx,by+r,1,1,false,true)
+	spr(c,bx+w,by+r,1,1,true,true)
+
+	--horizontal edges
+	for i=1,columns-1 do
+		spr(h,bx+i*8,by)
+		spr(h,bx+i*8,by+r,1,1,false,true)
+		--fill
+		for n=1,rows-1 do
+			spr(f,bx+i*8,by+n*8)
+		end
 	end
 
-	--building the box
-	--face corner
-	spr(face,boxx,boxy)
-	--other three corners
-	spr(top_left,boxx+(columns*8),boxy,1,1,true) --topright
-	spr(top_left,boxx,boxy+(rows*8),1,1,false,true) --bottomleft
-	spr(top_left,boxx+(columns*8),boxy+(rows*8),1,1,true,true) --bottomright
-	for i=1,(columns-1) do
-		--horizontal borders
-		spr(h_border,boxx+i*8,boxy)
-		spr(h_border,boxx+i*8,boxy+(rows*8),1,1,false,true)
- 	for n=1,(rows-1) do
- 		--vertical borders
-			spr(v_border,boxx,boxy+n*8)
-			spr(v_border,boxx+(columns*8),boxy+n*8,1,1,true,false)
- 		--fill
- 		spr(fill,boxx+i*8,boxy+n*8)
- 	end
- end
+	--vertical edges
+	for n=1,rows-1 do
+		spr(v,bx,by+n*8)
+		spr(v,bx+w,by+n*8,1,1,true)
+	end
 end
 
 function draw_win_lose()
@@ -966,7 +791,7 @@ function init_player()
  p.x=2 --starting x
 	p.y=3 --starting y
 	p.dx=0 --x facing: -1 (left), 0, 1 (right)
- p.dy=-1 --y facing: -1 (up), 0, 1 (down)
+	p.dy=-1 --y facing: -1 (up), 0, 1 (down)
 	p.sprite=1
 	==starting stats==
 	p.name="????"
@@ -1234,7 +1059,7 @@ function set_last_light()
 end
 
 function draw_player()
-	spr(p.sprite,p.x*8,p.y*8,1.0,1.0,flip_x)
+	spr(p.sprite,p.px or p.x*8,p.py or p.y*8,1.0,1.0,flip_x)
 end
 
 function move_player()
@@ -1300,14 +1125,10 @@ function init_map()
 	,11,12,13,14,15,18,21,22,23,24
 	,25,28,29,32,33,34,35,36,37,38
 	,44,45,50,52]],",")
-	anim1=split([[12,14,28,44,60
-	,62]],",")
-	anim2=split([[13,15,29,45,61
-	,63]],",")
-	--text=split([[26,63]],",")
+	anim1=split([[12,14,28,44,60,62]],",")
+	anim2=split([[13,15,29,45,61,63]],",")
 	lose={}
-	win={}
-	cutscene={}	
+	win={}	
 end
 
 function update_map()
@@ -1328,13 +1149,10 @@ end
 
 function draw_npcs()
 	for n in all(npc_data) do
-  draw_npc(n.sprite, n.x, n.y)
- end
+  		spr(n.sprite, n.px or n.x*8, n.py or n.y*8)
+	end
 end
 
-function draw_npc(sprite,x,y)
-	spr(sprite,x*8,y*8)
-end
 
 function is_tile(tile_type,x,y)
 	tile=mget(x,y)
@@ -1368,6 +1186,7 @@ end
 --dialogue code
 
 function init_dialogue()
+	init_boxes()
 	flags,dialogue,triggers={},{},{}
 	--tile triggers: fire when you step on x,y
 	--entries must set a flag (or they re-fire)
@@ -1375,34 +1194,32 @@ function init_dialogue()
 	trigger(2,4,
 		run_once("exit_temple","as you leave this once holy place to face the agents of darkness, you are struck by;a feeling that you will likely never return.;did your goddess feel the same when she stood alone against the dark gods?")
 	)
-	trigger(8,14,
-		run_once("gate_won","here they come!",
-			function() 
-				start_battle("slimes_x2",
-					function(won) 
-						if won then flags.gate_won=true end 
-					end
-				)
-			end
-		)
-	)
 end
 
 function trigger(x,y,...)
 	triggers[x+y*128]={dialogue={...}}
 end
 
---"req flags|page;page;page|set flags"
---flags comma separated, "!" = must be false / set false
---action = optional function run when it closes
---(use it to start a battle or cutscene)
 function init_dlg(s,action)
+	--"req flags|page;page;page|set flags" flags comma separated, "!" = must be false / set false
+	--action = optional function run when it closes (use it to start a battle or cutscene)
 	local req,pages,sets=unpack(split(s,"|",false))
 	return {
 		cond=make_cond(req),
 		pages=split(pages,";",false),
 		on_end=make_onend(sets,action)
 	}
+end
+
+function init_boxes()
+	--one row per box style:
+	--name,face,corner,h_border,v_border[,fill]
+	faces,box_styles={},{}
+	for r in all(split([[default,64,64,65,80;hero,66,68,67,82;alt,69,84,70,85]],";")) do
+		local name,face,c,h,v,f=unpack(split(r))
+		faces[name]=face
+		box_styles[face]={c,h,v,f}
+	end
 end
 
 function parse_flags(s)
@@ -1440,7 +1257,11 @@ end
 function dialogue_start(src)
 	for e in all(src.dialogue) do
 		if not e.cond or e.cond() then
-			dialogue={active=true,entry=e,page=1}
+			if not e.pages[1] or e.pages[1]=="" then
+				if (e.on_end) e.on_end()
+			else
+				dialogue={active=true,entry=e,page=1,src=src}
+			end
 			return
 		end
 	end
@@ -1462,12 +1283,28 @@ end
 
 function draw_dialogue()
 	local pg,face=dialogue.entry.pages[dialogue.page],64
-	local f=faces[sub(pg,1,1)]
-	if f then face,pg=f,sub(pg,2) end
-	draw_box(3,15,0,96,face)
-	local tx,ty=mapx*8,mapy*8+96
+	local k=split(pg,":",false)[1]
+	if faces[k] then face,pg=faces[k],sub(pg,#k+2) end
+	dialogue.y=dialogue.y or dialogue_y()
+	local by=dialogue.y
+	draw_box(3,15,0,by,face)
+	local tx,ty=mapx*8,mapy*8+by
 	print(wrap(pg),tx+5,ty+5,7)
 	if (flr(time()*4)%2==0) spr(100,tx+116,ty+20)
+end
+
+function dialogue_y()
+	--this is to prevent the dialogue box covering talking sprites
+	--bottom box (default) covers screen y 96-128, top box covers 0-32
+	local lo,hi
+	for e in all({p,dialogue.src}) do
+		if e.y then
+			local sy=(e.py or e.y*8)-mapy*8
+			lo=lo or sy+8>96
+			hi=hi or sy<32
+		end
+	end
+	return lo and not hi and 0 or 96
 end
 
 function wrap(s,w)
@@ -1482,6 +1319,117 @@ function wrap(s,w)
 		end
 	end
 	return out..line
+end
+
+-->8
+--cutscene code
+
+function cutscene(fn)
+	--run fn as a locked cutscene:
+	--player input and the menu are off until it ends
+	cutscene_on=true
+	async(function()
+		fn()
+		cutscene_on=false
+	end)
+end
+
+function when(flag,fn)
+	--run fn in the background once a flag is set
+	--(no input lock, ex. npcs that wander off)
+	async(function()
+		while not flags[flag] do yield() end
+		fn()
+	end)
+end
+
+--cutscene commands (use inside cutscene or when)
+function pause(n)
+	--pause for n frames
+	for i=1,n do yield() end
+end
+
+function walk(e,steps,spd)
+	--move p or any npc along "r,l,u,d"
+	--spd = pixels per frame (default 1, 8 frames/tile)
+	spd=spd or 1
+	for s in all(split(steps)) do
+		local d=dirs[s]
+		local dx,dy=d[1],d[2]
+		local tx,ty=(e.x+dx)*8,(e.y+dy)*8
+		if e==p then
+			p.dx,p.dy=dx,dy
+			if (dx!=0) flip_x=dx<0
+		end
+		e.px,e.py=e.px or e.x*8,e.py or e.y*8
+		while e.px!=tx or e.py!=ty do
+			e.px+=mid(-spd,tx-e.px,spd)
+			e.py+=mid(-spd,ty-e.py,spd)
+			yield()
+		end
+		e.x+=dx
+		e.y+=dy
+	end
+	e.px,e.py=nil,nil
+end
+
+function say(s)
+	--show text, wait until it is closed
+	--"page;page;hero: hero page" same format as init_dlg
+	dialogue_start({dialogue={init_dlg("|"..s)}})
+	dlg_wait()
+end
+
+function talk(n)
+	--run an npc's normal (flag based) dialogue
+	dialogue_start(n)
+	dlg_wait()
+end
+
+function dlg_wait()
+	while dialogue.active do yield() end
+end
+
+function fight(group)
+	--start a battle and wait for it. returns true if won
+	--(the script is frozen while the battle scene runs)
+	local won
+	start_battle(group,function(w) won=w end)
+	repeat yield() until won!=nil
+	return won
+end
+
+--scenes
+function init_scenes()
+	--cutscene triggers
+	--"!gate_scene||gate_scene" = once only, no pages, just run the action
+	trigger(8,14,
+		init_dlg("!gate_scene||gate_scene",function() cutscene(gate_scene) end))
+
+	--when triggers
+	--once the gate is won the elder walks off (adjust the path to your map!)
+	when("gate_won",function()
+		walk(who.elder,"l,u,u,u,u,u,u,u,u")
+	end)
+end
+
+function gate_scene()
+	--bumping the monster at (8,14) starts the gate scene.
+	say("hero:this ends here.")
+	pause(20)
+	if fight("slimes_x2") then
+		clear_gate_monsters()
+		say("hero:...the light holds.;hero:for now.")
+		pause(20)
+		flags.gate_won=true
+	end
+	--if you lose, game over triggers by itself
+end
+
+function clear_gate_monsters()
+	for n in all(npc_data) do
+		if (n.tag=="gate_scene") del(npc_data,n)
+	end
 end
 
 -->8
@@ -1843,9 +1791,10 @@ function draw_battle()
 			print((b.sel==i and ">" or " ")..m[i],4,88+i*8,7)
 		end
 	elseif b.state==battle_state.skill then
-		local sk=p_skills[b.ksel]
-		print(sk.d1,4,16,6)
-		print(sk.d2,4,22,6)
+		local s,d=p_skills[b.ksel],skill_dmg(b.ksel)
+		print(s.d1,4,16,6)
+		if (d>0) print(d,4,22,9)
+		print(s.d2,4,22,6)
 		for i,s in inext,p_skills do
 			local c=h.mp<skill_cost(i,h) and 5 or 7
 			print((b.ksel==i and ">" or " ")..s.name,4,82+i*8,c)
