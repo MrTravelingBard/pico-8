@@ -5,7 +5,6 @@ on:
     branches: [ main ]
     # Run when a project folder changes, OR when the landing page changes
     paths:
-      - 'even-a-slime-can-win/**'
       - 'knights-of-power-last-light/**'
       - 'landing-page/**'
   workflow_dispatch: #Allows manual re-runs from the Actions tab
@@ -17,7 +16,6 @@ on:
         type: choice
         options:
           - auto-detect
-          - even-a-slime-can-win
           - knights-of-power-last-light
           - all-games
           - landing-page
@@ -48,7 +46,7 @@ jobs:
           fi
 
           #Manual overrides for specific game(s) should not also redeploy the landing page.
-          if [ "$MANUAL_PROJECT" = "even-a-slime-can-win" ] || [ "$MANUAL_PROJECT" = "knights-of-power-last-light" ]; then
+          if [ "$MANUAL_PROJECT" = "knights-of-power-last-light" ]; then
             echo "Manual override: deploying $MANUAL_PROJECT only."
             echo "landing_changed=false" >> "$GITHUB_OUTPUT"
             echo "projects=[\"$MANUAL_PROJECT\"]" >> "$GITHUB_OUTPUT"
@@ -58,7 +56,7 @@ jobs:
           if [ "$MANUAL_PROJECT" = "all-games" ]; then
             echo "Manual override: deploying all game projects."
             echo "landing_changed=false" >> "$GITHUB_OUTPUT"
-            echo 'projects=["even-a-slime-can-win","knights-of-power-last-light"]' >> "$GITHUB_OUTPUT"
+            echo 'projects=["knights-of-power-last-light"]' >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -72,7 +70,7 @@ jobs:
           fi
 
           #Detect all supported game folders changed in the last commit (not just the first)
-          CHANGED_DIRS=$(git diff --name-only HEAD~1 | grep -E '^(even-a-slime-can-win|knights-of-power-last-light)/' | cut -d'/' -f1 | sort -u)
+          CHANGED_DIRS=$(git diff --name-only HEAD~1 | grep -E '^(knights-of-power-last-light)/' | cut -d'/' -f1 | sort -u)
 
           if [ -z "$CHANGED_DIRS" ]; then
             echo "No supported game folder modifications detected."
@@ -83,7 +81,7 @@ jobs:
           echo "Detected changes in:"
           echo "$CHANGED_DIRS"
 
-          #Convert newline-separated list into a JSON array for the matrix, e.g. ["even-a-slime-can-win","knights-of-power-last-light"]
+          #Convert newline-separated list into a JSON array for the matrix, e.g. ["knights-of-power-last-light"]
           JSON=$(printf '%s\n' "$CHANGED_DIRS" | jq -R . | jq -sc .)
           echo "projects=$JSON" >> "$GITHUB_OUTPUT"
 

@@ -5,14 +5,15 @@ __lua__
 --by mr traveling bard
 
 --global variables
-routines={}
-wait=0
-wait_cnt=0
-main_sel=1
---test=false
+version,wait,wait_cnt,main_sel="V0.1.0",0,0,1
+--for menus
+menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main"}
+--for cutscenes
+dirs={r={1,0},l={-1,0},u={0,-1},d={0,1}}
+--for battle
+battle_state={menu=1,target=2,anim=3,enemy=4,win=5,lose=6,idle=7,skill=8}
 
---==game state inits==
---intro state init
+--init scenes
 function init_intro()
 	--variables
 	scene="intro"
@@ -22,7 +23,6 @@ function init_intro()
 	_draw=draw_intro
 end
 
---main menu state init
 function init_mainmenu()
 	scene="mainmenu"
 	menu_sel=1
@@ -33,16 +33,6 @@ function init_mainmenu()
 	_draw=draw_mainmenu
 end
 
---battle state init
-function init_battle()
-	--variables
- scene="battle"
-	--setup main functions
-	_update=update_battle()
-	_draw=draw_battle()
-end
-
---save state init
 function init_savemenu()
 	scene="savemenu"
 	menu_sel=1
@@ -51,121 +41,75 @@ function init_savemenu()
 	_draw=draw_savemenu
 end
 
---game state init
 function init_game()
 	--variables
-	scene="game"
-	game_win=false
-	game_over=false
-	menu_active=false
-	bbeg_defeated=false
+	scene,game_win,game_over,cutscene_on,bbeg_defeated,routines="game",false,false,false,false,{}
 	--setup calls
-	init_map() --in map code
-	init_text() --in text code
+	init_map()
+	init_dialogue()
+	init_enemies()
 	init_statuseffect()
 	init_inventory()
 	init_skills()
 	init_status()
-	init_player() --in player code
+	init_player()
 	init_npcs()
-	init_switches()
+	init_scenes()
 	set_wait(30)
 	--setup main functions
 	_update = update_game 
 	_draw = draw_game
 end
 
---==game functions==
---menus
-function init_menu()
-	--setup variables
-	menuselect=1
-end
-
+--init menus/windows
 function init_use_menu()
-	use_menu=false
 	useselect=1
-	usestep=false
 end
 
---game data
-function init_npc(id,name,sprite,x,y,dialogue)
- return {
-  id=id,
-  name=name,
-  sprite=sprite,
-  x=x,
-  y=y,
-  --dialogue should be {{},{}}
-  dialogue=dialogue
- }
-end
-
+--init game data
 function init_npcs()
-	--main npc data source
-	npc_data={}
-	--for easier maintenance
-	npc_temp1={} --non-dialogue
-	npc_temp2={} --dialogue only
-	--map1
-	npc_temp1=split([[
-	1,elder,136,3,10;
-	2,kid,134,11,1;
-	3,kid,133,7,3;
-	4,kid,132,6,8;
-	5,kid,135,7,8;
-	6,villager,128,12,8;
-	7,villager,129,9,2;
-	8,villager,130,11,10;
-	9,villager,131,9,10;
-	10,guard,142,13,3;
-	11,guard,141,7,13;
-	12,guard,139,9,13;
-	13,monster,163,15,3;
-	14,monster,166,8,14;
-	15,monster,164,7,15;
-	16,monster,166,8,15;
-	17,monster,164,9,15;
-	18,monster,162,3,14;
-	19,monster,167,2,15;
-	20,monster,162,12,14;
-	21,monster,167,13,15]],";")
+	npc_data,who={},{}
 
---npcid,order,end?,self?,switch,story_req,set_story,text		
-	npc_temp2=split([[
-	1;64;1;false;false;;0;0;in our most dire need, where \are the gnomes, the wild men, \and the wizards of the spiral|
-	1;64;2;true;false;;0;0;tower? will they stand by & \watch us burn?! or...are they \already dead?|
-	2;64;1;true;false;;0;0;my dad said he heard something\by this side of the wall. he\looks worried...i'm scared.|
-	3;64;1;true;false;;0;0;what are those at the gate \yelling about? what's going \on?|
-	4;64;1;false;true;;0;0;my grandma said you shouldn't\show monsters fear. it only\makes them stronger.|
-	4;64;2;false;true;;0;0;i'm still scared though...|
-	4;66;3;false;true;;0;0;you don't have to be afraid.\i won't let them inside these\walls. the light will prevail.|
-	4;64;4;false;true;;0;0;but...aren't you scared too?|
-	4;66;5;false;true;;0;0;of course. but sometimes we\have to fight what is in front\of us, even if we're scared.|
-	4;66;6;true;true;;0;0;because the cost of not doing\so is too high. stay strong.\the light will win this day.|
-	4;64;1;true;false;;0;0;i'm staying strong, mister.|
-	5;64;1;false;false;;0;0;the little blue ones look \kind of cute.|
-	5;64;2;true;false;;0;0;are they really monsters?|
-	6;64;1;false;false;;0;0;i don't care about goddesses,\gods, light, or darkness. but\when a bunch of monsters,|
-	6;64;2;true;false;;0;0;ogres, & lizard folk turn up\with weapons, well... i'm \open to divine intervention.|
-	7;64;1;false;false;;0;0;how can the goddess of light\let this happen? has the \light truly faded?|
-	7;64;2;true;false;;0;0;should we accept our fate?\is this the end?;66|
-	10;64;1;true;false;;0;0;i know it's just beyond this\wall. will it climb or...is it\strong enough to bust through?|
-	11;64;1;true;false;;0;0;this is bad. we simply don't\have the numbers to hold this\many back!|
-	12;64;1;false;false;;0;0;we are supposed to deal with\bandits & the occasional\monster. but this...|
-	12;64;2;true;false;;0;0;this is a small army... what\if it's only the vanguard?]],"|")
-	
-	for i=1,#npc_temp1 do
-		local id,name,sprite,x,y=unpack(split(npc_temp1[i],","))
-		local dialogue=parse_text(npc_temp2,true,id)
-		add(npc_data,init_npc(id,name,sprite,x,y,dialogue))
+	--elder
+	npc("136,3,10,elder",
+		run_once(1,"in our most dire need, where are the gnomes, the wild men, and the wizards of the spiral;tower? will they stand by & watch us burn?! or...are they already dead?"))
+
+	--kids
+	npc("134,11,1",
+		run_once(2,"my dad said he heard something by this side of the wall. he looks worried...i'm scared."))
+	npc("133,7,3",
+		run_once(3,"what are those at the gate yelling about? what's going on?"))
+	--kid + hero conversation, then a repeat line
+	npc("132,6,8",
+		run_once(4,"my grandma said you shouldn't show monsters fear. it only makes them stronger.;i'm still scared though...;hero:you don't have to be afraid. i won't let them inside these walls. the light will prevail.;but...aren't you scared too?;hero:of course. but sometimes we have to fight what is in front of us, even if we're scared.;hero:because the cost of not doing so is too high. stay strong. the light will win this day."),
+		init_dlg("|i'm staying strong, mister."))
+	--repeatable
+	npc("135,7,8",
+		init_dlg("|the little blue ones look kind of cute.;are they really monsters?"))
+
+	--villagers
+	npc("128,12,8",
+		run_once(6,"i don't care about goddesses, gods, light, or darkness. but when a bunch of monsters,;ogres, & lizard folk turn up with weapons, well... i'm open to divine intervention."))
+	npc("129,9,2",
+		run_once(7,"how can the goddess of light let this happen? has the light truly faded?;should we accept our fate? is this the end?"))
+
+	--guards
+	npc("142,13,3",
+		run_once(10,"i know it's just beyond this wall. will it climb or...is it strong enough to bust through?"))
+	npc("141,7,13,gl",
+		run_once(11,"this is bad. we simply don't have the numbers to hold this many back!"))
+	npc("139,9,13,gr",
+		run_once(12,"we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?"))
+
+	--no dialogue: 2 villagers + monsters idx13-21
+	for r in all(split("130,11,10;131,9,10;163,15,3,chest_guardian;166,8,14,tag:gate_scene;164,7,15,tag:gate_scene;166,8,15,tag:gate_scene;164,9,15,tag:gate_scene;162,3,14,tag:gate_scene;167,2,15,tag:gate_scene;162,12,14,tag:gate_scene;167,13,15,tag:gate_scene",";")) do
+		npc(r)
 	end
 end
 
 function init_inventory()
 	--setup variables
 	invselect=1
-	invstep=false
 	--add inventory
 	--format:item_num,name,quick desc,full desc,
 	--q heal amount,q status effect to add, q se to remove,
@@ -181,21 +125,18 @@ function init_inventory()
 end
 
 function init_skills()
-	--setup variables
 	skiselect=1
-	skistep=false
-	--add skills
-	--format:skill_num,name,
-	--desc line 1,desc line 2,
-	--mp cost,damage,se add,menu useable;
-	if not skills_data then
-		skills_data=split([[
-		1,sword of light  ,one enemy,   holy damage,2,0,0,0;
-		2,healing light   ,self,restores hp to full,5,0,0,1;
-		3,shield of light ,self,negate all damage/1 turn,2,0,10,0;
-		4,flash of light  ,all enemies,   holy damage + 50% stun,3,0,0,0;
-		5,the last light  ,all enemies,release remaining light,60,0,0,0]],";")
-	end
+	if (skill_defs) return
+	--name,desc1,desc2,mp,menu-usable,target
+	--target: e=one enemy s=self a=all enemies
+	--(desc2 padding leaves room for the damage number)
+	skill_defs={
+		init_skill("sword of light  ,one enemy,   holy damage,2,0,e"),
+		init_skill("healing light   ,self,restores hp to full,5,1,s"),
+		init_skill("shield of light ,self,negate all damage/1 turn,2,0,s"),
+		init_skill("flash of light  ,all enemies,   holy damage + 50% stun,3,0,a"),
+		init_skill("the last light  ,all enemies,release remaining light,60,0,a")
+	}
 end
 
 function init_status()
@@ -249,9 +190,33 @@ function init_temp_stats()
 	end
 end
 
-function init_switches()
-	switches={}
-	--add(switches,{"test",false})
+--init helpers
+function npc(s,...)
+	--npc("sprite,x,y", dlg1, dlg2, ...)
+	--first dialogue whose conditions pass wins
+	local sprite,x,y,key=unpack(split(s))
+	local n={sprite=sprite,x=x,y=y,dialogue={...}}
+	if key then
+		if sub(key,1,4)=="tag:" then
+			--just to group together for scenes as needed
+			n.tag=sub(key,5)
+		else
+			who[key]=n
+		end
+	end
+	add(npc_data,n)
+end
+
+function run_once(id,pages,action)
+	--one-time conversation: plays run_once, then
+	--this npc falls silent (unless you add another entry after it)
+	--remove the run_once() wrapper for a repeatable npc
+	return init_dlg("!t"..id.."|"..pages.."|t"..id,action)
+end
+
+function init_skill(s)
+	local name,d1,d2,mp,menu,tgt=unpack(split(s))
+	return {name=name,d1=d1,d2=d2,mp=mp,menu=menu==1,tgt=tgt}
 end
 
 --main config
@@ -259,14 +224,13 @@ _init = init_intro
 -->8
 --update code
 
---intro state update
+--update scenes
 function update_intro()
 	if btnp(4) or wait_check() then
 		init_mainmenu()
 	end
 end
 
---main menu state update
 function update_mainmenu()
 	local option_cnt=#menu_options
 	if wait_cnt==2 then
@@ -277,7 +241,6 @@ function update_mainmenu()
 	end
 end
 
---save state update
 function update_savemenu()
 	if wait_check() then
 		if btnp(4) then
@@ -286,40 +249,89 @@ function update_savemenu()
 	end
 end
 
---game state update
 function update_game()
 	if wait_check() then
-		if (not game_over) then
-			if ((not active_text) and (not menu_active) and (not active_dialogue)) then
+		if not game_over then
+			run_async()
+			if dialogue.active then
+				update_dialogue()
+			elseif menu_mode then
+				update_menus()
+			else
 				update_map()
-				move_player()
-				check_win_lose()
-			elseif menu_active then
-				if inventory_menu then
-					if use_menu then
-						update_use_menu()
+				if not cutscene_on then
+					if btnp(5) then
+						menu_mode,menuselect="main",1
 					else
-						update_inventory()
+						move_player()
 					end
-				elseif skills_menu then
-					if use_menu then
-						update_use_menu()
-					else
-						update_skills()
-					end
-				elseif status_menu then 
-					--lock select for main menu
-				else
-					update_menu()
 				end
+				check_win_lose()
 			end
-		else
-			if (btnp(❎))	extcmd("reset")
+		elseif btnp(5) then
+			extcmd("reset")
 		end
 	end
 end
 
---game functions
+--update menus
+function update_menus()
+	local m=menu_mode
+
+	--a message box cycles input until dismissed
+	if active_text then
+		if (btnp(4)) active_text=nil
+		return
+	end
+
+	local d=(btnp(3) and 1 or 0)-(btnp(2) and 1 or 0) --down/up
+	local h=(btnp(1) and 1 or 0)-(btnp(0) and 1 or 0) --right/left
+
+	if btnp(5) then
+		menu_mode=menu_back[m]
+
+	elseif m=="main" then
+		menuselect=(menuselect+h-1)%4+1
+		if btnp(4) then
+			if menuselect==1 then
+				init_inventory()
+				menu_mode="items"
+			elseif menuselect==2 then
+				init_skills()
+				menu_mode="skills"
+			elseif menuselect==3 then
+				menu_mode="status"
+			end
+		end
+
+	elseif m=="items" then
+		local n=#p_inventory
+		if n>0 then
+			invselect=(invselect+d-1)%n+1
+			if (btnp(4)) menu_mode,useselect="item_use",1
+		end
+
+	elseif m=="skills" then
+		skiselect=(skiselect+d-1)%#p_skills+1
+		if (btnp(4)) menu_mode,useselect="skill_use",1
+
+	elseif m=="item_use" or m=="skill_use" then
+		if (d!=0) useselect=3-useselect
+		if btnp(4) then
+			local item=m=="item_use"
+			menu_mode=item and "items" or "skills"
+			if useselect==1 then
+				if item and check_can_use_item() then
+					use_item()
+				elseif not item and check_can_use_skill() then
+					use_skill()
+				end
+			end
+		end
+	end
+end
+
+--update helper functions
 function update_tiles()
 	for x=mapx,mapx+15 do
 		for y=mapy,mapy+15 do
@@ -334,94 +346,25 @@ function update_tiles()
 	end
 end
 
-function update_menu()
---todo: consolidate all these
---update menus into single func
---since they are very similar
-	if btnp(➡️) then
-		if menuselect<4 then
-			menuselect+=1
-		else
-			menuselect=1
-		end
-	elseif btnp(⬅️) then
-		if menuselect>1 then
-			menuselect-=1
-		else
-			menuselect=4
-		end
-	end
-end
-
-function update_inventory() 
-	if btnp(⬇️) and p_inventory then
-		if invselect<#p_inventory then
-			invselect+=1
-		else
-			invselect=1
-		end
-	elseif btnp(⬆️) and p_inventory then
-		if invselect>1 then
-			invselect-=1
-		else
-			invselect=#p_inventory
-		end
-	end
-end
-
-function update_skills() 
-	if btnp(⬇️) then
-		if skiselect<#p_skills then
-			skiselect+=1
-		else
-			skiselect=1
-		end
-	elseif btnp(⬆️) then
-		if skiselect>1 then
-			skiselect-=1
-		else
-			skiselect=#p_skills
-		end
-	end
-end
-
-function update_use_menu() 
-	if btnp(⬇️) or btnp(⬆️) then
-		if useselect==1 then
-			useselect=2
-		else
-			useselect=1
-		end
-	end
-end
-
 function check_can_use_item()
-	local value=p_inventory[invselect][1]
-	
-	if value==4 and p.hp==p.maxhp then
+	if p_inventory[invselect][1]==4 and p.hp==p.maxhp then
 		active_text="\n\n     your health is full"
-		draw_text()
 		return false
 	end
 	return true
 end
 
 function check_can_use_skill()
-	local mp_cost=p_skills[skiselect][5]
-	--check if menu only
-	if p_skills[skiselect][8]==0 and scene=="game" then
-		active_text="\n\n   skill can't be used now"
-		draw_text()
-		return false
-	--check if you have enough mana
-	elseif (mp_cost>p.mp or p.mp==0) then
-		active_text="\n\n    your mana is too low"
-		draw_text()
-		return false
-	--check if you are already at full hp
+	local s,m=p_skills[skiselect]
+	if not s.menu then
+		m="\n\n   skill can't be used now"
+	elseif s.mp>p.mp or p.mp==0 then
+		m="\n\n    your mana is too low"
 	elseif skiselect==2 and p.hp==p.maxhp then
-		active_text="\n\n     your health is full"
-		draw_text()
+		m="\n\n     your health is full"
+	end
+	if m then
+		active_text=m
 		return false
 	end
 	return true
@@ -443,12 +386,6 @@ function async(func)
 	add(routines,cocreate(func))
 end
 
-function wait(frames)
-	for i=1,frames do
-		yield()
-	end
-end
-
 function run_async()
 	for r in all(routines) do
 		if costatus(r) == "dead" then
@@ -459,33 +396,8 @@ function run_async()
 	end
 end
 
-function move(obj,key,dest,frames,expr)
-	local init=obj[key]
-	frames=frames or 30
-	expr=expr or linear
-	
-	for i=1,frames do
-		obj[key]=lerp(init,dest,expr(i/frames))
-		yield()
-	end
-end
-
-function lerp(a,b,t)
-	return a+(b-a)*t
-end
-
-function linear(t)
-	return t
-end
-
-function easeinelastic(t)
-	if(t==0) return 0
-	return 2^(10*t-10)*cos(2*t-2)
-end
-
 function is_empty(t)
---checks if a table is empty
-
+	--checks if a table is empty
 	for _,_ in pairs(t) do
 		return false
 	end
@@ -529,13 +441,12 @@ end
 -->8
 --draw code
 
---intro state draw
+--draw scenes
 function draw_intro()
 	cls()
-	print("a mr traveling bard production",0,60,7)
+	draw_centered("a mr traveling bard production")
 end
 
---main menu state draw
 function draw_mainmenu()
 	cls()
 
@@ -552,9 +463,54 @@ function draw_mainmenu()
 		for n=1,#menu_options do
 			print((menu_sel==n and ">" or " ")..menu_options[n],40,88+(n*8),7)
 		end
+		print(version,0,120,5)
 	end
 end
 
+function draw_savemenu()
+	cls()
+	if wait_check() then
+		draw_centered("placeholder for save menu")
+	end
+end
+
+function draw_game()
+	cls()
+	if game_over==false then
+		if wait==0 then
+			draw_map()
+			draw_npcs()
+			draw_player()
+			camera()
+			if (dialogue.active) draw_dialogue()
+			draw_menus()
+			--==debug start==
+
+			--==debug end==
+		end
+	else
+		draw_win_lose()
+	end
+end
+
+--draw menus
+function draw_menus()
+	local m=menu_mode
+	if (not m) return
+
+	check_hp_color()
+	draw_menu()
+	draw_mini_status(faces.hero)
+
+	if m=="items" or m=="item_use" then draw_inventory() end
+	if m=="skills" or m=="skill_use" then draw_skills() end
+	if m=="status" then draw_status() end
+	if (m=="item_use" or m=="skill_use") draw_use_menu()
+
+	draw_text()
+end
+
+--draw helper functions
 function draw_mainmenu_animation(x,y)
 	spr(1, x, y)
 	
@@ -586,159 +542,9 @@ function draw_mainmenu_animation(x,y)
 
 	local title = "knights of power: last light"
 	local title_flash = is_flash and 10 or 7
-	print(title, 64 - (#title*4)/2, 60, title_flash)
+	draw_centered(title,60,title_flash)
 end
 
---save state draw
-function draw_savemenu()
-	cls()
-	if wait_check() then
-		print("placeholder for save menu",0,0,7)
-	end
-end
-
---game state draw
-function draw_game()
-	cls()
-	if game_over==false then
-		if wait_check() then
-			draw_map()
-			draw_npcs()
-			draw_player()
-			if (not active_text) then
-				if active_dialogue then
-					draw_textbox(face)
-				else
-					--x button checks
-					if (btnp(❎) and (not menu_active)) then
-						init_menu()
-						menu_active=true
-				elseif (btnp(❎) and menu_active) then
-					if not (inventory_menu or use_menu or skills_menu or status_menu) then
-						menu_active=false
-					else
-						if (btnp(❎) and inventory_menu) then
-							if (not use_menu) then
-								inventory_menu=false
-							else
-								init_use_menu()
-							end
-						elseif (btnp(❎) and skills_menu) then
-							if (not use_menu) then
-								skills_menu=false
-							else
-								init_use_menu()
-							end
-						elseif (btnp(❎) and status_menu) then
-							status_menu=false
-						end
-					end
-				end
-			end
-			--draw active menus
-			if menu_active then
-				check_hp_color()
-				draw_menu()
-				draw_mini_status(66)
-				--main menu options
-				if (btnp(🅾️) and menuselect==1) then 
-					if (not inventory_menu) init_inventory()
-						inventory_menu=true 
-					elseif (btnp(🅾️) and menuselect==2) then
-						if (not skills_menu) init_skills()
-						skills_menu=true
-					elseif (btnp(🅾️) and menuselect==3) then 
-						status_menu=true 
-					end
-					--items
-					if inventory_menu then 
-						draw_inventory()
-						--use
-						if (btnp(🅾️) and p_inventory and #p_inventory>0) then
-							if invstep and (not usestep) then
-								init_use_menu()
-								use_menu=true 
-							else
-								invstep=true
-							end
-						end
-						if use_menu then
-							draw_use_menu()
-							if (btnp(🅾️) and useselect==1) then
-								if usestep then 
-									if check_can_use_item() then
-										use_item()
-									else
-										init_use_menu()
-									end
-								else
-									usestep=true
-								end
-							elseif (btnp(🅾️) and useselect==2) then
-								init_use_menu()
-							end
-						end
-					end
-					--skills
-					if skills_menu then 
-						draw_skills()
-						--use
-						if (btnp(🅾️) and skistep and (not usestep)) then
-								init_use_menu()
-								use_menu=true 
-						else
-								skistep=true
-						end
-						if use_menu then
-							draw_use_menu()
-							if (btnp(🅾️) and useselect==1) then
-								if usestep then 
-									if check_can_use_skill() then
-										use_skill()
-									else
-										init_use_menu()
-									end
-								else
-									usestep=true
-								end
-							elseif (btnp(🅾️) and useselect==2) then
-								init_use_menu()
-							end
-						end
-					end
-					--status
-					if status_menu then 
-						draw_status()
-					end
-					--options
-				end
-			else
-				draw_text()
-			end
-			--==testing area==
-			--print(next_text,9)
-			--print("p.x: "..p.x,0,0,0)
-			--print("p.y: "..p.y,0,8,0)
-			--print("p.dx: "..p.dx,0,16,0)
-			--print("p.dy: "..p.dy,0,24,0)
-			--print("t.x: "..(targetx or 0),0,32,0)
-			--print("t.y: "..(targety or 0),0,40,0)
-			--print(text_data[1][2],0,0,9)
-			--print(text_data[2][2],0,8,9)
-			--print(text_data[3][2],0,16,9)
-			--print(npc_data[4].dialogue[1][6],0,0,0)
-			--print(npc_data[4].dialogue[2][6],0,8,0)
-			--print(npc_data[4].dialogue[7][6],0,16,0)	
-			--print("diff x: "..abs(p.x - npc_data[1].x),0,32,0)
-			--print("diff y: "..abs(p.y - npc_data[1].y),0,40,0)
-			--==end of testing area==
-		end
-	else
-		draw_win_lose()
-	end
-end
-
---game functions
 function draw_menu()	
 	menux=mapx*8+10
 	menuy=mapy*8+7
@@ -789,27 +595,22 @@ function draw_inventory()
 end
 
 function draw_skills()
-	local skix=mapx*8+10
-	local skiy=mapy*8+2
-	local line_item=0
-
+	local skix,skiy=mapx*8+10,mapy*8+2
 	--skills box
- draw_box(5,11,4,44)
- --description box
+	draw_box(5,11,4,44)
+	--desc box
 	draw_box(2,14,4,19)
- --skiselect
- rectfill(skix-2,skiy+38+(skiselect*8),skix+85,skiy+44+(skiselect*8),13)
+	--skill select
+	rectfill(skix-2,skiy+38+(skiselect*8),skix+85,skiy+44+(skiselect*8),13)
 	--skills
-	for i=1,#p_skills do
-		line_item+=1
-		print(p_skills[i][2].." "..(p_skills[i][5]<10 and "0" or "")..p_skills[i][5].."mp",skix,skiy+39+(line_item*8),7)
+	for i,s in inext,p_skills do
+		print(s.name.." "..(s.mp<10 and "0" or "")..s.mp.."mp",skix,skiy+39+i*8,7)
 	end
-	--description
-	print(p_skills[skiselect][3],skix,skiy+22,7)
-	if p_skills[skiselect][6]>0 and skiselect~=5 then
-		print(p_skills[skiselect][6],skix,skiy+30,9)
-	end
- print(p_skills[skiselect][4],skix,skiy+30,7) 	
+	--desc
+	local s,d=p_skills[skiselect],skill_dmg(skiselect)
+	print(s.d1,skix,skiy+22,7)
+	if (d>0) print(d,skix,skiy+30,9)
+	print(s.d2,skix,skiy+30,7)
 end
 
 function draw_use_menu()
@@ -906,116 +707,64 @@ function draw_print(split_string,x,y,color_flag)
 	end
 end
 
-function draw_textbox(face)
-	--faces: default 64;hero 66
-	face=face or 64
-	textx=mapx*8
-	texty=mapy*8+96
-	
-	if active_dialogue then
-		--draw_box(3,15,0,52,face)
-		draw_box(3,15,0,96,face)
-		print(active_dialogue,textx+5,texty+5,7)
-		if (flr(time()*4)%2==0) then
-			spr(100,textx+116,texty+20)
-		end
-	end
-	
-	if (btnp(🅾️) and read) then
-		active_dialogue=nil
-		read=false	
-	else
-		read=true
-	end
-end
-
-function draw_text(rows,col,x,y)
-	--local iterate=iterate or false
-	--local text_index=text_index or 0
-	local rows=rows or 3
-	local col=col or 14
-	local x=x or 4
-	local y=y or 52
-	 
-	if active_text then
-		if scene=="game" then
-			textx=mapx*8+x
-			texty=mapy*8+y
-		else
-			textx=x
-			texty=y
-		end
-	
-		draw_box(rows,col,x,y)
-		print(active_text,textx+4,texty+4,7)
-		if (flr(time()*4)%2==0) then
-			spr(100,textx+(col*8-4),texty+(rows*8-4))
-		end
-	end
-	
-	if (btnp(🅾️) and read) then
-		active_text=nil
-		read=false	
-	else
-		read=true
-	end	
+function draw_text()
+	--message box only (input is in update_menus)
+	if (not active_text) return
+	local x,y=mapx*8+4,mapy*8+52
+	draw_box(3,14,4,52)
+	print(active_text,x+4,y+4,7)
+	if (flr(time()*4)%2==0) spr(100,x+108,y+20)
 end
 
 function draw_box(rows,columns,x,y,face)
 	--face is the sprite or default box
-	face=face or 64
-	if (scene=="game") then
-		boxx=mapx*8+x
-		boxy=mapy*8+y
-	else
-		boxx=x
-		boxy=y
+	local c,h,v,f=unpack(box_styles[face] or box_styles[64])
+	f=f or 81
+	local bx,by=x,y
+	if scene=="game" then
+		bx+=mapx*8
+		by+=mapy*8
 	end
-	--default box
-	fill=81
-	top_left=64
-	v_border=80
-	h_border=65
-	--conditional updates
-	if (face==66) then 
-		top_left=68
-		v_border=82
-		h_border=67		
-	elseif (face==69) then
-		top_left=84
-		v_border=85
-		h_border=70
+	local r,w=rows*8,columns*8
+
+	--corners (face corner has the portrait)
+	spr(face or c,bx,by)
+	spr(c,bx+w,by,1,1,true)
+	spr(c,bx,by+r,1,1,false,true)
+	spr(c,bx+w,by+r,1,1,true,true)
+
+	--horizontal edges
+	for i=1,columns-1 do
+		spr(h,bx+i*8,by)
+		spr(h,bx+i*8,by+r,1,1,false,true)
+		--fill
+		for n=1,rows-1 do
+			spr(f,bx+i*8,by+n*8)
+		end
 	end
 
-	--building the box
-	--face corner
-	spr(face,boxx,boxy)
-	--other three corners
-	spr(top_left,boxx+(columns*8),boxy,1,1,true) --topright
-	spr(top_left,boxx,boxy+(rows*8),1,1,false,true) --bottomleft
-	spr(top_left,boxx+(columns*8),boxy+(rows*8),1,1,true,true) --bottomright
-	for i=1,(columns-1) do
-		--horizontal borders
-		spr(h_border,boxx+i*8,boxy)
-		spr(h_border,boxx+i*8,boxy+(rows*8),1,1,false,true)
- 	for n=1,(rows-1) do
- 		--vertical borders
-			spr(v_border,boxx,boxy+n*8)
-			spr(v_border,boxx+(columns*8),boxy+n*8,1,1,true,false)
- 		--fill
- 		spr(fill,boxx+i*8,boxy+n*8)
- 	end
- end
+	--vertical edges
+	for n=1,rows-1 do
+		spr(v,bx,by+n*8)
+		spr(v,bx+w,by+n*8,1,1,true)
+	end
 end
 
 function draw_win_lose()
 	camera()
 	if (game_win) then
-		print("★ you win! ★",37,64,7)
- else
- 	print("game over! :(",38,64,7)
- end
- 	print("press ❎ to play again",20,72,5)
+		draw_centered("★ you win! ★",64)
+	else
+		draw_centered("game over! :(",64)
+	end
+ 	draw_centered("press ❎ to play again",72,5)
+end
+
+--draw misc
+function draw_centered(text,y,c)
+	local y=y or 60
+	local c=c or 7
+	print(text, 64 - (#text*4)/2, y, c)
 end
 
 function print_range(list,start_i,end_i,x,y)
@@ -1024,6 +773,11 @@ function print_range(list,start_i,end_i,x,y)
     str = str .. list[i][1] .. " "
   end
   if str ~= "" then print(str,x,y,7) end
+end
+
+function trim(s)
+	while sub(s,-1)==" " do s=sub(s,1,-2) end
+	return s
 end
 
 -->8
@@ -1037,7 +791,7 @@ function init_player()
  p.x=2 --starting x
 	p.y=3 --starting y
 	p.dx=0 --x facing: -1 (left), 0, 1 (right)
- p.dy=-1 --y facing: -1 (up), 0, 1 (down)
+	p.dy=-1 --y facing: -1 (up), 0, 1 (down)
 	p.sprite=1
 	==starting stats==
 	p.name="????"
@@ -1104,10 +858,6 @@ end
 
 function lookup_inventory_data(item_num)
 	return unpack(split(inventory_data[item_num],","))
-end
-
-function lookup_skills_data(skill_num)
-	return unpack(split(skills_data[skill_num],","))
 end
 
 function lookup_statuseffect_data(status_num)
@@ -1242,8 +992,8 @@ function levelup()
 		if p.mp>p_maxmp then 
 			p_maxmp=p.mp
 		end
-		p_skills[5][2]="the last light+ "
-		p_skills[5][4]="destroy the darkness"
+		p_skills[5].name="the last light+ "
+		p_skills[5].d2="destroy the darkness"
 	end
 	set_stats()
 end
@@ -1282,50 +1032,34 @@ end
 
 function set_skills()
 	--sets player skill list
-	for i=1,#skills_data do		
-			add_skill(i)
-	end
+	p_skills=skill_defs
 end
 
-function add_skill(skill_num)
---adds skills to player
-	local snum,sname,sdesc1,sdesc2,smpcost,sdamage,sadd,smenu=lookup_skills_data(skill_num)
-	--specific to 1 & 4 that describe values that need to be updated
-	if snum==1 then
-		sdamage=p.atk+(p.matk*2)
-	elseif snum==4 then
-		sdamage=p.matk
-	elseif snum==5 then
-		sdamage=(p.matk*p.mp)*(p.lvl==5 and 2 or 1)
-	end
-	add(p_skills,{snum,sname,sdesc1,sdesc2,smpcost,sdamage,sadd,smenu})
+function skill_dmg(i,u)
+	--damage shown in menu & used in battle
+	--u is p for the menu and hero battler in a fight
+	u=u or p
+	return i==1 and u.atk+u.matk*2 or i==4 and u.matk or 0
 end
 
-function use_skill(use_type)
---uses skills
-	local use_type=use_type or "m"
-	local smpcost,sdamage,sadd,smenu=unpack(p_skills[skiselect],5,8)
-	--add statuses if available
-	if sadd>0 then
-		change_statuseffects(sadd,true)
-	end
-	--recover health if available
-	if skiselect==2 then
-		p.hp=p.maxhp
-	end
-	--deduct mp & adjust last light
-	p.mp-=p_skills[skiselect][5]
+function skill_cost(i,u)
+	--the last light costs all your mp
+	return i==5 and u.mp or p_skills[i].mp
+end
+
+function use_skill()
+	if (skiselect==2) p.hp=p.maxhp
+	p.mp-=p_skills[skiselect].mp
 	set_last_light()
-	--cleanup
 	init_use_menu()
 end
 
 function set_last_light()
-	p_skills[5][5]=p.mp
+	p_skills[5].mp=p.mp
 end
 
 function draw_player()
-	spr(p.sprite,p.x*8,p.y*8,1.0,1.0,flip_x)
+	spr(p.sprite,p.px or p.x*8,p.py or p.y*8,1.0,1.0,flip_x)
 end
 
 function move_player()
@@ -1362,33 +1096,20 @@ function move_player()
 end
 
 function interact(x,y)
-	targetx=p.x+p.dx
-	targety=p.y+p.dy
-	--check for text
-	active_text=get_text(x,y)
-	--check for fight
-	if x==8 and y==14 then
-		if not slime_defeated then
-			init_battle()
+	targetx,targety=p.x+p.dx,p.y+p.dy
+	--tile triggers
+	local t=triggers[x+y*128]
+	if (t) dialogue_start(t)
+
+	--talk to npc
+	if btnp(4) then
+		for n in all(npc_data) do
+			if targetx==n.x and targety==n.y then
+				dialogue_start(n)
+				break
+			end
 		end
 	end
-	--check for npc dialogue
-	if btnp(🅾️) and active_dialogue==nil then 
- 	talking=true
- end
- if talking then
- 	for n in all(npc_data) do
-  	-- distance check between player and this specific npc
-  	if targetx==n.x and targety==n.y then
-   	active_dialogue,face=get_npc_dialogue(n) 
-   	break
-  	end
- 	end
- end
- if active_dialogue==nil then
- 	talking=false
- 	clean_reads()
- end
 end
 
 -->8
@@ -1404,14 +1125,10 @@ function init_map()
 	,11,12,13,14,15,18,21,22,23,24
 	,25,28,29,32,33,34,35,36,37,38
 	,44,45,50,52]],",")
-	anim1=split([[12,14,28,44,60
-	,62]],",")
-	anim2=split([[13,15,29,45,61
-	,63]],",")
-	--text=split([[26,63]],",")
+	anim1=split([[12,14,28,44,60,62]],",")
+	anim2=split([[13,15,29,45,61,63]],",")
 	lose={}
-	win={}
-	cutscene={}	
+	win={}	
 end
 
 function update_map()
@@ -1432,13 +1149,10 @@ end
 
 function draw_npcs()
 	for n in all(npc_data) do
-  draw_npc(n.sprite, n.x, n.y)
- end
+  		spr(n.sprite, n.px or n.x*8, n.py or n.y*8)
+	end
 end
 
-function draw_npc(sprite,x,y)
-	spr(sprite,x*8,y*8)
-end
 
 function is_tile(tile_type,x,y)
 	tile=mget(x,y)
@@ -1469,460 +1183,645 @@ function unswap_tile(x,y)
 	mset(x,y,tile-1)
 end
 -->8
---text code
+--dialogue code
 
-function init_text()
-	--story variables
-	story_beat=0
-	next_text=0
-	cleaned_reads=true
-	ended=false
-	face=64
-	
-	--setup tables
-	text_data={}
-	cutscene_data={}
-	
-	--common text
-	locked_door="the door is locked.\nperhaps there's a\nkey nearby..."
-
-	--adding text to dictionary
-	--(x,y,order,end?,self?,switch?,story?,set_story?,text
-	set_alltext()
-	
+function init_dialogue()
+	init_boxes()
+	flags,dialogue,triggers={},{},{}
+	--tile triggers: fire when you step on x,y
+	--entries must set a flag (or they re-fire)
+	--a function is optionally possible in the final slot
+	trigger(2,4,
+		run_once("exit_temple","as you leave this once holy place to face the agents of darkness, you are struck by;a feeling that you will likely never return.;did your goddess feel the same when she stood alone against the dark gods?")
+	)
 end
 
-function set_alltext()	
-	temp_text_data={}
-	--initial text state
---x,y,order,end?,self?,switch,story_req,set_story,text	
-	--map1
-	temp_text_data=split([[
-	2;4;1;false;true;;0;0;as you leave this once holy \place to face the agents of \darkness, you are struck by|
- 2;4;2;false;true;;0;0;a feeling that you will \likely never return.|
- 2;4;3;true;true;;0;1;did your goddess feel the \same when she stood alone \against the dark gods?]],"|")
- 
- --load data into text_data 
- parse_text(temp_text_data,false)	
+function trigger(x,y,...)
+	triggers[x+y*128]={dialogue={...}}
 end
 
-function parse_text(split_table,npc_flag,id)
- local id=id or 0
-	local npc_dialogue={}
-	
-	for i=1,#split_table do
- 	local order,text_end,set_selfswitch,switch,story_req,set_story,text=unpack(split(split_table[i],";"),3,9)
- 	local split_text=split(text,"\\")
- 	local end_flag= text_end=="true" and true or false
-		local self_flag= set_selfswitch=="true" and true or false
- 	
- 	if #split_text>1 then
- 		local temp_text=""
- 		for i=1,#split_text do
- 			temp_text=temp_text..split_text[i]..chr(10)
- 		end		
- 		--override text with temp
- 		text=temp_text
- 	end
- 	if npc_flag then
- 		local npcid,face=unpack(split(split_table[i],";"),1,2)
- 		if npcid==id then
- 			add(npc_dialogue,{npcid,false,order,end_flag,self_flag,false,switch,story_req,set_story,text,face})
- 		end
- 	else
- 		local x,y=unpack(split(split_table[i],";"),1,2)
- 		add_text(x,y,order,end_flag,self_flag,switch,story_req,set_story,text)
- 	end
- end
- --returns a dialogue table for a npc init
- if npc_flag then
- 	return npc_dialogue
- end
+function init_dlg(s,action)
+	--"req flags|page;page;page|set flags" flags comma separated, "!" = must be false / set false
+	--action = optional function run when it closes (use it to start a battle or cutscene)
+	local req,pages,sets=unpack(split(s,"|",false))
+	return {
+		cond=make_cond(req),
+		pages=split(pages,";",false),
+		on_end=make_onend(sets,action)
+	}
 end
 
-function add_text(x,y,order,text_end,set_selfswitch,switch,story_req,set_story,text)
---x,y that triggers it
---the boolean here is being set for normal iteration as false by default
---order of text as a number
---text_end is a boolean,false means there is more,true means it is the end
---set_selfswitch is a boolean, false will allow repeats, true will not allow repeats
---the boolean here is being set for normal selfswitch use if being used, false by default
---switch is a string that will be looked up if true otherwise ignore
---story_req is a num of the required story_beat, if 0 then doesn't matter
---set_story sets the story beat
-	add(text_data,{x+y*128,false,order,text_end,set_selfswitch,false,switch,story_req,set_story,text})
+function init_boxes()
+	--one row per box style:
+	--name,face,corner,h_border,v_border[,fill]
+	faces,box_styles={},{}
+	for r in all(split([[default,64,64,65,80;hero,66,68,67,82;alt,69,84,70,85]],";")) do
+		local name,face,c,h,v,f=unpack(split(r))
+		faces[name]=face
+		box_styles[face]={c,h,v,f}
+	end
 end
 
-function get_text(x,y)
---search texts for x and y
-	local index=x+y*128
-	local exists=exists_in(text_data,index)
-	
-	--does something exist on this tile?
-	if exists then
-		exists+=next_text
-		local index,read,order,text_end,set_self,self,switch,story_req,set_story,text=unpack(text_data[exists])
-		local checked=text_check(read,text_end,switch,story_req,set_story)
-		
-		--show text if not read yet
-		if checked then
-			--update read
-			text_data[exists][2]=true
-			--update selfswitch as needed
-			if set_self then
-				text_data[exists][6]=true
+function parse_flags(s)
+	if (not s or s=="") return
+	local t={}
+	for k in all(split(s,",",false)) do
+		local n=sub(k,1,1)=="!"
+		t[n and sub(k,2) or k]=not n
+	end
+	return t
+end
+
+function make_cond(r)
+	local t=parse_flags(r)
+	if t then
+		return function()
+			for f,v in next,t do
+				if (flags[f] or false)~=v then return false end
 			end
-			--send text
-			return text
+			return true
+		end
+	end
+end
+
+function make_onend(sets,action)
+	local t=parse_flags(sets)
+	if t or action then
+		return function()
+			for f,v in next,t or {} do flags[f]=v end
+			if (action) action()
+		end
+	end
+end
+
+function dialogue_start(src)
+	for e in all(src.dialogue) do
+		if not e.cond or e.cond() then
+			if not e.pages[1] or e.pages[1]=="" then
+				if (e.on_end) e.on_end()
+			else
+				dialogue={active=true,entry=e,page=1,src=src}
+			end
+			return
+		end
+	end
+end
+
+function update_dialogue()
+	if btnp(4) then
+		local d=dialogue
+		if d.page<#d.entry.pages then
+			d.page+=1
 		else
-			return nil
+			--close first so on_end can open
+			--another dialogue or a battle
+			dialogue={}
+			if (d.entry.on_end) d.entry.on_end()
 		end
-	else
-		--nothing was found for this tile
-		return nil
 	end
 end
 
-function get_npc_dialogue(npc)
-	local line_index=first_available_dialogue(npc)
-	local empty=is_empty(npc.dialogue)
-	
-	--does this npc have dialogue?
-	if empty then
-		return nil
-	else
-		local npcid,read,order,text_end,set_self,self,switch,story_req,set_story,text,face=unpack(npc.dialogue[line_index])
-		local checked=text_check(read,text_end,switch,story_req,set_story)
-		
-		--show text if not read yet
-		if checked and ended==false then
-			--update read
-			npc.dialogue[line_index][2]=true
-			--update selfswitch as needed
-			if set_self then
-				npc.dialogue[line_index][6]=true
-			end
-			if text_end then
-				ended=true
-			end
-			--send text and face
-			return text,face
+function draw_dialogue()
+	local pg,face=dialogue.entry.pages[dialogue.page],64
+	local k=split(pg,":",false)[1]
+	if faces[k] then face,pg=faces[k],sub(pg,#k+2) end
+	dialogue.y=dialogue.y or dialogue_y()
+	local by=dialogue.y
+	draw_box(3,15,0,by,face)
+	local tx,ty=mapx*8,mapy*8+by
+	print(wrap(pg),tx+5,ty+5,7)
+	if (flr(time()*4)%2==0) spr(100,tx+116,ty+20)
+end
+
+function dialogue_y()
+	--this is to prevent the dialogue box covering talking sprites
+	--bottom box (default) covers screen y 96-128, top box covers 0-32
+	local lo,hi
+	for e in all({p,dialogue.src}) do
+		if e.y then
+			local sy=(e.py or e.y*8)-mapy*8
+			lo=lo or sy+8>96
+			hi=hi or sy<32
+		end
+	end
+	return lo and not hi and 0 or 96
+end
+
+function wrap(s,w)
+	w=w or 29
+	local out,line="",""
+	for word in all(split(s," ",false)) do
+		if line!="" and #line+#word+1>w then
+			out..=line.."\n"
+			line=word
 		else
-			ended=false
-			return nil
+			line..=(line=="" and "" or " ")..word
 		end
-	end	
+	end
+	return out..line
 end
 
-function text_check(read,text_end,switch,story_req,set_story)
-	local switch_exists=exists_in(switches,switch)
-	--==checks==	
-	--check switches
-	if switch_exists then
-		if switches[switch_exists][2]==false then
-			return nil
-		end
-	end
-	--check story req
-	if story_req~=0 and story_req>story_beat then
-		return nil
-	end
-	--show text if not read yet
-	if read then
-			return nil
-	end
-	--==passes==
-	--update story beat as needed
-	if story_beat<set_story then
-		story_beat=set_story
-	end
-	--iterate if needed
-	if text_end then
-		next_text=0
-		--setup cleaner
-		cleaned_reads=false
-	else
-		next_text+=1
-	end
-	return true
+-->8
+--cutscene code
+
+function cutscene(fn)
+	--run fn as a locked cutscene:
+	--player input and the menu are off until it ends
+	cutscene_on=true
+	async(function()
+		fn()
+		cutscene_on=false
+	end)
 end
 
-function clean_reads()
---if selfswitch is false,then 
---update reads set to true from
---interactions
-	for i=1,#text_data do
-		if text_data[i][6]==false and text_data[i][2] then
-			text_data[i][2]=false
+function when(flag,fn)
+	--run fn in the background once a flag is set
+	--(no input lock, ex. npcs that wander off)
+	async(function()
+		while not flags[flag] do yield() end
+		fn()
+	end)
+end
+
+--cutscene commands (use inside cutscene or when)
+function pause(n)
+	--pause for n frames
+	for i=1,n do yield() end
+end
+
+function walk(e,steps,spd)
+	--move p or any npc along "r,l,u,d"
+	--spd = pixels per frame (default 1, 8 frames/tile)
+	spd=spd or 1
+	for s in all(split(steps)) do
+		local d=dirs[s]
+		local dx,dy=d[1],d[2]
+		local tx,ty=(e.x+dx)*8,(e.y+dy)*8
+		if e==p then
+			p.dx,p.dy=dx,dy
+			if (dx!=0) flip_x=dx<0
 		end
+		e.px,e.py=e.px or e.x*8,e.py or e.y*8
+		while e.px!=tx or e.py!=ty do
+			e.px+=mid(-spd,tx-e.px,spd)
+			e.py+=mid(-spd,ty-e.py,spd)
+			yield()
+		end
+		e.x+=dx
+		e.y+=dy
 	end
+	e.px,e.py=nil,nil
+end
+
+function say(s)
+	--show text, wait until it is closed
+	--"page;page;hero: hero page" same format as init_dlg
+	dialogue_start({dialogue={init_dlg("|"..s)}})
+	dlg_wait()
+end
+
+function talk(n)
+	--run an npc's normal (flag based) dialogue
+	dialogue_start(n)
+	dlg_wait()
+end
+
+function dlg_wait()
+	while dialogue.active do yield() end
+end
+
+function fight(group)
+	--start a battle and wait for it. returns true if won
+	--(the script is frozen while the battle scene runs)
+	local won
+	start_battle(group,function(w) won=w end)
+	repeat yield() until won!=nil
+	return won
+end
+
+--scenes
+function init_scenes()
+	--cutscene triggers
+	--"!gate_scene||gate_scene" = once only, no pages, just run the action
+	trigger(8,14,
+		init_dlg("!gate_scene||gate_scene",function() cutscene(gate_scene) end))
+
+	--when triggers
+	--once the gate is won the elder walks off (adjust the path to your map!)
+	when("gate_won",function()
+		walk(who.elder,"l,u,u,u,u,u,u,u,u")
+	end)
+end
+
+function gate_scene()
+	--bumping the monster at (8,14) starts the gate scene.
+	say("hero:this ends here.")
+	pause(20)
+	if fight("slimes_x2") then
+		clear_gate_monsters()
+		say("hero:...the light holds.;hero:for now.")
+		pause(20)
+		flags.gate_won=true
+	end
+	--if you lose, game over triggers by itself
+end
+
+function clear_gate_monsters()
 	for n in all(npc_data) do
-		for i=1,#n.dialogue do
-			if n.dialogue[i][6]==false and n.dialogue[i][2] then
-				n.dialogue[i][2]=false
-			end
-		end
+		if (n.tag=="gate_scene") del(npc_data,n)
 	end
-	cleaned_reads=true
-end
-
-function first_available_dialogue(npc)
-	local n=#npc.dialogue
-	
-	for i=1,n do
-		if npc.dialogue[i][2]==false and npc.dialogue[i][6]==false then
-			return i
-		end
-	end
-	return n
-end
-
-function add_cutscene(map_num,seq,switch,obj,action,key,dest,frames,text)
---add code
-end
-
-function get_cutscene()
---add code
-end
-
-function run_cutscene()
--- parse instructions and 
--- create async func like below
--- possible actions: 
--- wait,move,text,battle,animate
-
---	async(function()
---		move(p,"x",64)
---  wait(30)
---		move(p,"y",32)
---	end)
 end
 
 -->8
 --battlesystem code
 
-function init_battle()
-	--game states
-	battle_state={
-		player_turn=1,
-		enemy_turn=2,
-		anim=3,
-		win=4,
-		lose=5
-	}
-	--battle test data
+--init battle functions
+function init_battle(en,on_end)
+	local h=init_battler(p)
+	h.x,h.y=58,52
+	for i,e in inext,en do
+		e.x,e.y=59+(i-(#en+1)/2)*16,32
+	end
 	battle={
-		state=1,
-		enemy={hp=15,maxhp=15,atk=10,def=4,name="slime",status={}},
+		state=battle_state.menu,
+		sel=1,
 		message="your turn!",
-		battle_select=1, --1=attack,2=heal 
 		anim_timer=0,
-		frames=0,
-		player_defends=false,
-		enemy_defends=false
+		hero=h,
+		enemies=en,
+		popups={},
+		on_end=on_end,
+		en_id=1
 	}
-	--anim config
-	anim={
-		frames=0,
-		maxframes=0,
-		fn=nil,
-		done=nil
-	}
-	--setup main functions
-	scene="battle"
-	_update = update_battle 
-	_draw = draw_battle
+	scene,_update,_draw="battle",update_battle,draw_battle
 end
 
+function init_enemies()
+	--enemy data: name,sprite,hp,atk,def
+	enemy_defs={
+		slime=init_enemy("slime,198,15,10,4")
+	}
+	enemy_groups={
+		slime={"slime"},
+		slimes_x2={"slime","slime"}
+	}
+end
+
+function init_enemy(s)
+	local name,sprite,hp,atk,def=unpack(split(s))
+	return {name=name,sprite=sprite,hp=hp,maxhp=hp,atk=atk,def=def}
+end
+
+function init_battler(s,e)
+	--copies stats so every fight starts fresh
+	--(works for the hero p and for enemy defs)
+	return {
+		name=s.name,
+		sprite=e and s.sprite or 224,
+		hp=s.hp,maxhp=s.maxhp,
+		mp=s.mp or 0,maxmp=s.maxmp or p_maxmp,
+		atk=s.atk,def=s.def,
+		matk=s.matk,mdef=s.mdef,
+		shield=s.shield_score or 0
+	}
+end
+
+--call battle functions
+function start_battle(group,on_end)
+	--any npc, tile or dialogue action can call this
+	--on_end(won) runs when the fight is over
+	local en={}
+	for k in all(enemy_groups[group]) do
+		add(en,init_battler(enemy_defs[k],true))
+	end
+	init_battle(en,on_end)
+end
+
+function end_battle(won)
+	local h=battle.hero
+	p.hp,p.mp=max(h.hp,0),h.mp
+	set_last_light()
+	scene,_update,_draw="game",update_game,draw_game
+	if (battle.on_end) battle.on_end(won)
+end
+
+--update battle functions
 function update_battle()
-	battle.anim_timer -= 1
-	if battle.state==battle_state.anim then
-		anim.frames-=1
-		if anim.frames<=0 then anim.done() end
-		return
-	end		
-	if battle.state==battle_state.player_turn then
-		--move select
-		if btnp(2) then 
-			battle.battle_select-=1
-			if battle.battle_select<1 then
-				battle.battle_select=4
-			end 
+	local b=battle
+	local s=b.state
+	b.anim_timer-=1
+	update_popups()
+
+	if s==battle_state.anim then
+		anim.t-=1
+		anim.fn()
+		if anim.t<=0 then
+			b.state=battle_state.idle
+			anim.done()
 		end
-		if btnp(3) then 
-			battle.battle_select+=1 
-			if battle.battle_select>4 then
-				battle.battle_select=1
-			end
-		end
-		--confirm action
-		if btnp(4) and battle.anim_timer<=0 then
-			if battle.battle_select==1 then
-				--sword attack
-				local dmg=max(p.atk+flr(rnd(3))-battle.enemy.def,1)
-				play_anim(
-					20,
-					function() 
-						local shake=flr(rnd(3))-1 
-						spr(224,58+shake,52+shake)
-						spr(198,59,32)
-					end,
-					function()
-						battle.enemy.hp-=dmg
-						battle.message="you hit for "..dmg.."!"
-						battle.anim_timer=30
-						--check win
-						if battle.enemy.hp<=0 then
-							battle.enemy.hp=0
-							battle.state=battle_state.win
-							battle.message="you won!"
-							--temp
-							slime_defeated=true
-							--end of temp
-							battle.anim_timer=60
-							return
-						end
-						battle.state=battle_state.enemy_turn
-					end)	
-			elseif battle.battle_select==2 then
-				--shield
-				local dmg=max(flr(p.atk/2)+flr(rnd(3))+p.shield_score-battle.enemy.def,1)
-				local stun_chance=rnd(1)<0.25 --25% chance true
-				play_anim(
-					10,
-					function() 
-						local shake=flr(rnd(3))-1 
-						spr(224,58+shake,52+shake)
-						spr(198,59,32)
-					end,
-					function()
-						player_defends=true
-						battle.enemy.hp-=dmg
-						battle.message="you hit for "..dmg.."!"
-						battle.anim_timer=30
-						--check win
-						if battle.enemy.hp<=0 then
-							battle.enemy.hp=0
-							battle.state=battle_state.win
-							battle.message="you won!"
-							--temp
-							slime_defeated=true
-							--end of temp
-							battle.anim_timer=60
-							return
-						end
-						battle.state=battle_state.enemy_turn
-					end)	
-			end
-		end
-	elseif battle.state==battle_state.enemy_turn then
-		--wait for animation, then enemy acts
-		if battle.anim_timer<=0 then
-			local dmg=max(battle.enemy.atk+flr(rnd(3))-p.def,1)
-			if player_defends then
-				dmg=max(flr(dmg/2),1)
-			end
-			play_anim(
-				dmg*3,
-				function()
-					local shake=flr(rnd(3))-1
-					rectfill(0,0,127,127,0)
-					spr(198,59,32+shake)
-					spr(224,58,52)
-				end,
-				function()
-					p.hp-=dmg
-					battle.message=battle.enemy.name.." hits for "..dmg.."!"
-					battle.anim_timer=30
-					battle.state=battle_state.player_turn
-				end)
-			--check lose
-			if p.hp<=0 then
-				p.hp=0
-				battle.state=battle_state.lose
-				battle.message="you lost..."
-			end
-		end
-	else
-		--go back to the game
-		if battle.anim_timer<=0 then
-			scene="game"
-			_update=update_game 
-		 _draw=draw_game					
+	elseif s==battle_state.menu then
+		update_battle_menu()
+	elseif s==battle_state.skill then
+		update_battle_skills()
+	elseif s==battle_state.target then
+		update_battle_target()
+	elseif s==battle_state.enemy then
+		update_enemy_turn()
+	elseif s==battle_state.win or s==battle_state.lose then
+		if (b.anim_timer<=0) end_battle(s==battle_state.win)
+	end
+end
+
+function update_battle_menu()
+	local b,h=battle,battle.hero
+	if (btnp(2)) b.sel=(b.sel-2)%4+1
+	if (btnp(3)) b.sel=b.sel%4+1
+	if btnp(4) and b.anim_timer<=0 then
+		local sh=b.sel==2
+		if b.sel<3 then
+			choose("e",function(t) do_attack(h,t,sh) end)
+		elseif b.sel==3 then
+			b.state,b.ksel=battle_state.skill,1
+		else
+			b.message="coming soon!"
 		end
 	end
 end
 
+function update_battle_skills()
+	local b,n=battle,#p_skills
+	if (btnp(2)) b.ksel=(b.ksel-2)%n+1
+	if (btnp(3)) b.ksel=b.ksel%n+1
+	if (btnp(5)) b.state=battle_state.menu
+	if (btnp(4) and b.anim_timer<=0) use_battle_skill(b.ksel)
+end
+
+function update_battle_target()
+	local b=battle
+	if (btnp(0)) b.tsel=(b.tsel-2)%#b.tl+1
+	if (btnp(1)) b.tsel=b.tsel%#b.tl+1
+	if (btnp(5)) b.state=b.back
+	if (btnp(4)) b.act(b.tl[b.tsel])
+end
+
+function update_enemy_turn()
+	local b,h=battle,battle.hero
+	if (b.anim_timer>0) return
+
+	--round over
+	if b.ei>#b.enemies then
+		h.defending,h.safe=false,false
+		tick_status(h)
+		if h.hp<=0 then
+			b.state,b.message,b.anim_timer=battle_state.lose,"you lost...",60
+		else
+			b.state,b.sel,b.message=battle_state.menu,1,"your turn!"
+		end
+		return
+	end
+
+	local e=b.enemies[b.ei]
+	b.ei+=1
+	if (e.hp<=0) return
+	if e.stun then
+		e.stun=false
+		b.message,b.anim_timer=e.name.." is stunned!",30
+		return
+	end
+
+	local d=calc_dmg(e.atk,h.def)
+	if (h.defending) d=max(flr(d/2),1)
+	if (h.safe) d=0
+	play_anim(max(d*3,10),
+		function() b.shake,b.sx=e,flr(rnd(3))-1 end,
+		function()
+			b.shake=nil
+			land_hit(h,d,h.safe and "blocked by the light!" or e.name.." hits for "..d.."!",8)
+			if h.hp<=0 then
+				b.state,b.message,b.anim_timer=battle_state.lose,"you lost...",60
+			else
+				b.state=battle_state.enemy
+			end
+		end)
+end
+
+--battle actions
+function choose(tgt,fn)
+	--runs fn once the target is selected
+	--tgt "e": 1 enemy, default if only 1 is alive
+	--all others don't need a target
+	local b=battle
+	b.act,b.back=fn,b.state
+	if tgt=="e" then
+		b.tl,b.tsel=alive(b.enemies),1
+		if #b.tl>1 then
+			b.state=battle_state.target
+			return
+		end
+		fn(b.tl[1])
+	else
+		fn()
+	end
+end
+
+function do_attack(u,t,shield)
+	local b=battle
+	local d=calc_dmg(shield and flr(u.atk/2)+u.shield or u.atk,t.def)
+	play_anim(shield and 10 or 20,
+		function() b.shake,b.sx=u,flr(rnd(3))-1 end,
+		function()
+			b.shake=nil
+			u.defending=shield
+			land_hit(t,d,"you hit for "..d.."!",8)
+			end_player_action()
+		end)
+end
+
+function use_battle_skill(i)
+	local b,h,s=battle,battle.hero,p_skills[i]
+	if skill_cost(i,h)>h.mp or h.mp==0 then
+		b.message="your mana is too low"
+	elseif i==2 and h.hp==h.maxhp then
+		b.message="your health is full"
+	else
+		choose(s.tgt,function(t) cast(i,t) end)
+	end
+end
+
+function cast(i,t)
+	--1 sword 2 heal 3 shield 4 flash 5 last light
+	local b,h,s=battle,battle.hero,p_skills[i]
+	local c=skill_cost(i,h)
+	local base=i==5 and h.matk*h.mp*(p.lvl==5 and 2 or 1) or skill_dmg(i,h)
+	local ts=s.tgt=="a" and alive(b.enemies) or {t}
+	h.mp-=c
+	play_anim(20,
+		function() b.shake,b.sx=h,flr(rnd(3))-1 end,
+		function()
+			b.shake=nil
+			if i==2 then
+				land_hit(h,h.hp-h.maxhp,"you are fully healed!",11)
+			elseif i==3 then
+				h.safe=true
+				b.message,b.anim_timer="shield of light up!",30
+			else
+				local d
+				for e in all(ts) do
+					d=calc_dmg(base,e.mdef or 0,1)
+					land_hit(e,d,"",7)
+					if (i==4 and rnd()<.5) e.stun=true
+				end
+				b.message=trim(s.name)..(#ts>1 and " hits all!" or " hits for "..d.."!")
+			end
+			end_player_action()
+		end)
+end
+
+function end_player_action()
+	local b=battle
+	for e in all(b.enemies) do
+		if e.hp>0 then
+			b.state,b.ei=battle_state.enemy,1
+			return
+		end
+	end
+	b.state,b.message,b.anim_timer=battle_state.win,"you won!",60
+end
+
+--battle helpers
+function tick_status(h)
+	--runs at the end of every round. effects with stat 0 are hp per turn
+	--(burned -1, fouled -2, full +3 ...), then the turn counter drops and 
+	--expired statuses are removed through change_statuseffects
+	local hp0=h.hp
+	p.hp=h.hp
+	for st in all(p.status) do
+		for n=1,#statuseffect_data do
+			local _,name,s1,v1,s2,v2=lookup_statuseffect_data(n)
+			if name==st[1] then
+				if (s1==0) p.hp+=v1
+				if (s2==0) p.hp+=v2
+				p.hp=mid(0,p.hp,p.maxhp)
+				st[2]-=1
+				if (st[2]<=0) change_statuseffects(n,false)
+			end
+		end
+	end
+	h.hp,h.maxhp,h.atk,h.def,h.matk,h.mdef=p.hp,p.maxhp,p.atk,p.def,p.matk,p.mdef
+	if (h.hp!=hp0) spawn_popup(h.x,h.y-4,abs(h.hp-hp0),h.hp>hp0 and 11 or 8)
+end
+
+function calc_dmg(atk,def,var)
+	return max(atk+flr(rnd(var or 3))-def,1)
+end
+
+function land_hit(t,d,msg,col)
+	--negative dmg heals
+	t.hp=mid(0,t.hp-d,t.maxhp)
+	spawn_popup(t.x,t.y-4,abs(d),col)
+	battle.message=msg
+	battle.anim_timer=30
+end
+
+function alive(side)
+	local o={}
+	for e in all(side) do
+		if (e.hp>0) add(o,e)
+	end
+	return o
+end
+
+function play_anim(frames,fn,done)
+	anim={t=frames,fn=fn,done=done}
+	battle.state=battle_state.anim
+end
+
+function spawn_popup(x,y,v,c)
+	add(battle.popups,{x=x+flr(rnd(5))-2,y=y,v=v,c=c,t=30})
+end
+
+function update_popups()
+	for o in all(battle.popups) do
+		o.y-=0.5
+		o.t-=1
+		if (o.t<=0) del(battle.popups,o)
+	end
+end
+
+--draw battle functions
 function draw_battle()
 	cls()
-	--enemy info
-	print(battle.enemy.name,35,10,7)
-	draw_bar(35,17,battle.enemy.hp,battle.enemy.maxhp,8)
-	--player info
-	--draw_box(3,8,30,64)
-	print("????",35,68,7)
-	draw_bar(35,75,p.hp,p.maxhp,11)
-	draw_bar(35,82,p.mp,p_maxmp,9)
-	--sprite w/ override
-	if battle.state==battle_state.anim and anim.fn then
-		anim.fn()
+	camera()
+	local b,h=battle,battle.hero
+	local w=b.state==battle_state.win
+
+	--message / win-lose overlay
+	if w or b.state==battle_state.lose then
+		print(b.message,44,44,w and 11 or 8)
 	else
-		if battle.enemy.hp>0 then
-			--enemy
-			spr(198,59,32)
-		end
-		--player
-		spr(224,58,52)
+		draw_centered(b.message,8,7)
 	end
-	--action menu (player turn only)
-	if battle.state==battle_state.player_turn then
-		print((battle.battle_select==1 and ">" or " ").."sword",4,96,7)
-		print((battle.battle_select==2 and ">" or " ").."shield",4,104,7) 
-		print((battle.battle_select==3 and ">" or " ").."skills",4,112,7)
-		print((battle.battle_select==4 and ">" or " ").."items",4,120,7)
- end
-	--win/lose overlay & battle log
-	if battle.state==battle_state.win or battle.state==battle_state.lose then
-		local col=battle.state==battle_state.win and 11 or 8
-		print(battle.message,44,44,col)
-	else
-		print(battle.message,37,96,7)
+
+	--enemies
+	for e in all(b.enemies) do
+		if e.hp>0 then
+			spr(e.sprite,e.x+(b.shake==e and b.sx or 0),e.y)
+			mini_bar(e.x-3,e.y+10,e.hp,e.maxhp,14,8)
+			if (e.stun) print("zz",e.x,e.y-6,6)
+		end
+	end
+
+	--hero
+	spr(h.sprite,h.x+(b.shake==h and b.sx or 0),h.y)
+	print(h.name,35,68,7)
+	draw_bar(35,75,h.hp,h.maxhp,11)
+	draw_bar(35,82,h.mp,h.maxmp,9)
+
+	--target cursor
+	if b.state==battle_state.target then
+		local t=b.tl[b.tsel]
+		print("v",t.x+2,t.y-8+flr(sin(time()*2)*2),7)
+		draw_centered(t.name,20,7)
+	end
+
+	--action menu
+	if b.state==battle_state.menu then
+		local m=split("sword,shield,skills,items")
+		for i=1,4 do
+			print((b.sel==i and ">" or " ")..m[i],4,88+i*8,7)
+		end
+	elseif b.state==battle_state.skill then
+		local s,d=p_skills[b.ksel],skill_dmg(b.ksel)
+		print(s.d1,4,16,6)
+		if (d>0) print(d,4,22,9)
+		print(s.d2,4,22,6)
+		for i,s in inext,p_skills do
+			local c=h.mp<skill_cost(i,h) and 5 or 7
+			print((b.ksel==i and ">" or " ")..s.name,4,82+i*8,c)
+			print(skill_cost(i,h).."mp",76,82+i*8,c)
+		end	
+	end
+
+	--popups
+	for o in all(b.popups) do
+		local s=tostr(o.v)
+		print(s,o.x-#s*2+1,o.y+1,0)
+		print(s,o.x-#s*2,o.y,o.c)
 	end
 end
 
 function draw_bar(x,y,val,maxval,col)
 	local w=40
-	--rect(x,y,x+w,y+4,7)
 	local fill=max(0,flr((val/maxval)*w)-1)
 	if fill>0 then rectfill(x+1,y+1,x+fill,y+3,col) end
 	print(val.."/"..maxval,x+w+2,y,7)
 end
 
-function play_anim(maxframes,fn,done)
-	anim.frames=maxframes
-	anim.maxframes=maxframes
-	anim.fn=fn
-	anim.done=done
-	battle.state=battle_state.anim
+function mini_bar(x,y,v,m,w,c)
+	rectfill(x,y,x+w-1,y+1,5)
+	rectfill(x,y,x+max(1,flr(v/m*w))-1,y+1,c)
 end
 
-function heal_anim(heal)
-	--items and skills should use
-	--this by passing heal amount
-	local heal=heal or p.maxhp-p.hp
-	play_anim(
-		15,
-		function()
-			local c=anim.frames%2==0 and 11 or 7
-			draw_bar(35,75,p.hp,p.maxhp,c)
-		end,
-		function()
-			p.hp=min(p.hp+heal,p.maxhp)
-			battle.message="healed "..heal.." hp!"
-			battle.anim_timer=30
-			battle.state=battle_state.enemy_turn
-		end)
-end
 __gfx__
 000000000dd666000dd666004444444433344454335d5dd333333333335ddd536644446666444466a782287a66666666ddbbbb333dddbb3d3333333333377333
 000000000dd666070dd666074ffffff133444544335ddd5333333333335d5dd36647746666cccc66799aa997666666663bdddbddddbbddb33337733363377337
