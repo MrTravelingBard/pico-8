@@ -5,13 +5,15 @@ __lua__
 --by mr traveling bard
 
 --global variables
-version,wait,wait_cnt,main_sel="V0.1.0",0,0,1
+version,wait,wait_cnt,main_sel="V0.2.0",0,0,1
 --for menus
 menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main"}
 --for cutscenes
 dirs={r={1,0},l={-1,0},u={0,-1},d={0,1}}
 --for battle
 battle_state={menu=1,target=2,anim=3,enemy=4,win=5,lose=6,idle=7,skill=8}
+--for levelups
+stat_keys=split"str,dex,con,mag"
 
 --init scenes
 function init_intro()
@@ -131,8 +133,8 @@ function init_skills()
 	--target: e=one enemy s=self a=all enemies
 	--(desc2 padding leaves room for the damage number)
 	skill_defs={
-		init_skill("sword of light  ,one enemy,   holy damage,2,0,e"),
-		init_skill("healing light   ,self,restores hp to full,5,1,s"),
+		init_skill("sword of light  ,one enemy,   holy damage,4,0,e"),
+		init_skill("healing light   ,self,restores hp to full,6,1,s"),
 		init_skill("shield of light ,self,negate all damage/1 turn,2,0,s"),
 		init_skill("flash of light  ,all enemies,   holy damage + 50% stun,3,0,a"),
 		init_skill("the last light  ,all enemies,release remaining light,60,0,a")
@@ -159,8 +161,9 @@ function init_status()
 	15,  atk: ;
 	16,  def: ;
 	17,  spd: ;
-	18,m.atk: ;
-	19,m.def:	]],";")
+	18,  eva: ;
+	19,m.atk: ;
+	20,m.def:	]],";")
 end
 
 function init_statuseffect()
@@ -235,7 +238,7 @@ function update_mainmenu()
 	local option_cnt=#menu_options
 	if wait_cnt==2 then
 		if menu_control(#menu_options) then
-			if menu_sel==1 then init_game() end
+			if menu_sel==1 then init_name() end
 			if menu_sel==2 then init_savemenu() end
 		end
 	end
@@ -253,7 +256,9 @@ function update_game()
 	if wait_check() then
 		if not game_over then
 			run_async()
-			if dialogue.active then
+			if lu then
+				update_levelup()
+			elseif dialogue.active then
 				update_dialogue()
 			elseif menu_mode then
 				update_menus()
@@ -484,6 +489,7 @@ function draw_game()
 			camera()
 			if (dialogue.active) draw_dialogue()
 			draw_menus()
+			if (lu) draw_levelup()
 			--==debug start==
 
 			--==debug end==
@@ -512,37 +518,16 @@ end
 
 --draw helper functions
 function draw_mainmenu_animation(x,y)
-	spr(1, x, y)
-	
-	local speed = 0.45
-	local p = (time()*speed) % 1
-	local charge_end = 0.7 -- two phases now: charge (0-0.7), flash (0.7-1.0)
-
-	if p < charge_end then
-		local charge_p = p / charge_end -- 0 to 1
-		local num_particles = flr(charge_p * 3) + 1 -- grows from 1 to 3
-
-		for i=1,num_particles do
-			if rnd(1) > 0.4 then
-				local ox = flr(rnd(3)) - 1
-				local oy = flr(rnd(5)) - 2
-				pset(x+7+ox, y+oy, 6)
-			end
+spr(1,x,y)
+	local t=time()*.45%1
+	if t<.7 then
+		for i=1,t/.7*3\1+1 do
+			if (rnd()>.4) pset(x+6+rnd(3)\1,y-2+rnd(5)\1,6)
 		end
-
-		local core = charge_p > 0.6 and 10 or 7
-		pset(x+7, y, core)
 	end
-
-	local is_flash = p >= charge_end
-	local flash = is_flash and 10 or 7
-	for i=0,4 do
-		pset(x+7, y+i, flash)
-	end
-
-	local title = "knights of power: last light"
-	local title_flash = is_flash and 10 or 7
-	draw_centered(title,60,title_flash)
+	local f=t<.7 and 7 or 10
+	line(x+7,y,x+7,y+4,f)
+	draw_centered("knights of power: last light",60,f)
 end
 
 function draw_menu()	
@@ -649,7 +634,7 @@ function draw_status()
  print(p.name,statusx,statusy+22,7)
  print(p.title,statusx,statusy+30,7)
  draw_print(status_labels1,statusx,statusy+30)
- draw_print(status_labels2,statusx+72,statusy+38)
+ draw_print(status_labels2,statusx+72,statusy+30)
  --values
  print(p.lvl,statusx+14,statusy+38,7)
  --hp & mp
@@ -671,11 +656,11 @@ function draw_status()
 	print(p.shield_score,statusx+57,statusy+110,7)
  --the rest of the stats
  
- temp_stats=split(p_str_total..",;"..p_dex_total..",;"..p_con_total..",;"..p_mag_total..",;"..p.atk..",;"..p.def..",;"..p.spd..",;"..p.matk..",;"..p.mdef..",",";")
-	for i=1,9 do
-		temp_stats[i]=temp_stats[i]..check_color(p.temp_stats[i])
+ temp_stats=split(p_str_total..",;"..p_dex_total..",;"..p_con_total..",;"..p_mag_total..",;"..p.atk..",;"..p.def..",;"..p.spd..",;"..p.eva.."%,;"..p.matk..",;"..p.mdef..",",";")
+	for i=1,10 do
+		temp_stats[i]=temp_stats[i]..check_color(p.temp_stats[i] or p.temp_stats[2]+p.temp_stats[7])
 	end
-	draw_print(temp_stats,statusx+98,statusy+38,true)
+	draw_print(temp_stats,statusx+98,statusy+30,true)
 end
 
 function check_color(value)
@@ -808,8 +793,9 @@ function init_player()
 	p.shield_score=2
 	]]
 	p.x,p.y,p.dx,p.dy,p.sprite,p.name,p.title,p.lvl,p.mp,p.xp,p.str,p.dex,p.con,p.mag,p.sword_score,p.shield_score=
-	unpack(split("2,3,0,-1,1,????,the last light,1,60,0,4,4,4,4,5,2"))
+	unpack(split("2,3,0,-1,1,????,the last light,1,60,0,4,4,4,4,2,2"))
 	--starting stats
+	set_xp_table()
 	p_maxmp=60 --just for drawing
 	p.status={}
 	init_temp_stats()
@@ -824,17 +810,39 @@ function init_player()
 	set_inventory()
 end
 
-function set_xp_table()
---orders papa johns pizza
+function init_name()
+	nm,ch,c,a="","",1,"abcdefghijklmnopqrstuvwxyz*"
+	_update=function()
+		c=(c+(btnp(3) and 1 or 0)-(btnp(2) and 1 or 0)-1)%27+1
+		ch=sub(a,c,c)
+		if btnp(5) then
+			nm=sub(nm,1,-2)
+		elseif btnp(4) then
+			if ch=="*" then
+				init_game()
+				p.name=nm!="" and nm or "lance"
+			elseif #nm<8 then
+				nm..=ch
+			end
+		end
+	end
+	_draw=function()
+		cls()
+		spr(1,60,28)
+		print("name your hero:\n"..nm..ch,30,50,7)
+		print("⬆️⬇️ letter 🅾️ add ❎ del *=done",0,120,5)
+	end
+end
 
+function set_xp_table()
+	--orders papa johns pizza
 	xp_table = split("10,30,90,270")
 end
 
 function set_inventory()
---sets starting player inv
-
+	--sets starting player inv
 	start_inv=split("1,1;2,8;3,11;4,1;5,2",";")
- --start_inv=split("5,2;1,2",";")
+ 	--start_inv=split("5,2;1,2",";")
 	if start_inv then
 		for i=1,#start_inv do
 			local item_num,quantity=unpack(split(start_inv[i],","))
@@ -845,7 +853,7 @@ function set_inventory()
 end
 
 function add_item(item_num,quantity)
---adds/updates items to player
+	--adds/updates items to player
 	
 	local inum,iname,qdesc,fdesc,qheal,qadd_stat,qremove_stat,fheal,fadd_stat,fremove_stat=lookup_inventory_data(item_num)
 	local exists=exists_in(p_inventory,iname)
@@ -978,24 +986,87 @@ function exists_in(t,v,delete_flag)
 end
 
 function check_for_levelup()
---checks player xp against xp_table
-
-	if (xp_table[p.lvl] >= p.xp) levelup()
+	if xp_table[p.lvl] and p.xp>=xp_table[p.lvl] then
+		p.lvl+=1
+		lu={step=1,sel=1}
+	end
 end
 
-function levelup()
---prompt the player which stat they would like to update
---draw_levelup()
-	p.lvl+=1
-	if p.lvl==5 then 
+function lu_next()
+	--steps: 1 stat, 2 skill cost, 3 lv5 info, 4 done
+	local s,l=lu.step+1,p.lvl
+	if (s==2 and l!=2 and l!=4) s=3
+	if (s==3 and l!=5) s=4
+	if s==3 then
 		p.mp+=10
-		if p.mp>p_maxmp then 
-			p_maxmp=p.mp
-		end
+		p_maxmp+=10
 		p_skills[5].name="the last light+ "
 		p_skills[5].d2="destroy the darkness"
+		set_last_light()
 	end
-	set_stats()
+	if s==4 then
+		lu=nil
+		set_stats()
+		check_for_levelup()
+	else
+		lu.step,lu.sel=s,1
+	end
+end
+
+function update_levelup()
+	local s=lu.step
+	if s<3 then
+		lu.sel=(lu.sel+(btnp(3) and 1 or 0)-(btnp(2) and 1 or 0)-1)%4+1
+	end
+	if btnp(4) then
+		if s==1 then
+			local k=stat_keys[lu.sel]
+			p[k]+=1
+			lu_next()
+		elseif s==2 then
+			local sk=p_skills[lu.sel]
+			if sk.mp>1 then
+				sk.mp-=1
+				lu_next()
+			end
+		else
+			lu_next()
+		end
+	end
+end
+
+function draw_levelup()
+	local s=lu.step
+	rectfill(0,0,127,127,0)
+	rect(2,2,125,125,6)
+	draw_centered("level up! lv "..p.lvl,10,10)
+	if s==1 then
+		draw_centered("raise a stat",24,6)
+		for i=1,4 do
+			local k=stat_keys[i]
+			print((lu.sel==i and ">" or " ")..k.."  "..p[k].." > "..(p[k]+1),36,40+i*10,lu.sel==i and 7 or 6)
+		end
+		--TODO: add desc on hover
+		--str increases atk in battle & skill checks
+		--dex increases spd in battle & skill checks
+		--con increases def, maxhp, & resistance checks
+		--mag increase matk, mdef, & arcana checks
+	elseif s==2 then
+		draw_centered("reduce a skill's mp cost",24,6)
+		for i=1,4 do
+			local sk=p_skills[i]
+			local c=sk.mp>1 and 7 or 5
+			print((lu.sel==i and ">" or " ")..sk.name,8,40+i*10,c)
+			print(sk.mp>1 and sk.mp.." > "..(sk.mp-1) or "min",96,40+i*10,c)
+		end
+		--TODO: add skill desc 1 & 2 on hover
+	else
+		print(wrap("the light within is honed into a sharp blade"),8,36,7)
+		print("last light upgraded!",8,56,10)
+		print(wrap("a residual spark of the goddess' light finds its way to you"),8,72,7)
+		print("+10 mp",8,96,12)
+	end
+	draw_centered("z: confirm",114,5)
 end
 
 function set_stats(refresh)
@@ -1008,13 +1079,14 @@ function set_stats(refresh)
 	p_dex_total=p.dex+temp_dex
 	p_con_total=p.con+temp_con
 	p_mag_total=p.mag+temp_mag
-	
-	p.atk = p.str + p.lvl + p.sword_score + temp_atk
+
+	p.atk = p.str*2 + p.sword_score + temp_atk
 	p.def = p.con + p.shield_score + temp_def
 	p.spd = p.dex + p.lvl + temp_spd
-	p.matk = p.mag + p.lvl + p.sword_score + temp_matk
+	p.eva = mid(0,p_dex_total*3+temp_spd*3,50)
+	p.matk = p.mag*2 + p.sword_score + temp_matk
 	p.mdef = p.mag + p.shield_score + temp_mdef
-	p.maxhp = (p.con*4) + (p.lvl*4) + (temp_con*3)
+	p.maxhp = p.con*5 + p.lvl*2 + temp_con*3
 	if refresh then
 		--if maxhp increases hp increases
 		local hpdiff=p.maxhp-maxhp_start
@@ -1039,7 +1111,7 @@ function skill_dmg(i,u)
 	--damage shown in menu & used in battle
 	--u is p for the menu and hero battler in a fight
 	u=u or p
-	return i==1 and u.atk+u.matk*2 or i==4 and u.matk or 0
+	return i==1 and u.atk+(u.matk*2) or i==4 and u.matk or 0
 end
 
 function skill_cost(i,u)
@@ -1396,6 +1468,7 @@ function fight(group)
 	local won
 	start_battle(group,function(w) won=w end)
 	repeat yield() until won!=nil
+	while lu do yield() end
 	return won
 end
 
@@ -1451,25 +1524,39 @@ function init_battle(en,on_end)
 		enemies=en,
 		popups={},
 		on_end=on_end,
-		en_id=1
+		en_id=1,
+		xp=0
 	}
+	if (rnd(20)>p.spd+8) battle.state,battle.en_id=battle_state.enemy,1
 	scene,_update,_draw="battle",update_battle,draw_battle
 end
 
 function init_enemies()
-	--enemy data: name,sprite,hp,atk,def
+	--enemy data: name,sprite,hp,atk,def,xp
 	enemy_defs={
-		slime=init_enemy("slime,198,15,10,4")
+		slime=init_enemy("slime,198,12,6,2,3"),
+		undead=init_enemy("undead,198,14,8,3,4"),
+		lizardman=init_enemy("lizardman,198,20,10,3,5"),
+		gargoyle=init_enemy("gargoyle,198,18,10,2,5"),
+		ogre=init_enemy("ogre,198,26,13,4,6"),
+		cultist=init_enemy("cultist,198,26,11,3,6"),
+		mid_rogue=init_enemy("famous rogue,198,30,12,3,12"),
+		mid_mage=init_enemy("spiral mage,198,45,8,2,12"),
+		mid_ogre=init_enemy("ogre warchief,198,40,14,4,12"),
+		boss_undead=init_enemy("undead knight,198,60,11,5,20"),
+		boss_necro=init_enemy("necromancer,198,55,9,3,25"),
+		boss_shadow=init_enemy("shadow knight,198,75,14,6,0"),
+		boss_dragon=init_enemy("dragon,198,100,15,6,40")
 	}
 	enemy_groups={
 		slime={"slime"},
-		slimes_x2={"slime","slime"}
+		slimes_x2={"slime","slime","slime","slime"}
 	}
 end
 
 function init_enemy(s)
-	local name,sprite,hp,atk,def=unpack(split(s))
-	return {name=name,sprite=sprite,hp=hp,maxhp=hp,atk=atk,def=def}
+	local name,sprite,hp,atk,def,xp=unpack(split(s))
+	return {name=name,sprite=sprite,hp=hp,maxhp=hp,atk=atk,def=def,xp=xp}
 end
 
 function init_battler(s,e)
@@ -1482,7 +1569,8 @@ function init_battler(s,e)
 		mp=s.mp or 0,maxmp=s.maxmp or p_maxmp,
 		atk=s.atk,def=s.def,
 		matk=s.matk,mdef=s.mdef,
-		shield=s.shield_score or 0
+		shield=s.shield_score or 0,
+		xp=s.xp or 0
 	}
 end
 
@@ -1500,6 +1588,8 @@ end
 function end_battle(won)
 	local h=battle.hero
 	p.hp,p.mp=max(h.hp,0),h.mp
+	p.xp+=battle.xp
+	check_for_levelup()
 	set_last_light()
 	scene,_update,_draw="game",update_game,draw_game
 	if (battle.on_end) battle.on_end(won)
@@ -1569,7 +1659,7 @@ function update_enemy_turn()
 	if (b.anim_timer>0) return
 
 	--round over
-	if b.ei>#b.enemies then
+	if b.en_id>#b.enemies then
 		h.defending,h.safe=false,false
 		tick_status(h)
 		if h.hp<=0 then
@@ -1580,8 +1670,8 @@ function update_enemy_turn()
 		return
 	end
 
-	local e=b.enemies[b.ei]
-	b.ei+=1
+	local e=b.enemies[b.en_id]
+	b.en_id+=1
 	if (e.hp<=0) return
 	if e.stun then
 		e.stun=false
@@ -1590,13 +1680,14 @@ function update_enemy_turn()
 	end
 
 	local d=calc_dmg(e.atk,h.def)
+	local dodged=rnd(100)<p.eva
 	if (h.defending) d=max(flr(d/2),1)
-	if (h.safe) d=0
+	if (h.safe or dodged) d=0
 	play_anim(max(d*3,10),
 		function() b.shake,b.sx=e,flr(rnd(3))-1 end,
 		function()
 			b.shake=nil
-			land_hit(h,d,h.safe and "blocked by the light!" or e.name.." hits for "..d.."!",8)
+			land_hit(h,d,h.safe and "blocked by the light!" or dodged and e.name.." missed!" or e.name.." hits for "..d.."!",8)
 			if h.hp<=0 then
 				b.state,b.message,b.anim_timer=battle_state.lose,"you lost...",60
 			else
@@ -1681,11 +1772,18 @@ function end_player_action()
 	local b=battle
 	for e in all(b.enemies) do
 		if e.hp>0 then
-			b.state,b.ei=battle_state.enemy,1
+			b.state,b.en_id=battle_state.enemy,1
 			return
 		end
 	end
-	b.state,b.message,b.anim_timer=battle_state.win,"you won!",60
+	--enemies defeated
+	local total_xp=0
+	for e in all(b.enemies) do
+		if e.hp<=0 then
+			total_xp+=e.xp
+		end
+	end
+	b.state,b.message,b.anim_timer,b.xp=battle_state.win,"you won!\nyou gain "..total_xp.."xp",60,total_xp
 end
 
 --battle helpers
@@ -1757,7 +1855,7 @@ function draw_battle()
 
 	--message / win-lose overlay
 	if w or b.state==battle_state.lose then
-		print(b.message,44,44,w and 11 or 8)
+		print(b.message,44,34,w and 11 or 8)
 	else
 		draw_centered(b.message,8,7)
 	end
