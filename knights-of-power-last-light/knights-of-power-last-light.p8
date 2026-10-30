@@ -5,7 +5,7 @@ __lua__
 --by mr traveling bard
 
 --global variables
-version,wait,wait_cnt,main_sel="V0.2.1",0,0,1
+version,wait,wait_cnt="V0.2.1",0,0
 --for menus
 menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main"}
 --for cutscenes
@@ -36,7 +36,7 @@ function init_savemenu()
 end
 
 function init_game()
-	game_win,game_over,cutscene_on,bbeg_defeated,routines=false,false,false,false,{}
+	routines={}
 	init_map()
 	init_dialogue()
 	init_enemies()
@@ -50,11 +50,6 @@ function init_game()
 	set_wait(30)
 	_update = update_game 
 	_draw = draw_game
-end
-
---init menus/windows
-function init_use_menu()
-	useselect=1
 end
 
 --init game data
@@ -85,15 +80,19 @@ function init_npcs()
 		run_once(7,"how can the goddess of light let this happen? has the light truly faded?;should we accept our fate? is this the end?"))
 
 	--guards
-	npc("142,13,3",
+	npc("141,13,3",
 		run_once(10,"i know it's just beyond this wall. will it climb or...is it strong enough to bust through?"))
-	npc("141,7,13,gl",
+	npc("140,7,13,gl",
 		run_once(11,"this is bad. we simply don't have the numbers to hold this many back!"))
-	npc("139,9,13,gr",
+	npc("138,9,13,gr",
 		run_once(12,"we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?"))
+	
+	--monsters
+	npc("169,15,3,tag:chest_guardian",
+		init_dlg("!chest_guardian||chest_guardian",function() cutscene(golem_fight) end))
 
 	--no dialogue: 2 villagers + monsters idx13-21
-	for r in all(split("130,11,10;131,9,10;169,15,3,chest_guardian;152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene",";")) do
+	for r in all(split("130,11,10;131,9,10;152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene",";")) do
 		npc(r)
 	end
 end
@@ -163,14 +162,7 @@ function init_statuseffect()
 	11,stun,0,0,0,0]],";")
 end
 
-function init_temp_stats()
---1,str 2,dex 3,con 4,mag
---5,atk 6,def 7,spd 8,matk 9,mdef
-	p.temp_stats={}
-	for i=1,9 do
-		add(p.temp_stats,0)
-	end
-end
+function init_temp_stats() p.temp_stats=split"0,0,0,0,0,0,0,0,0" end
 
 --init helpers
 function npc(s,...)
@@ -342,13 +334,7 @@ function check_can_use_skill()
 end
 
 function check_win_lose()
-	if bbeg_defeated then
-		game_win=true
-		game_over=true
-	elseif p.hp<=0 then
-		game_win=false
-		game_over=true
-	end
+	game_over=flags.bbeg_defeated or p.hp<=0
 end
 
 --utility functions
@@ -367,14 +353,6 @@ function run_async()
 	end
 end
 
-function is_empty(t)
-	--checks if a table is empty
-	for _,_ in pairs(t) do
-		return false
-	end
-	return true
-end
-
 function wait_check()	
 	if wait==0 then
 		return true
@@ -384,9 +362,7 @@ function wait_check()
 	end
 end
 
-function set_wait(num)
-	wait=num
-end
+function set_wait(n) wait=n end
 
 function menu_control(n)
 	menu_sel=nav(menu_sel,n,3,2)
@@ -440,7 +416,9 @@ end
 
 function draw_game()
 	cls()
-	if game_over==false then
+	if game_over then
+		draw_win_lose()
+	else
 		if wait==0 then
 			draw_map()
 			draw_npcs()
@@ -453,8 +431,6 @@ function draw_game()
 
 			--==debug end==
 		end
-	else
-		draw_win_lose()
 	end
 end
 
@@ -477,7 +453,7 @@ end
 
 --draw helper functions
 function draw_mainmenu_animation(x,y)
-spr(112,x,y)
+	spr(112,x,y)
 	local t=time()*.45%1
 	if t<.7 then
 		for i=1,t/.7*3\1+1 do
@@ -491,68 +467,38 @@ end
 
 function draw_menu()	
 	menux,menuy=10,7
-	
+	local a,b=split"8,32,60,88",split"30,58,86,118"
+
 	draw_box(1,14,4,2)
-	if menuselect==1 then
-	--x1=8,x2=30
-	rectfill(menux-2,menuy-1,menux+20,menuy+5,13)
- elseif menuselect==2 then
-	--x1=32,x2=58
-	rectfill(menux+22,menuy-1,menux+48,menuy+5,13)
- elseif menuselect==3 then
-	--x1=60,x2=86
-	rectfill(menux+50,menuy-1,menux+76,menuy+5,13)
- else
-	--x1=88,x2=118
-	rectfill(menux+78,menuy-1,menux+108,menuy+5,13)
- end
+	rectfill(a[menuselect],6,b[menuselect],12,13)
 	print("items skills status options",menux,menuy,7)
---troubleshooting
---print(menuselect,1,1,12)
 end
 
 function draw_inventory()
-	local invx,invy=10,2
- 	local line_item=0
-
-	--inventory box
-	draw_box(5,11,4,44)
-	--description box
-	draw_box(2,14,4,19)
-	--print if available
- if p_inventory and #p_inventory>0 then
- 	--invselect
- 	rectfill(invx-2,invy+38+(invselect*8),invx+85,invy+44+(invselect*8),13)
-		--inventory
-		for i=1,#p_inventory do
-			if p_inventory[i][3]>0 then
-				line_item+=1
-				print(pad(p_inventory[i][3]).." "..p_inventory[i][2],invx,invy+39+(line_item*8),7)
-			end
+	draw_box(5,11,4,44) --inv box
+	draw_box(2,14,4,19) --desc box
+	if #p_inventory>0 then
+		rectfill(8,40+invselect*8,95,46+invselect*8,13)
+		for i,it in inext,p_inventory do
+			print(pad(it[3]).." "..it[2],10,41+i*8,7)
 		end
-		--description
-		print(p_inventory[invselect][4],invx,invy+22,7)
-		print(p_inventory[invselect][5],invx,invy+30,7) 
-	end	
+		local it=p_inventory[invselect]
+		print(it[4],10,24,7)
+		print(it[5],10,32,7)
+	end
 end
 
 function draw_skills()
-	local skix,skiy=10,2
-	--skills box
-	draw_box(5,11,4,44)
-	--desc box
-	draw_box(2,14,4,19)
-	--skill select
-	rectfill(skix-2,skiy+38+(skiselect*8),skix+85,skiy+44+(skiselect*8),13)
-	--skills
+	draw_box(5,11,4,44) --skills box
+	draw_box(2,14,4,19) --desc box
+	rectfill(8,40+skiselect*8,95,46+skiselect*8,13)
 	for i,s in inext,p_skills do
-		print(s.name.." "..pad(s.mp).."mp",skix,skiy+39+i*8,7)
+		print(s.name.." "..pad(s.mp).."mp",10,41+i*8,7)
 	end
-	--desc
 	local s,d=p_skills[skiselect],skill_dmg(skiselect)
-	print(s.d1,skix,skiy+22,7)
-	if (d>0) print(d,skix,skiy+30,9)
-	print(s.d2,skix,skiy+30,7)
+	print(s.d1,10,24,7)
+	if (d>0) print(d,10,32,9)
+	print(s.d2,10,32,7)
 end
 
 function draw_use_menu()
@@ -598,7 +544,7 @@ function draw_status()
 	print(pad(p.mp).."/"..p_maxmp,statusx+14,statusy+54,7)
 	print(p.xp,statusx+14,statusy+62,7)
 	--status
-	if is_empty(p.status) then
+	if #p.status<1 then
 			print("normal",statusx+28,statusy+70,7)	
 	else
 		print_range(p.status,1,2,statusx+28,statusy+70)
@@ -632,10 +578,10 @@ function draw_print(split_string,x,y,color_flag)
 	
 	for i=1,#split_string do
 		if color_flag then
-			local label,c_num=unpack(split(split_string[i],","))	
+			local label,c_num=unpack(split(split_string[i]))	
 			print(label,x,y+(i*8),c_num)
 		else
-			local line_item,label=unpack(split(split_string[i],","))
+			local line_item,label=unpack(split(split_string[i]))
 			print(label,x,y+(i*8),7)	
 		end
 	end
@@ -647,7 +593,7 @@ function draw_text()
 	local x,y=4,52
 	draw_box(3,14,4,52)
 	print(active_text,x+4,y+4,7)
-	if (flr(time()*4)%2==0) spr(96,x+108,y+20)
+	if (time()%.5<.25) spr(96,x+108,y+20)
 end
 
 function draw_box(rows,columns,x,y,face)
@@ -681,11 +627,7 @@ end
 
 function draw_win_lose()
 	camera()
-	if (game_win) then
-		draw_centered("★ you win! ★",64)
-	else
-		draw_centered("game over! :(",64)
-	end
+	draw_centered(flags.bbeg_defeated and "★ you win! ★" or "game over! :(",64)
  	draw_centered("press ❎ to play again",72,5)
 end
 
@@ -715,34 +657,11 @@ end
 --player code
 
 function init_player()
---sets all initial player data
-
 	p={}
---[[	
- p.x=2 --starting x
-	p.y=3 --starting y
-	p.dx=0 --x facing: -1 (left), 0, 1 (right)
-	p.dy=-1 --y facing: -1 (up), 0, 1 (down)
-	p.sprite=1
-	==starting stats==
-	p.name="????"
-	p.title="the last"
-	p.lvl=1
-	p.mp=60
-	p.xp=0
-	p.str=4
-	p.dex=4
-	p.con=4
-	p.mag=4
-	==starting equipment stats==
-	p.sword_score=5
-	p.shield_score=2
-	]]
 	p.x,p.y,p.dx,p.dy,p.sprite,p.name,p.title,p.lvl,p.mp,p.xp,p.str,p.dex,p.con,p.mag,p.sword_score,p.shield_score=
-	unpack(split("2,3,0,-1,112,????,the last light,1,60,0,4,4,4,4,2,2"))
-	--starting stats
+	unpack(split"2,3,0,-1,112,????,the last light,1,60,0,4,4,4,4,2,2")
 	set_xp_table()
-	p_maxmp=60 --just for drawing
+	p_maxmp=60
 	p.status={}
 	init_temp_stats()
 	set_stats()
@@ -780,10 +699,7 @@ function init_name()
 	end
 end
 
-function set_xp_table()
-	--orders papa johns pizza
-	xp_table = split("10,30,90,270")
-end
+function set_xp_table()	xp_table = split"10,30,90,270,810" end
 
 function set_inventory()
 	--sets starting player inv
@@ -791,144 +707,60 @@ function set_inventory()
  	--start_inv=split("5,2;1,2",";")
 	if start_inv then
 		for i=1,#start_inv do
-			local item_num,quantity=unpack(split(start_inv[i],","))
+			local item_num,quantity=unpack(split(start_inv[i]))
 		
 			add_item(item_num,quantity)
 		end
 	end
 end
 
-function add_item(item_num,quantity)
-	--adds/updates items to player
-	
-	local inum,iname,qdesc,fdesc,qheal,qadd_stat,qremove_stat,fheal,fadd_stat,fremove_stat=lookup_inventory_data(item_num)
-	local exists=exists_in(p_inventory,iname)
-	if exists then
-		p_inventory[exists][3]+=quantity
-	else 
-		add(p_inventory,{inum,iname,quantity,qdesc,fdesc,qheal,qadd_stat,qremove_stat,fheal,fadd_stat,fremove_stat})
-	end
-end
-
-function lookup_inventory_data(item_num)
-	return unpack(split(inventory_data[item_num],","))
+function add_item(num,qty)
+	local it=split(inventory_data[num])
+	local e=exists_in(p_inventory,it[2])
+	if e then p_inventory[e][3]+=qty
+	else add(it,qty,3) add(p_inventory,it) end
 end
 
 function lookup_statuseffect_data(status_num)
 	return unpack(split(statuseffect_data[status_num],","))
 end
 
-function use_item(use_type)
---uses items
-	local use_type=use_type or "f"
-	local qheal,qadd,qremove,fheal,fadd,fremove=unpack(p_inventory[invselect],6,11)
-	--=quick use=
- if use_type=="q" then
-		--remove statuses if available
-		if qremove>0 then
-			change_statuseffects(qremove,false)
-		end
-		--add statuses if available
-		if qadd>0 then
-			change_statuseffects(qadd,true)
-		end
-		--recover health if available
-		if qheal>0 then
-			p.hp+=qheal
-			if p.hp>p.maxhp then
-				p.hp=p.maxhp
-			end
-		end
-	--=full use=
-	else
-		--remove statuses if available
-		if fremove>0 then
-			change_statuseffects(fremove,false)
-		end
-		--add statuses if available
-		if fadd>0 then
-			change_statuseffects(fadd,true)
-		end
-		--recover health if available
-		if fheal>0 then
-			p.hp+=fheal
-			if p.hp>p.maxhp then
-				p.hp=p.maxhp
-			end
-		end
+function use_item(q)
+	local it=p_inventory[invselect]
+	local i=q and 6 or 9
+	local heal,ad,rem=it[i],it[i+1],it[i+2]
+	if (rem>0) change_statuseffects(rem,false)
+	if (ad>0) change_statuseffects(ad,true)
+	p.hp=min(p.hp+heal,p.maxhp)
+	it[3]-=1
+	if it[3]==0 then
+		deli(p_inventory,invselect)
+		invselect=min(invselect,#p_inventory)
 	end
-	--deduct from inventory
-	p_inventory[invselect][3]-=1
-	if p_inventory[invselect][3]==0 then
-	 local i=(invselect==#p_inventory and invselect-1 or invselect)
-	 deli(p_inventory,invselect)
-	 invselect=i
-	end
-	--cleanup
-	init_use_menu()
 end
 
-function change_statuseffects(status_num,add_boolean,for_enemy)
-	local for_enemy=for_enemy or false
-	local snum,sdesc,stat1,val1,stat2,val2=lookup_statuseffect_data(status_num)
-	
-	if add_boolean then
-		local exists=exists_in(p.status,sdesc)
-		if exists then
-			p.status[exists][2]=3
-		else
-			add(p.status,{sdesc,3})
-			change_stats(stat1,val1)
-			change_stats(stat2,val2)
-		end
-	else
-		local exists=exists_in(p.status,sdesc,true)
-		if exists then
-			change_stats(stat1,val1,true)
-			change_stats(stat2,val2,true)
-		end
+function change_statuseffects(n,on)
+	local _,name,s1,v1,s2,v2=lookup_statuseffect_data(n)
+	local e=exists_in(p.status,name)
+	if on and e then
+		p.status[e][2]=3
+	elseif on or e then
+		if on then add(p.status,{name,3,n}) else deli(p.status,e) end
+		local k=on and 1 or -1
+		change_stats(s1,v1*k)
+		change_stats(s2,v2*k)
 	end
 	set_stats(true)
 end
 
-function change_stats(stat_num,value,stat_revert)
---0,hp 10,all main stats
-	local stat_revert=stat_revert or false
-	
-	if stat_num>0 then
-		if stat_num==10 then
-			for i=1,9 do
-				if stat_revert then
-					p.temp_stats[i]-=value
-				else
-					p.temp_stats[i]+=value
-				end
-			end
-		else
-			if stat_revert then
-				p.temp_stats[stat_num]-=value
-			else
-				p.temp_stats[stat_num]+=value
-			end
-		end
+function change_stats(n,v)
+	for i=1,9 do
+		if (n==10 or n==i) p.temp_stats[i]+=v
 	end
 end
 
-function exists_in(t,v,delete_flag)
-	local delete_flag=delete_flag or false
-	local n=#t
-	
-	for i=1,n do
-		if t[i][1]==v then
-			if delete_flag then
-				deli(t,i)
-				return true
-			else
-				return i
-			end
-		end
-	end
-	return false
+function exists_in(t,v)
+	for i=1,#t do if (t[i][1]==v) return i end
 end
 
 function check_for_levelup()
@@ -1049,7 +881,6 @@ function set_stats(refresh)
 end
 
 function set_skills()
-	--sets player skill list
 	p_skills=skill_defs
 end
 
@@ -1069,7 +900,6 @@ function use_skill()
 	if (skiselect==2) p.hp=p.maxhp
 	p.mp-=p_skills[skiselect].mp
 	set_last_light()
-	init_use_menu()
 end
 
 function set_last_light()
@@ -1180,7 +1010,7 @@ function init_boxes()
 	--one row per box style:
 	--name,face,corner,h_border,v_border[,fill]
 	faces,box_styles={},{}
-	for r in all(split([[default,64,64,65,80;hero,66,68,67,82;alt,69,84,70,85]],";")) do
+	for r in all(split("default,64,64,65,80;hero,66,92,67,82",";")) do
 		local name,face,c,h,v,f=unpack(split(r))
 		faces[name]=face
 		box_styles[face]={c,h,v,f}
@@ -1382,13 +1212,22 @@ function gate_scene()
 	--bumping the monster at (8,14) starts the gate scene.
 	say("hero:this ends here.")
 	pause(20)
-	if fight("slimes_x2") then
+	if fight("slime_x2") then
 		clear_gate_monsters()
 		say("hero:...the light holds.;hero:for now.")
 		pause(20)
 		flags.gate_won=true
 	end
 	--if you lose, game over triggers by itself
+end
+
+function golem_fight()
+	if fight("golem") then
+		pause(20)
+		for n in all(npc_data) do
+			if (n.tag=="chest_guardian") del(npc_data,n)
+		end
+	end
 end
 
 function clear_gate_monsters()
@@ -1424,27 +1263,23 @@ function init_battle(en,on_end)
 end
 
 function init_enemies()
-	--enemy data: name,sprite,hp,atk,def,xp
+	--enemy_def key,name,sprite,hp,atk,def,xp
 	enemy_defs=load_defs("slime,slime,152,12,6,2,3;undead,undead,156,14,8,3,4;l_man,lizardman,159,20,10,3,5;garg,gargoyle,162,18,10,2,5;ogre,ogre,166,26,13,4,6;golem,earth golem,169,26,11,3,6;mid_rogue,famous rogue,193,30,12,3,12;mid_mage,spiral mage,172,45,8,2,12;mid_ogre,ogre warchief,200,40,14,4,12;boss_undead,undead knight,177,60,11,5,20;boss_necro,necromancer,180,55,9,3,25;boss_shadow,shadow knight,183,75,14,6,0;boss_drak,dragon,196,100,15,6,40;shadow,shadow,211,30,12,3,12","name,sprite,hp,atk,def,xp")
-	enemy_groups={
-		slime={"slime"},
-		slimes_x2={"slime","slime","slime","slime"}
-	}
+	enemy_groups={}
+	for r in all(split("slime_x2,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man",";")) do
+		local g=split(r)
+		enemy_groups[deli(g,1)]=g
+	end
 end
 
 function init_battler(s,e)
 	--copies stats so every fight starts fresh
 	--(works for the hero p and for enemy defs)
-	return {
-		name=s.name,
-		sprite=e and s.sprite or 224,
-		hp=s.hp,maxhp=s.maxhp or s.hp,
-		mp=s.mp or 0,maxmp=s.maxmp or p_maxmp,
-		atk=s.atk,def=s.def,
-		matk=s.matk,mdef=s.mdef,
-		shield=s.shield_score or 0,
-		xp=s.xp or 0
-	}
+	local b={}
+	for k,v in next,s do b[k]=v	end
+	b.maxhp=s.maxhp or s.hp
+	if (not e) b.sprite,b.maxmp=224,p_maxmp
+	return b
 end
 
 --call battle functions
@@ -1452,7 +1287,7 @@ function start_battle(group,on_end)
 	--any npc, tile or dialogue action can call this
 	--on_end(won) runs when the fight is over
 	local en={}
-	for k in all(enemy_groups[group]) do
+	for k in all(enemy_groups[group] or {group}) do
 		add(en,init_battler(enemy_defs[k],true))
 	end
 	init_battle(en,on_end)
@@ -1477,9 +1312,9 @@ function update_battle()
 
 	if s=="anim" then
 		anim.t-=1
-		anim.fn()
+		b.shake,b.sx=anim.u,flr(rnd(3))-1
 		if anim.t<=0 then
-			b.state="idle"
+			b.shake=nil
 			anim.done()
 		end
 	elseif s=="menu" then
@@ -1505,7 +1340,7 @@ function update_battle_menu()
 		elseif b.sel==3 then
 			b.state,b.ksel="skill",1
 		else
-			b.message="coming soon!"
+			b.state="enemy"
 		end
 	end
 end
@@ -1528,15 +1363,17 @@ function update_enemy_turn()
 	local b,h=battle,battle.hero
 	if (b.anim_timer>0) return
 
+	if h.hp<=0 then
+		b.state,b.message,b.anim_timer="lose","you lost...",60
+		return
+	end
+
 	--round over
 	if b.en_id>#b.enemies then
 		h.defending,h.safe=false,false
 		tick_status(h)
-		if h.hp<=0 then
-			b.state,b.message,b.anim_timer="lose","you lost...",60
-		else
-			b.state,b.sel,b.message="menu",1,"your turn!"
-		end
+		b.en_id=1
+		if (h.hp>0) b.state,b.sel,b.message="menu",1,"your turn!"
 		return
 	end
 
@@ -1553,16 +1390,11 @@ function update_enemy_turn()
 	local dodged=rnd(100)<p.eva
 	if (h.defending) d=max(flr(d/2),1)
 	if (h.safe or dodged) d=0
-	play_anim(max(d*3,10),
-		function() b.shake,b.sx=e,flr(rnd(3))-1 end,
+	play_anim(max(d*3,10),e,
 		function()
 			b.shake=nil
 			land_hit(h,d,h.safe and "blocked by the light!" or dodged and e.name.." missed!" or e.name.." hits for "..d.."!",8)
-			if h.hp<=0 then
-				b.state,b.message,b.anim_timer="lose","you lost...",60
-			else
-				b.state="enemy"
-			end
+			b.state="enemy"
 		end)
 end
 
@@ -1587,9 +1419,8 @@ end
 
 function do_attack(u,t,shield)
 	local b=battle
-	local d=calc_dmg(shield and flr(u.atk/2)+u.shield or u.atk,t.def)
-	play_anim(shield and 10 or 20,
-		function() b.shake,b.sx=u,flr(rnd(3))-1 end,
+	local d=calc_dmg(shield and flr(u.atk/2)+u.shield_score or u.atk,t.def)
+	play_anim(shield and 10 or 20,u,
 		function()
 			b.shake=nil
 			u.defending=shield
@@ -1616,8 +1447,7 @@ function cast(i,t)
 	local base=i==5 and h.matk*h.mp*(p.lvl==5 and 2 or 1) or skill_dmg(i,h)
 	local ts=s.tgt=="a" and alive(b.enemies) or {t}
 	h.mp-=c
-	play_anim(20,
-		function() b.shake,b.sx=h,flr(rnd(3))-1 end,
+	play_anim(20,h,
 		function()
 			b.shake=nil
 			if i==2 then
@@ -1640,20 +1470,10 @@ end
 
 function end_player_action()
 	local b=battle
-	for e in all(b.enemies) do
-		if e.hp>0 then
-			b.state,b.en_id="enemy",1
-			return
-		end
-	end
-	--enemies defeated
-	local total_xp=0
-	for e in all(b.enemies) do
-		if e.hp<=0 then
-			total_xp+=e.xp
-		end
-	end
-	b.state,b.message,b.anim_timer,b.xp="win","you won!\nyou gain "..total_xp.."xp",60,total_xp
+	if #alive(b.enemies)>0 then b.state,b.en_id="enemy",1 return end
+	local xp=0
+	for e in all(b.enemies) do xp+=e.xp end
+	b.state,b.message,b.anim_timer,b.xp="win","you won!\nyou gain "..xp.."xp",60,xp
 end
 
 --battle helpers
@@ -1664,16 +1484,12 @@ function tick_status(h)
 	local hp0=h.hp
 	p.hp=h.hp
 	for st in all(p.status) do
-		for n=1,#statuseffect_data do
-			local _,name,s1,v1,s2,v2=lookup_statuseffect_data(n)
-			if name==st[1] then
-				if (s1==0) p.hp+=v1
-				if (s2==0) p.hp+=v2
-				p.hp=mid(0,p.hp,p.maxhp)
-				st[2]-=1
-				if (st[2]<=0) change_statuseffects(n,false)
-			end
-		end
+		local _,_,s1,v1,s2,v2=lookup_statuseffect_data(st[3])
+		if (s1==0) p.hp+=v1
+		if (s2==0) p.hp+=v2
+		p.hp=mid(0,p.hp,p.maxhp)
+		st[2]-=1
+		if (st[2]<=0) change_statuseffects(st[3],false)
 	end
 	h.hp,h.maxhp,h.atk,h.def,h.matk,h.mdef=p.hp,p.maxhp,p.atk,p.def,p.matk,p.mdef
 	if (h.hp!=hp0) spawn_popup(h.x,h.y-4,abs(h.hp-hp0),h.hp>hp0 and 11 or 8)
@@ -1699,8 +1515,8 @@ function alive(side)
 	return o
 end
 
-function play_anim(frames,fn,done)
-	anim={t=frames,fn=fn,done=done}
+function play_anim(frames,unit,done)
+	anim={t=frames,u=unit,done=done}
 	battle.state="anim"
 end
 
@@ -1725,7 +1541,7 @@ function draw_battle()
 
 	--message / win-lose overlay
 	if w or b.state=="lose" then
-		print(b.message,44,34,w and 11 or 8)
+		print(b.message,44,100,w and 11 or 8)
 	else
 		draw_centered(b.message,8,7)
 	end
@@ -1754,7 +1570,7 @@ function draw_battle()
 
 	--action menu
 	if b.state=="menu" then
-		local m=split("sword,shield,skills,items")
+		local m=split"sword,shield,skills,items"
 		for i=1,4 do
 			print((b.sel==i and ">" or " ")..m[i],4,88+i*8,7)
 		end
@@ -2050,7 +1866,7 @@ __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-0001010101010101010101010000010100000100000101010100010100000000010101010101000001010100010100000303030307030303030300000001010800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003030303
+0001010101010101010101010000010100000100000101010100010100000000010101010101000001010100010100000303030305010303030300000001010800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003030303
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 2a2a2a2a2a022828282828161616031610101020202020341034101016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
