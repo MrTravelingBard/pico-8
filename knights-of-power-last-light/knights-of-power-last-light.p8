@@ -42,6 +42,7 @@ function init_game()
 	init_enemies()
 	init_statuseffect()
 	init_inventory()
+	init_chests()
 	init_skills()
 	init_status()
 	init_player()
@@ -54,47 +55,52 @@ end
 
 --init game data
 function init_npcs()
-	npc_data,who={},{}
-
-	--elder
-	npc("136,3,10,elder",
-		run_once(1,"in our most dire need, where are the gnomes, the wild men, and the wizards of the spiral;tower? will they stand by & watch us burn?! or...are they already dead?"))
-
-	--kids
-	npc("134,11,1",
-		run_once(2,"my dad said he heard something by this side of the wall. he looks worried...i'm scared."))
-	npc("133,7,3",
-		run_once(3,"what are those at the gate yelling about? what's going on?"))
-	--kid + hero conversation, then a repeat line
-	npc("132,6,8",
-		run_once(4,"my grandma said you shouldn't show monsters fear. it only makes them stronger.;i'm still scared though...;hero:you don't have to be afraid. i won't let them inside these walls. the light will prevail.;but...aren't you scared too?;hero:of course. but sometimes we have to fight what is in front of us, even if we're scared.;hero:because the cost of not doing so is too high. stay strong. the light will win this day."),
-		init_dlg("|i'm staying strong, mister."))
-	--repeatable
-	npc("135,7,8",
-		init_dlg("|the little blue ones look kind of cute.;are they really monsters?"))
-
-	--villagers
-	npc("128,12,8",
-		run_once(6,"i don't care about goddesses, gods, light, or darkness. but when a bunch of monsters,;ogres, & lizard folk turn up with weapons, well... i'm open to divine intervention."))
-	npc("129,9,2",
-		run_once(7,"how can the goddess of light let this happen? has the light truly faded?;should we accept our fate? is this the end?"))
-
-	--guards
-	npc("141,13,3",
-		run_once(10,"i know it's just beyond this wall. will it climb or...is it strong enough to bust through?"))
-	npc("140,7,13,gl",
-		run_once(11,"this is bad. we simply don't have the numbers to hold this many back!"))
-	npc("138,9,13,gr",
-		run_once(12,"we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?"))
-	
-	--monsters
-	npc("169,15,3,tag:chest_guardian",
-		init_dlg("!chest_guardian||chest_guardian",function() cutscene(golem_fight) end))
-
-	--no dialogue: 2 villagers + monsters idx13-21
-	for r in all(split("130,11,10;131,9,10;152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene",";")) do
-		npc(r)
-	end
+npc_data,who={},{}
+npc("136,3,10,elder",
+init_dlg"elder_bread|oh goddess, preserve us in this, our darkest hour.",
+init_dlg("gate_won|you held the gate...i never doubted the light would prevail.;take this. dwarven bread, the last from our stores. may it aid you in beating back the darkness.|elder_bread",function()loot"1,3"end),
+init_dlg"|in our most dire need, where are the gnomes, the wild men, and the wizards of the spiral;tower? will they stand by & watch us burn?! or...are they already dead?")
+npc("134,11,1",
+init_dlg"chest_guardian|my dad looks more relaxed. you checked what was there, right? what was it?;hero:it was nothing. just some trees hitting the wall.",
+init_dlg"|my dad said he heard something by this side of the wall. he looks worried...i'm scared.")
+npc("133,7,3",
+init_dlg"gate_won|what were they yelling about at the gate?;hero:there were some arguments but things have calmed for now.;people should be more considerate of others.",
+init_dlg"|what are those at the gate yelling about? what's going on?")
+npc("132,6,8",
+run_once(4,"my grandma said you shouldn't show monsters fear. it only makes them stronger.;i'm still scared though...;hero:you don't have to be afraid. i won't let them inside these walls. the light will prevail.;but...aren't you scared too?;hero:of course. but sometimes we have to fight what is in front of us, even if we're scared.;hero:because the cost of not doing so is too high. stay strong. the light will win this day."),
+init_dlg"gate_won|i hope when i'm older i can defeat monsters like you, mister.",
+init_dlg"|i'm staying strong, mister.")
+npc("135,7,8",
+init_dlg"gate_won|they were much less cute when they were attacking...",
+init_dlg"|the little blue ones look kind of cute.;are they really monsters?")
+npc("128,12,8",
+init_dlg"gate_won|good old fashioned skill of arms works too! thank you, knight.",
+init_dlg"|i don't care about goddesses, gods, light, or darkness. but when a bunch of monsters,;ogres, & lizard folk turn up with weapons, well... i'm open to divine intervention.")
+npc("129,9,2",
+init_dlg"gate_won|thank the goddess we live another day!",
+init_dlg"|how can the goddess of light let this happen? has the light truly faded?;should we accept our fate? is this the end?")
+npc("130,11,10",
+init_dlg"gate_won|what a relief. i thought surely this was the end...",
+init_dlg"|i've made my peace. whatever comes next, be it darkness or light, i accept it.")
+npc("131,9,10",
+init_dlg"gate_won|i'm going to go find my spell book and study for the next wave...",
+init_dlg"|it's been years since i've used magic. i wish i studied more at the spiral tower.")
+npc("141,13,3",
+init_dlg"guard2|...",
+init_dlg"chest_guardian and !guard2|i heard you fighting with it, could it have...?;hero:yes, it could have broken through. i fear there are many more where it came from. ready yourself for what is to come.|guard2",
+init_dlg"|i know it's just beyond this wall. will it climb or...is it strong enough to bust through?")
+npc("140,7,13,gl",
+init_dlg"gate_won|thank you for letting us catch our breath. we'll do our best to hold back any others.",
+init_dlg"|this is bad. we simply don't have the numbers to hold this many back!")
+npc("138,9,13,gr",
+init_dlg"guard|i wish you a safe return...",
+init_dlg"gate_won and !guard|thank you, this town is in your debt. without you, we would have been overrun.;hero:rest and ready for the waves to come.;there will be more?!;hero:very likely. i'll go forth to face them head on. should i fall, it will be up to you.;...|guard",
+init_dlg"|we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?")
+npc("169,15,2,tag:chest_guardian",
+init_dlg("!chest_guardian||chest_guardian",function()cutscene(golem_fight)end))
+for r in all(split("152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene",";"))do
+npc(r)
+end
 end
 
 function init_inventory()
@@ -293,14 +299,15 @@ function update_menus()
 		if (btnp(4)) menu_mode,useselect="skill_use",1
 
 	elseif m=="item_use" or m=="skill_use" then
+		local item=m=="item_use"
 		useselect=nav(useselect,2,3,2)
 		if btnp(4) then
-			local item=m=="item_use"
 			menu_mode=item and "items" or "skills"
 			if useselect==1 then
-				if item and check_can_use_item() then
-					use_item()
-				elseif not item and check_can_use_skill() then
+				if item then
+					local msg=item_block()
+					if msg then active_text="\n     "..msg else use_item(false) end
+				elseif check_can_use_skill() then
 					use_skill()
 				end
 			end
@@ -309,12 +316,10 @@ function update_menus()
 end
 
 --update helper functions
-function check_can_use_item()
+function item_block()
 	if p_inventory[invselect][1]==4 and p.hp==p.maxhp then
-		active_text="\n     your health is full"
-		return false
+		return "your health is full"
 	end
-	return true
 end
 
 function check_can_use_skill()
@@ -401,7 +406,9 @@ function draw_mainmenu()
 
 	if wait_cnt==2 then
 		for n=1,#menu_options do
-			print((menu_sel==n and ">" or " ")..menu_options[n],40,88+(n*8),7)
+			local s=menu_sel==n
+			if (s) spr(98,39,86+n*8)
+			print(menu_options[n],48,88+n*8,s and 7 or 6)
 		end
 		print(version,0,120,5)
 	end
@@ -426,9 +433,9 @@ function draw_game()
 			camera()
 			if (dialogue.active) draw_dialogue()
 			draw_menus()
+			if (ask_on) draw_use_menu(split"yes,no")
 			if (lu) draw_levelup()
 			--==debug start==
-
 			--==debug end==
 		end
 	end
@@ -446,7 +453,7 @@ function draw_menus()
 	if m=="items" or m=="item_use" then draw_inventory() end
 	if m=="skills" or m=="skill_use" then draw_skills() end
 	if m=="status" then draw_status() end
-	if (m=="item_use" or m=="skill_use") draw_use_menu()
+	if m=="item_use" or m=="skill_use" then draw_use_menu(split"yes,no") end
 
 	draw_text()
 end
@@ -501,16 +508,12 @@ function draw_skills()
 	print(s.d2,10,32,7)
 end
 
-function draw_use_menu()
-	local usex,usey=106,48
- 
-	draw_box(3,2,101,44)
-	--use select
-	rectfill(usex,usey-1+(useselect*8),usex+13,usey+5+(useselect*8),13)
-	--use menu
-	print("use?",usex,usey,7)
-	print("yes",usex+1,usey+8,7)
-	print("no",usex+1,usey+16,7)
+function draw_use_menu(opts)
+	local x,y=99,48
+	draw_box(#opts+1,3,94,44)
+	rectfill(x-1,y-1+useselect*8,x+23,y+5+useselect*8,13)
+	print("use?",x,y,7)
+	for i,o in inext,opts do print(o,x,y+i*8,7) end
 end
 
 function draw_mini_status(face)
@@ -659,7 +662,7 @@ end
 function init_player()
 	p={}
 	p.x,p.y,p.dx,p.dy,p.title,p.lvl,p.mp,p.xp,p.str,p.dex,p.con,p.mag,p.sword_score,p.shield_score=
-	unpack(split"2,3,0,-1,the last light,1,60,0,4,4,4,4,2,2")
+	unpack(split"2,2,0,-1,the last light,1,60,0,4,4,4,4,2,2")
 	set_xp_table()
 	p_maxmp=60
 	p.status={}
@@ -667,10 +670,18 @@ function init_player()
 	set_stats()
 	p_skills={}
 	set_skills()
-	--testing area
-	--change_statuseffects(1,true)
-	--p.hp=2
-	--starting inventory
+	--negative fx sprite = flipped. fx defaults to 240,241,242
+	--shk=1 shakes the unit while it animates
+	--keep=1 leaves the last frame up after the anim
+	b_anim={
+		sw={seq=split"225,227,229,227",hit="0010",fx=split"204,205,206,207"},
+		sh={seq=split"230,230",shk=1},
+		{seq=split"225,226,227,228,229,227",hit="000010",fx=split"204,205,206,207"}, --1 sword of light
+		{seq=split"227,233,234,235,234,235,233,227"}, --2 healing light
+		{seq=split"227,232,227"}, --3 shield of light
+		{seq=split"225,226",hit="01",fx=split"243,244,245,-245,245,-245"}, --4 flash
+		down={seq=split"227,233,236",keep=1}
+	}
 	p_inventory={}
 	set_inventory()
 end
@@ -716,7 +727,7 @@ end
 
 function add_item(num,qty)
 	local it=split(inventory_data[num])
-	local e=exists_in(p_inventory,it[2])
+	local e=exists_in(p_inventory,it[2],2)
 	if e then p_inventory[e][3]+=qty
 	else add(it,qty,3) add(p_inventory,it) end
 end
@@ -759,8 +770,8 @@ function change_stats(n,v)
 	end
 end
 
-function exists_in(t,v)
-	for i=1,#t do if (t[i][1]==v) return i end
+function exists_in(t,v,k)
+	for i=1,#t do if (t[i][k or 1]==v) return i end
 end
 
 function check_for_levelup()
@@ -939,7 +950,9 @@ function interact(x,y)
 
 	local n=npc_at(targetx,targety)
 	if (btnp(4) and n) dialogue_start(n)
-		
+	if (btnp(4)) open_chest(targetx,targety)
+	local a=acts[targetx+targety*128]
+	if (btnp(4) and a and not cutscene_on) cutscene(a)
 end
 
 -->8
@@ -947,6 +960,12 @@ end
 
 function init_map()
 	timer=0
+	flips={}
+  	poke(0x5f56,0x80)                     -- map lives at 0x8000
+  	poke(0x5f57,128)                      -- 128 tiles wide
+  	memcpy(0x8000,0x2000,4096)            -- north half of map
+  	reload(0x9000,0x2000,4096,"south.p8") -- south half of map
+	flip_at(10,12) flip_at(11,12)
 end
 
 function update_map()
@@ -962,6 +981,10 @@ function update_map()
 	timer-=1
 end
 
+function flip_at(x,y)
+	flips[x+y*128]=true
+end
+
 function npc_at(x,y)
 	for n in all(npc_data) do
 		if (n.x==x and n.y==y) return n
@@ -969,11 +992,15 @@ function npc_at(x,y)
 end
 
 function draw_map()
-	mapx=flr(p.x/16)*16
-	mapy=flr(p.y/16)*16
+	mapx=p.x\16 * 16
+	mapy=p.y\16 * 16
 	camera(mapx*8,mapy*8)
-	
+
 	map(0,0,0,0,128,64)
+	for k in next,flips do
+		local x,y=k%128,k\128
+		spr(mget(x,y),x*8,y*8,1,1,true)
+	end
 end
 
 function draw_npcs()
@@ -984,6 +1011,45 @@ end
 
 function can_move(x,y)
 	return not npc_at(x,y) and not fget(mget(x,y),0)
+end
+
+function init_chests()
+	chests={}
+	--x,y,"item,qty;item,qty" (qty defaults to 1)
+	chest(15,1,"4,3;5,2")
+	chest(19,17,"2,3")
+	chest(23,0,"3,3")
+	chest(25,0,"2,5")
+	chest(17,46,"1;2;3;4;5")
+end
+
+function chest(x,y,loot)
+	chests[x+y*128]=loot
+end
+
+function open_chest(x,y)
+	local k=x+y*128
+	if chests[k] then
+		loot(chests[k])
+		chests[k]=nil
+		mset(x,y,mget(x,y)+1)
+	end
+end
+
+function loot(s)
+	--loot message
+	dialogue_start({dialogue={init_dlg("|found "..give(s).."!")}})
+end
+
+function give(s)
+	local m=""
+	for r in all(split(s,";",false)) do
+		local n,q=unpack(split(r))
+		q=q or 1
+		add_item(n,q)
+		m..=(m=="" and "" or ", ")..q.." "..split(inventory_data[n])[2]
+	end
+	return m
 end
 
 -->8
@@ -997,6 +1063,15 @@ function init_dialogue()
 	--a function is optionally possible in the final slot
 	trigger(2,4,
 		run_once("exit_temple","as you leave this once holy place to face the agents of darkness, you are struck by;a feeling that you will likely never return.;did your goddess feel the same when she stood alone against the dark gods?")
+	)
+	trigger(25,54,
+		init_dlg("|the way forward is blocked... for now.")
+	)
+	trigger(26,54,
+		init_dlg("|the way forward is blocked... for now.")
+	)
+	trigger(27,54,
+		init_dlg("|the way forward is blocked... for now.")
 	)
 end
 
@@ -1202,15 +1277,54 @@ function fight(group)
 	return won
 end
 
+--yes/no prompt (reuses the "use?" box). true = yes
+function ask()
+	useselect,ask_on=1,true
+	repeat
+		useselect=nav(useselect,2,3,2)
+		yield()
+	until btnp(4)
+	ask_on=nil
+	yield() --so this press doesn't also skip the next dialogue
+	return useselect==1
+end
+
+--set tiles + clear their hooks
+function snuff(l,s)
+	for i=1,#l,2 do
+		mset(l[i],l[i+1],s)
+		local k=l[i]+l[i+1]*128
+		triggers[k],acts[k]=nil
+	end
+end
+
 --scenes
 function init_scenes()
-	--cutscene triggers
-	--"!gate_scene||gate_scene" = once only, no pages, just run the action
-	trigger(8,14,
-		init_dlg("!gate_scene||gate_scene",function() cutscene(gate_scene) end))
+	acts,sigs={},4
+	sk,sg=split"3,36,1,38,1,42,3,44,5,44,11,45,11,41,13,43",split"1,34,1,45,10,43,3,54"
 
-	--when triggers
-	--once the gate is won the elder walks off (adjust the path to your map!)
+	--gate: bump the slime or press on it (same dialogue object)
+	local g=init_dlg("!gate_scene||gate_scene",function() cutscene(gate_scene) end)
+	trigger(8,14,g)
+	npc_at(8,14).dialogue={g}
+
+	--skeletons: bump to fight, once each
+	for i=1,#sk,2 do
+		local x,y=sk[i],sk[i+1]
+		trigger(x,y,init_dlg("!sk"..i.."||sk"..i,function() cutscene(function() skel(x,y) end) end))
+		acts[x+y*128]=function() skel(x,y) end
+	end
+
+	--sigils: button press
+	for i=1,#sg,2 do
+		local x,y=sg[i],sg[i+1]
+		acts[x+y*128]=function() sigil(x,y) end
+	end
+
+	npc("175,12,59,boss",boss_dlg(176))
+	who.boss.fx=true
+	trigger(12,60,boss_dlg(177))
+
 	when("gate_won",function()
 		walk(who.elder,"l,u,u,u,u,u,u,u,u")
 	end)
@@ -1221,12 +1335,27 @@ function gate_scene()
 	say("hero:this ends here.")
 	pause(20)
 	if fight("slime_x2") then
+		--only the two slimes (x=8) vanish
+		for n in all(npc_data) do
+			if (n.tag=="gate_scene" and n.x==8) del(npc_data,n)
+		end
+		say("hero:...the light preserves.;ogre:we should return for now.")
 		clear_gate_monsters()
-		say("hero:...the light holds.;hero:for now.")
+		mset(2,14,56) mset(5,15,56) mset(10,14,56)
 		pause(20)
 		flags.gate_won=true
 		p.sword=false
 	end
+end
+
+function clear_gate_monsters()
+	--the rest walk off the bottom of the screen, then vanish
+	for n in all(npc_data) do
+		if n.tag=="gate_scene" then
+			async(function() walk(n,"d,d") del(npc_data,n) end)
+		end
+	end
+	pause(24)
 end
 
 function golem_fight()
@@ -1238,9 +1367,49 @@ function golem_fight()
 	end
 end
 
-function clear_gate_monsters()
-	for n in all(npc_data) do
-		if (n.tag=="gate_scene") del(npc_data,n)
+function skel(x,y)
+	say("necro:grr...")
+	if fight(rnd{"undead","undead_x2"}) then
+		snuff({x,y},15)
+	end
+end
+
+function sigil(x,y)
+	say("hero:an unholy energy... perhaps if i use the light i may cleanse its influence.")
+	if ask() then
+		if p.mp<1 then
+			say("hero:...i have no light to spare.")
+			return
+		end
+		p.mp-=1
+		set_last_light()
+		sigs-=1
+		snuff({x,y},16)
+		say("the sigil is cleansed. you gain 3 xp.")
+		p.xp+=3
+		check_for_levelup()
+	end
+end
+
+function boss_dlg(s)
+	return init_dlg("!boss_scene||boss_scene",function() who.boss.sprite=s cutscene(boss_scene) end)
+end
+
+function boss_scene()
+	say("hero:i'm sorry master... dark forces have desecrated your remains.;hero:turned your form against the light you served your whole life.;undead:then you know what you must do, my pupil.;hero:i do.")
+	p.sword=true
+	--undead on each side = sigils left, split around the knight
+	local g={}
+	for i=1,(sigs+1)\2 do add(g,"undead") end
+	add(g,"boss_undead")
+	for i=1,sigs\2 do add(g,"undead") end
+	enemy_groups.knight=g
+	if fight("knight") then
+		del(npc_data,who.boss)
+		say("the dark presence in the area is quelled for now.")
+		snuff(sk,15)
+		snuff(sg,16)
+		p.sword=false
 	end
 end
 
@@ -1249,8 +1418,7 @@ end
 
 --init battle functions
 function init_battle(en,on_end)
-	local h=init_battler(p)
-	h.x,h.y=58,52
+	p.bx,p.by,p.x,p.y,p.defending,p.safe=p.x,p.y,58,52
 	for i,e in inext,en do
 		e.x,e.y=59+(i-(#en+1)/2)*16,32
 	end
@@ -1259,7 +1427,7 @@ function init_battle(en,on_end)
 		sel=1,
 		message="your turn!",
 		anim_timer=0,
-		hero=h,
+		hero=p,
 		enemies=en,
 		popups={},
 		on_end=on_end,
@@ -1273,7 +1441,7 @@ end
 
 function init_enemies()
 	--enemy_def key,name,sprite,hp,atk,def,xp
-	enemy_defs=load_defs("slime,slime,152,12,6,2,3;undead,undead,156,14,8,3,4;l_man,lizardman,159,20,10,3,5;garg,gargoyle,162,18,10,2,5;ogre,ogre,166,26,13,4,6;golem,earth golem,169,26,11,3,6;mid_rogue,famous rogue,193,30,12,3,12;mid_mage,spiral mage,172,45,8,2,12;mid_ogre,ogre warchief,200,40,14,4,12;boss_undead,undead knight,177,60,11,5,20;boss_necro,necromancer,180,55,9,3,25;boss_shadow,shadow knight,183,75,14,6,0;boss_drak,dragon,196,100,15,6,40;shadow,shadow,211,30,12,3,12","name,sprite,hp,atk,def,xp")
+	enemy_defs=load_defs("slime,slime,152,12,6,2,3,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,5,aar;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,26,13,4,6,aah;golem,earth golem,169,26,11,3,6,aah;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,60,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")
 	enemy_groups={}
 	for r in all(split("slime_x2,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man",";")) do
 		local g=split(r)
@@ -1281,17 +1449,16 @@ function init_enemies()
 	end
 	atk_anims={
 		[152]={seq=split"153,154,155",hit="001"},
-		[169]={seq=split"170,171,170,171",hit="1111"}
+		[156]={seq=split"157,158",hit="00100",fx=split"204,205,206,207"},
+		[169]={seq=split"170,171,170,171",hit="1111"},
+		[177]={seq=split"178,179",hit="00100",fx=split"204,205,206,207"}
 	}
 end
 
-function init_battler(s,e)
-	--copies stats so every fight starts fresh
-	--(works for the hero p and for enemy defs)
+function init_battler(s)
 	local b={}
-	for k,v in next,s do b[k]=v	end
-	b.maxhp=s.maxhp or s.hp
-	if (not e) b.sprite,b.maxmp=224,p_maxmp
+	for k,v in next,s do b[k]=v end
+	b.maxhp=s.hp
 	return b
 end
 
@@ -1301,14 +1468,13 @@ function start_battle(group,on_end)
 	--on_end(won) runs when the fight is over
 	local en={}
 	for k in all(enemy_groups[group] or {group}) do
-		add(en,init_battler(enemy_defs[k],true))
+		add(en,init_battler(enemy_defs[k]))
 	end
 	init_battle(en,on_end)
 end
 
 function end_battle(won)
-	local h=battle.hero
-	p.hp,p.mp=max(h.hp,0),h.mp
+	p.x,p.y=p.bx,p.by
 	p.xp+=battle.xp
 	check_for_levelup()
 	set_last_light()
@@ -1335,6 +1501,8 @@ function update_battle()
 		update_battle_menu()
 	elseif s=="skill" then
 		update_battle_skills()
+	elseif s=="items" or s=="use" then
+		update_battle_items()
 	elseif s=="target" then
 		update_battle_target()
 	elseif s=="enemy" then
@@ -1354,7 +1522,11 @@ function update_battle_menu()
 		elseif b.sel==3 then
 			b.state,b.ksel="skill",1
 		else
-			b.state="enemy"
+			if #p_inventory>0 then
+				b.state,invselect="items",1
+			else
+				b.message="no items"
+			end
 		end
 	end
 end
@@ -1364,6 +1536,33 @@ function update_battle_skills()
 	b.ksel=nav(b.ksel,n,3,2)
 	if (btnp(5)) b.state="menu"
 	if (btnp(4) and b.anim_timer<=0) use_battle_skill(b.ksel)
+end
+
+function update_battle_items()
+	local b=battle
+	if b.state=="items" then
+		invselect=nav(invselect,#p_inventory,3,2)
+		if (btnp(5)) b.state="menu"
+		if (btnp(4)) b.state,useselect="use",1
+	else
+		useselect=nav(useselect,3,3,2)
+		if (btnp(5)) b.state="items"
+		if btnp(4) then
+			b.state="items"
+			if useselect<3 then
+				local msg=item_block()
+				if msg then
+					b.message=msg
+				else
+					local hp0,it=p.hp,p_inventory[invselect]
+					use_item(useselect==1)
+					hp_popup(hp0)
+					b.message,b.anim_timer=it[2].." used",30
+					if useselect==2 then end_player_action() else b.state="menu" end
+				end
+			end
+		end
+	end
 end
 
 function update_battle_target()
@@ -1378,7 +1577,9 @@ function update_enemy_turn()
 	if (b.anim_timer>0) return
 
 	if h.hp<=0 then
-		b.state,b.message,b.anim_timer="lose","you lost...",60
+		play_seq(h,b_anim.down,nil,function()
+			b.state,b.message,b.anim_timer="lose","you lost...",60
+		end)
 		return
 	end
 
@@ -1400,9 +1601,27 @@ function update_enemy_turn()
 		return
 	end
 
-	local d=calc_dmg(e.atk,h.def)
+	local a=split(e.ai,1)
+	e.n=(e.n or 0)+1
+	local act=e.cyc and a[(e.n-1)%#a+1] or rnd(a)
+
+	if (act=="f" and e.hp>e.maxhp/2) act="a"
+
+	if act=="f" then --heal
+		land_hit(e,-(e.maxhp\4),e.name.." heals!",11)
+		return
+	elseif act=="c" then --charge (telegraph)
+		b.message,b.anim_timer=e.name.." is charging!",30
+		return
+	elseif act=="r" then --rally
+		e.atk+=2
+		b.message,b.anim_timer=e.name.." rallies!",30
+		return
+	end
+
+	local d=calc_dmg(e.atk*(act=="s" and 3 or act=="h" and 2 or 1),h.def)
 	local dodged=rnd(100)<p.eva
-	if (h.defending) d=max(flr(d/2),1)
+	if (h.defending) d=max(d\2,1)
 	if (h.safe or dodged) d=0
 	local function land()
 		b.shake=nil
@@ -1411,7 +1630,7 @@ function update_enemy_turn()
 	end
 	local a,t=atk_anims[e.sprite],max(d*3,10)
 	if a then
-		play_atk(e,a,d,function() play_anim(t,d>0 and h,land) end)
+		play_seq(e,a,d>0 and {h},function() play_anim(t,d>0 and h,land) end)
 	else
 		play_anim(t,e,land)
 	end
@@ -1438,13 +1657,16 @@ end
 
 function do_attack(u,t,shield)
 	local b=battle
-	local d=calc_dmg(shield and flr(u.atk/2)+u.shield_score or u.atk,t.def)
-	play_anim(shield and 10 or 20,u,
+	local d=calc_dmg(shield and u.atk\2 + u.shield_score or u.atk,t.def)
+	play_seq(u,shield and b_anim.sh or b_anim.sw,{t},
 		function()
-			b.shake=nil
-			u.defending=shield
-			land_hit(t,d,"you hit for "..d.."!",8)
-			end_player_action()
+			play_anim(10,t,
+				function()
+					b.shake=nil
+					u.defending=shield
+					land_hit(t,d,"you hit for "..d.."!",8)
+					end_player_action()
+				end)
 		end)
 end
 
@@ -1459,18 +1681,24 @@ function use_battle_skill(i)
 	end
 end
 
-function play_atk(e,a,d,fn)
-	--cycles e through a.seq, spawning hit fx on the hero
-	--on frames marked 1 (only if the hero actually takes damage)
-	local b,n,c,hits,o=battle,#a.seq,0,0,split"0,0,-4,-3,4,3,-3,4"
-	anim={t=n*6,done=function() e.frame=nil fn() end,
+function play_seq(u,a,ts,fn)
+	--cycles u through a.seq. on frames marked 1 in a.hit, spawns
+	--a.fx on every unit in ts (nil = no fx). calls fn at the end
+	local b,c,hits,o=battle,0,0,split"0,0,-4,-3,4,3,-3,4"
+	anim={t=#a.seq*6,u=a.shk and u,
+		done=function()
+			if (not a.keep) u.frame=nil
+			fn()
+		end,
 		step=function()
 			if c%6==0 then
 				local i=c\6+1
-				e.frame=a.seq[i]
-				if d>0 and sub(a.hit,i,i)=="1" then
+				u.frame=a.seq[i]
+				if sub(a.hit or "",i,i)=="1" then
 					hits+=1
-					add(b.fx,{x=b.hero.x+o[hits*2-1],y=b.hero.y+o[hits*2],t=15})
+					for t in all(ts or {}) do
+						add(b.fx,{x=t.x+o[hits*2-1],y=t.y+o[hits*2],s=a.fx or split"240,241,242",t=0})
+					end
 				end
 			end
 			c+=1
@@ -1485,9 +1713,8 @@ function cast(i,t)
 	local base=i==5 and h.matk*h.mp*(p.lvl==5 and 2 or 1) or skill_dmg(i,h)
 	local ts=s.tgt=="a" and alive(b.enemies) or {t}
 	h.mp-=c
-	play_anim(20,h,
-		function()
-			b.shake=nil
+	local function land()
+		b.shake=nil
 			if i==2 then
 				land_hit(h,h.hp-h.maxhp,"you are fully healed!",11)
 			elseif i==3 then
@@ -1503,7 +1730,11 @@ function cast(i,t)
 				b.message=trim(s.name)..(#ts>1 and " hits all!" or " hits for "..d.."!")
 			end
 			end_player_action()
-		end)
+	end
+	local a=b_anim[i]
+	if not a then play_anim(20,h,land)
+	elseif i==1 then play_seq(h,a,ts,function() play_anim(10,t,land) end)
+	else play_seq(h,a,ts,land) end
 end
 
 function end_player_action()
@@ -1519,8 +1750,7 @@ function tick_status(h)
 	--runs at the end of every round. effects with stat 0 are hp per turn
 	--(burned -1, fouled -2, full +3 ...), then the turn counter drops and 
 	--expired statuses are removed through change_statuseffects
-	local hp0=h.hp
-	p.hp=h.hp
+	local hp0=p.hp
 	for st in all(p.status) do
 		local _,_,s1,v1,s2,v2=lookup_statuseffect_data(st[3])
 		if (s1==0) p.hp+=v1
@@ -1529,8 +1759,11 @@ function tick_status(h)
 		st[2]-=1
 		if (st[2]<=0) change_statuseffects(st[3],false)
 	end
-	h.hp,h.maxhp,h.atk,h.def,h.matk,h.mdef=p.hp,p.maxhp,p.atk,p.def,p.matk,p.mdef
-	if (h.hp!=hp0) spawn_popup(h.x,h.y-4,abs(h.hp-hp0),h.hp>hp0 and 11 or 8)
+	hp_popup(hp0)
+end
+
+function hp_popup(hp0)
+	if (p.hp!=hp0) spawn_popup(p.x,p.y-4,abs(p.hp-hp0),p.hp>hp0 and 11 or 8)
 end
 
 function calc_dmg(atk,def,var)
@@ -1569,8 +1802,8 @@ function update_popups()
 		if (o.t<=0) del(battle.popups,o)
 	end
 	for o in all(battle.fx) do
-		o.t-=1
-		if (o.t<=0) del(battle.fx,o)
+		o.t+=1
+		if (o.t\3>=#o.s) del(battle.fx,o)
 	end
 end
 
@@ -1598,10 +1831,10 @@ function draw_battle()
 	end
 
 	--hero
-	spr(h.sprite,h.x+(b.shake==h and b.sx or 0),h.y)
+	spr(h.frame or 224,p.x+(b.shake==p and b.sx or 0),p.y)
 	print(h.name,35,68,7)
 	draw_bar(35,75,h.hp,h.maxhp,11)
-	draw_bar(35,82,h.mp,h.maxmp,9)
+	draw_bar(35,82,h.mp,p_maxmp,9)
 
 	--target cursor
 	if b.state=="target" then
@@ -1626,10 +1859,25 @@ function draw_battle()
 			print((b.ksel==i and ">" or " ")..s.name,4,82+i*8,c)
 			print(skill_cost(i,h).."mp",76,82+i*8,c)
 		end	
+	elseif b.state=="items" or b.state=="use" then
+		local d=p_inventory[invselect]
+		print(d[4],4,16,6)
+		print(d[5],4,22,6)
+		for i,it in inext,p_inventory do
+			print((invselect==i and ">" or " ")..pad(it[3]).." "..it[2],4,82+i*8,7)
+		end
+		if b.state=="use" then
+			for i,t in inext,split"quick,full,back" do
+				print((useselect==i and ">" or " ")..t,100,82+i*8,7)
+			end
+		end
 	end
 
 	--effects
-	for o in all(b.fx) do spr(240+(15-o.t)\5,o.x,o.y) end
+	for o in all(b.fx) do 
+		local s=o.s[o.t\3+1]
+		spr(abs(s),o.x,o.y,1,1,s<0) 
+	end
 
 	--popups
 	for o in all(b.popups) do
@@ -1911,41 +2159,41 @@ __label__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 
 __gff__
-0001010101010101010101010000010100000100000101010100010100000000010101010101000001010100010100000303030305010303030300000001010800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003030303
+0101010101010101010101010000010100000100000101010100010100000000010101010101000001010100010100000303030305010303030300000001010900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003030303
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
-2a2a2a2a2a022828282828161616031610101020202020341034101016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2a2909292a022807270b281016100334101010102020201010101f1016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2a0a0d0a2a1028272727281010100310101010101020202010163f1616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2a0a0c0a2a102827272728101010031010101010102020201016161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2a2a0c2a2a102828272828101016031010101010202020101616160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-06061f06061014131f1413141010031010101010202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10101f1f1f1f1e1e1e1f1f131406031010101020202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-02021f0606101f1e7e1e1f282828031010102020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2828262828131f1e1e1f1f262628031010102020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-282626260b281f1e1e1f28262628031010102020201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-282626262628101e1e1e28260828031010102020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-280826262628141f1e1e28282828031110102020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2a2a2a2a2a022828282828161616031610101223202020341034101116160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2a2909292a022807270b281016100334161110102021201010101f1016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2a0a0d0a2a1028272727281010100310101010101020232011163f1616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2a0a0c0a2a102827272728101010031010101110102020211016161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2a2a0c2a2a102828272828101016031010131010202120101616160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+06061f06061014131f1413141010031010101010222020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+10101f1f1f1f1e1e1e1f1f131406031011101020202320111616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02021f0606101f1e7e1e1f282828031010102021202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2828262828131f1e1e1f1f262628031010102020202310161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+282626260b281f1e1e1f28262628031010102020201316160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+282626262628101e1e1e28260828031010102320202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+280826262628141f1e1e28282828031110102020212014161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 282828282828101e1e1e10100202031010102020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-040404040404041e1e1f04040404051010102020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101032101110101f1e1e32101010101010101020202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101032101f1e1e10101110161632323232202020201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101010101f1f1f10101010101010101010102020201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101610101010101f1f1f10101610101010101034102020201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+040404040404041e1e1f04040404051010102320222010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101032101110101f1e1e32101010101010101020202120101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101010101032101f1e1e10101110161610101010202023201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101010101010101f1f1f10101010101010101010102020201116160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101610101110101f1f1f10101610111010111034102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101010101010101e1e1f10101010161010101010202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d101e1e1e1f1e1e1f101010101020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101010101f1e1f1e1f1f1e202020202020202010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d101f1e1e1f2f2f2e202020202020101016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101010101f1e1e1f2f2e20202020202010161616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d10101f1e10202020202e2f1f1616161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10101010101010101f1e102020202e2f1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d10101f1e102020201f1e1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10101010101010101e1f102020201f1f1f1f3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10282828262810101f1e10102020201016161616160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10282626262810101e1f10102020201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10282626262816101e1e10101020202016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-02280b26262810101e1e10161020202016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-02282828282810101f1f10101010202020161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d101e1e1e1f1e1e1f101011101020232013161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101010101010101f1e1f1e1f1f1e202120202320202210161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d101f1e1e1f2f2f2e202020212020141016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101010101010101f1e1e1f2f2e20202320202010161616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d10101f1e10212020202e2f1f1616161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+10101010101010101f1e102020232e2f1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d10101f1e102021201f1e1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+10101010101014101e1f102020201f1f1f1f3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+10282828262810101f1e10102020201116161616160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+14282626262810101e1f11102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+10282626262816101e1e10101020202216160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02280b26262810101e1e10161020232016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02282828282810101f1f10101010202021161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 000400000d02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 001000002d07000000390703907039070390603905039050390303901000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
