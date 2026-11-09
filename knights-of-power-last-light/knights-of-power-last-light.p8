@@ -5,34 +5,26 @@ __lua__
 --by mr traveling bard
 
 --global variables
-version,wait,wait_cnt="V0.2.1",0,0
+version,wait,wait_cnt="V0.3.0",0,0
 --for menus
 menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main"}
 --for cutscenes
-dirs={r={1,0},l={-1,0},u={0,-1},d={0,1}}
+dirs={r=split"1,0",l=split"-1,0",u=split"0,-1",d=split"0,1"}
 --for levelups
 stat_keys=split"str,dex,con,mag"
 
 --init scenes
 function init_intro()
-	set_wait(60)
-	_update=update_intro
-	_draw=draw_intro
+	wait,_update,_draw=60,update_intro,draw_intro
 end
 
 function init_mainmenu()
-	menu_sel=1
-	menu_options={"new game","continue"}
-	set_wait(30)
-	_update=update_mainmenu
-	_draw=draw_mainmenu
+	menu_sel,menu_options=1,split"new game,continue"
+	wait,_update,_draw=30,update_mainmenu,draw_mainmenu
 end
 
 function init_savemenu()
-	menu_sel=1
-	set_wait(30)
-	_update=update_savemenu
-	_draw=draw_savemenu
+	menu_sel,wait,_update,_draw=1,30,update_savemenu,draw_savemenu
 end
 
 function init_game()
@@ -48,9 +40,7 @@ function init_game()
 	init_player()
 	init_npcs()
 	init_scenes()
-	set_wait(30)
-	_update = update_game 
-	_draw = draw_game
+	wait,_update,_draw=30,update_game,draw_game
 end
 
 --init game data
@@ -87,18 +77,20 @@ init_dlg"gate_won|i'm going to go find my spell book and study for the next wave
 init_dlg"|it's been years since i've used magic. i wish i studied more at the spiral tower.")
 npc("141,13,3",
 init_dlg"guard2|...",
-init_dlg"chest_guardian and !guard2|i heard you fighting with it, could it have...?;hero:yes, it could have broken through. i fear there are many more where it came from. ready yourself for what is to come.|guard2",
+init_dlg"chest_guardian,!guard2|i heard you fighting with it, could it have...?;hero:yes, it could have broken through. i fear there are many more where it came from. ready yourself for what is to come.|guard2",
 init_dlg"|i know it's just beyond this wall. will it climb or...is it strong enough to bust through?")
 npc("140,7,13,gl",
 init_dlg"gate_won|thank you for letting us catch our breath. we'll do our best to hold back any others.",
 init_dlg"|this is bad. we simply don't have the numbers to hold this many back!")
 npc("138,9,13,gr",
 init_dlg"guard|i wish you a safe return...",
-init_dlg"gate_won and !guard|thank you, this town is in your debt. without you, we would have been overrun.;hero:rest and ready for the waves to come.;there will be more?!;hero:very likely. i'll go forth to face them head on. should i fall, it will be up to you.;...|guard",
+init_dlg"gate_won,!guard|thank you, this town is in your debt. without you, we would have been overrun.;hero:rest and ready for the waves to come.;there will be more?!;hero:very likely. i'll go forth to face them head on. should i fall, it will be up to you.;...|guard",
 init_dlg"|we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?")
 npc("169,15,2,tag:chest_guardian",
 init_dlg("!chest_guardian||chest_guardian",function()cutscene(golem_fight)end))
-for r in all(split("152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene",";"))do
+npc("166,28,58,tag:ogres",
+init_dlg("!ogres||ogres",function()cutscene(ogre_scene)end))
+for r in all(split("152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene;159,5,17,tag:ambush;159,11,17,tag:ambush;152,7,19,tag:ambush;152,7,20,tag:ambush;152,8,20,tag:ambush;152,9,20,tag:ambush;152,9,19,tag:ambush;162,10,19,tag:ambush;162,4,18,tag:ambush;162,12,18,tag:ambush",";"))do
 npc(r)
 end
 end
@@ -122,7 +114,7 @@ function init_skills()
 	skiselect=1
 	--name,desc1,desc2,mp,menu-usable,target
 	--target: e=one enemy s=self a=all enemies
-	skill_defs=load_defs("1,sword of light  ,one enemy,   holy damage,4,0,e;2,healing light   ,self,restores hp to full,6,1,s;3,shield of light ,self,negate all damage/1 turn,2,0,s;4,flash of light  ,all enemies,   holy damage + 50% stun,3,0,a;5,the last light  ,all enemies,release remaining light,60,0,a","name,d1,d2,mp,menu,tgt")
+	skill_defs=load_defs("1,sword of light,one enemy,   holy damage,4,0,e;2,healing light,self,restores hp to full,6,1,s;3,shield of light,self,negate all damage/1 turn,2,0,s;4,flash of light,all enemies,   holy damage + 50% stun,3,0,a;5,the last light,all enemies,release remaining light,60,0,a","name,d1,d2,mp,menu,tgt")
 end
 
 function init_status()
@@ -167,8 +159,6 @@ function init_statuseffect()
 	10,safe,0,0,0,0;
 	11,stun,0,0,0,0]],";")
 end
-
-function init_temp_stats() p.temp_stats=split"0,0,0,0,0,0,0,0,0" end
 
 --init helpers
 function npc(s,...)
@@ -218,19 +208,15 @@ end
 
 function update_mainmenu()
 	if wait_cnt==2 then
-		if menu_control(#menu_options) then
-			if menu_sel==1 then init_name() end
-			if menu_sel==2 then init_savemenu() end
+		menu_sel=nav(menu_sel,#menu_options,3,2)
+		if btnp(4) then
+			if menu_sel==1 then init_name() else init_savemenu() end
 		end
 	end
 end
 
 function update_savemenu()
-	if wait_check() then
-		if btnp(4) then
-			init_mainmenu()
-		end
-	end
+	if wait_check() and btnp(4) then init_mainmenu() end
 end
 
 function update_game()
@@ -276,15 +262,9 @@ function update_menus()
 	elseif m=="main" then
 		menuselect=nav(menuselect,4,1,0)
 		if btnp(4) then
-			if menuselect==1 then
-				init_inventory()
-				menu_mode="items"
-			elseif menuselect==2 then
-				init_skills()
-				menu_mode="skills"
-			elseif menuselect==3 then
-				menu_mode="status"
-			end
+			--4th entry (options) is a no-op for now
+			menu_mode=split"items,skills,status,main"[menuselect]
+			invselect,skiselect=1,1
 		end
 
 	elseif m=="items" then
@@ -302,7 +282,7 @@ function update_menus()
 		local item=m=="item_use"
 		useselect=nav(useselect,2,3,2)
 		if btnp(4) then
-			menu_mode=item and "items" or "skills"
+			menu_mode=menu_back[m]
 			if useselect==1 then
 				if item then
 					local msg=item_block()
@@ -331,11 +311,8 @@ function check_can_use_skill()
 	elseif skiselect==2 and p.hp==p.maxhp then
 		m="\n     your health is full"
 	end
-	if m then
-		active_text=m
-		return false
-	end
-	return true
+	active_text=m
+	return not m
 end
 
 function check_win_lose()
@@ -367,13 +344,6 @@ function wait_check()
 	end
 end
 
-function set_wait(n) wait=n end
-
-function menu_control(n)
-	menu_sel=nav(menu_sel,n,3,2)
-	return btnp(4)
-end
-
 function dir(a,b)
 	return (btnp(a) and 1 or 0)-(btnp(b) and 1 or 0)
 end
@@ -397,18 +367,18 @@ function draw_mainmenu()
 
 	if wait_check() and wait_cnt<2 then
 		wait_cnt+=1
-		set_wait(60)
+		wait=60
 	end
 
 	if wait_cnt>=1 then
-		draw_mainmenu_animation(60, 28)
+		draw_mainmenu_animation()
 	end
 
 	if wait_cnt==2 then
-		for n=1,#menu_options do
+		for n,o in inext,menu_options do
 			local s=menu_sel==n
 			if (s) spr(98,39,86+n*8)
-			print(menu_options[n],48,88+n*8,s and 7 or 6)
+			print(o,48,88+n*8,s and 7 or 6)
 		end
 		print(version,0,120,5)
 	end
@@ -433,7 +403,7 @@ function draw_game()
 			camera()
 			if (dialogue.active) draw_dialogue()
 			draw_menus()
-			if (ask_on) draw_use_menu(split"yes,no")
+			if (ask_on) draw_use_menu()
 			if (lu) draw_levelup()
 			--==debug start==
 			--==debug end==
@@ -450,40 +420,41 @@ function draw_menus()
 	draw_menu()
 	draw_mini_status(hero_face())
 
-	if m=="items" or m=="item_use" then draw_inventory() end
-	if m=="skills" or m=="skill_use" then draw_skills() end
-	if m=="status" then draw_status() end
-	if m=="item_use" or m=="skill_use" then draw_use_menu(split"yes,no") end
+	if m=="status" then
+		draw_status()
+	elseif m!="main" then
+		draw_box(5,11,4,44)
+		draw_box(2,14,4,19)
+		if m=="items" or m=="item_use" then draw_inventory() else draw_skills() end
+		if #m>7 then draw_use_menu() end
+	end
 
 	draw_text()
 end
 
 --draw helper functions
-function draw_mainmenu_animation(x,y)
-	spr(112,x,y)
+function draw_mainmenu_animation()
+	spr(112,60,28)
 	local t=time()*.45%1
 	if t<.7 then
 		for i=1,t/.7*3\1+1 do
-			if (rnd()>.4) pset(x+6+rnd(3)\1,y-2+rnd(5)\1,6)
+			if (rnd()>.4) pset(66+rnd(3)\1,26+rnd(5)\1,6)
 		end
 	end
 	local f=t<.7 and 7 or 10
-	line(x+7,y,x+7,y+4,f)
+	line(67,28,67,32,f)
 	draw_centered("knights of power: last light",60,f)
 end
 
-function draw_menu()	
-	menux,menuy=10,7
+function draw_menu()
 	local a,b=split"8,32,60,88",split"30,58,86,118"
 
 	draw_box(1,14,4,2)
 	rectfill(a[menuselect],6,b[menuselect],12,13)
-	print("items skills status options",menux,menuy,7)
+	print("items skills status options",10,7,7)
 end
 
 function draw_inventory()
-	draw_box(5,11,4,44) --inv box
-	draw_box(2,14,4,19) --desc box
 	if #p_inventory>0 then
 		rectfill(8,40+invselect*8,95,46+invselect*8,13)
 		for i,it in inext,p_inventory do
@@ -496,11 +467,10 @@ function draw_inventory()
 end
 
 function draw_skills()
-	draw_box(5,11,4,44) --skills box
-	draw_box(2,14,4,19) --desc box
 	rectfill(8,40+skiselect*8,95,46+skiselect*8,13)
 	for i,s in inext,p_skills do
-		print(s.name.." "..pad(s.mp).."mp",10,41+i*8,7)
+		print(s.name,10,41+i*8,7)
+		print(pad(s.mp).."mp",78,41+i*8,7)
 	end
 	local s,d=p_skills[skiselect],skill_dmg(skiselect)
 	print(s.d1,10,24,7)
@@ -508,63 +478,50 @@ function draw_skills()
 	print(s.d2,10,32,7)
 end
 
-function draw_use_menu(opts)
-	local x,y=99,48
-	draw_box(#opts+1,3,94,44)
-	rectfill(x-1,y-1+useselect*8,x+23,y+5+useselect*8,13)
-	print("use?",x,y,7)
-	for i,o in inext,opts do print(o,x,y+i*8,7) end
+function draw_use_menu()
+	draw_box(3,3,94,44)
+	rectfill(98,47+useselect*8,122,53+useselect*8,13)
+	print("use?",99,48,7)
+	for i,o in inext,split"yes,no" do print(o,99,48+i*8,7) end
 end
 
 function draw_mini_status(face)
-	mini_statusx,mini_statusy=42,92
-
 	draw_box(3,5,42,94,face)
-	print("lv: "..p.lvl,mini_statusx+6,mini_statusy+7,7)
-	print("hp: ",mini_statusx+6,mini_statusy+15,7)
-	print(pad(p.hp),mini_statusx+22,mini_statusy+15,hp_color)
-	print("/",mini_statusx+30,mini_statusy+15,7)
-	print(p.maxhp,mini_statusx+34,mini_statusy+15,maxhp_color)
-	print("mp: "..pad(p.mp).."/"..p_maxmp,mini_statusx+6,mini_statusy+23,7)	
+
+	print("lv: "..p.lvl,48,99,7)
+	print("hp: ",48,107,7)
+	print(pad(p.hp),64,107,hp_color)
+	print("/",72,107,7)
+	print(p.maxhp,76,107,maxhp_color)
+	print("mp: "..pad(p.mp).."/"..p_maxmp,48,115,7)
 end
 
 function draw_status()
-	local statusx,statusy=10,2
+	draw_box(12,14,4,19)
 
-	--status box
- 	draw_box(12,14,4,19)
-	--labels
-	print(p.name,statusx,statusy+22,7)
-	print(p.title,statusx,statusy+30,7)
-	draw_print(status_labels1,statusx,statusy+30)
-	draw_print(status_labels2,statusx+72,statusy+30)
-	--values
-	print(p.lvl,statusx+14,statusy+38,7)
-	--hp & mp
-	print(pad(p.hp),statusx+14,statusy+46,hp_color)
-	print("/",statusx+22,statusy+46,7)
-	print(p.maxhp,statusx+26,statusy+46,maxhp_color)
-	print(pad(p.mp).."/"..p_maxmp,statusx+14,statusy+54,7)
-	print(p.xp,statusx+14,statusy+62,7)
-	--status
+	print(p.name,10,24,7)
+	print(p.title,10,32,7)
+	draw_print(status_labels1,10,32)
+	draw_print(status_labels2,82,32)
+	print(p.lvl,24,40,7)
+	print(pad(p.hp),24,48,hp_color)
+	print("/",32,48,7)
+	print(p.maxhp,36,48,maxhp_color)
+	print(pad(p.mp).."/"..p_maxmp,24,56,7)
+	print(p.xp,24,64,7)
 	if #p.status<1 then
-			print("normal",statusx+28,statusy+70,7)	
+		print("normal",38,72,7)
 	else
-		print_range(p.status,1,2,statusx+28,statusy+70)
-		print_range(p.status,3,5,statusx,statusy+78)
-		print_range(p.status,6,8,statusx,statusy+86)
+		print_range(p.status,1,2,38,72)
+		print_range(p.status,3,5,10,80)
+		print_range(p.status,6,8,10,88)
 	end
-		--equipment
-		print(p.sword_score,statusx+57,statusy+102,7)
-		print(p.shield_score,statusx+57,statusy+110,7)
-	--the rest of the stats
-	
-	temp_stats=split(p_str_total..",;"..p_dex_total..",;"..p_con_total..",;"..p_mag_total..",;"..p.atk..",;"..p.def..",;"..p.spd..",;"..p.eva.."%,;"..p.matk..",;"..p.mdef..",",";")
+	print(p.sword_score,67,104,7)
+	print(p.shield_score,67,112,7)
 	local t=p.temp_stats
-	for i=1,10 do
-		temp_stats[i]=temp_stats[i]..check_color(i<8 and t[i] or i==8 and t[2]+t[7] or t[i-1])
+	for i,v in inext,{p_str_total,p_dex_total,p_con_total,p_mag_total,p.atk,p.def,p.spd,p.eva.."%",p.matk,p.mdef} do
+		print(v,108,32+i*8,check_color(i<8 and t[i] or i==8 and t[2]+t[7] or t[i-1]))
 	end
-	draw_print(temp_stats,statusx+98,statusy+30,true)
 end
 
 function check_color(v)
@@ -576,32 +533,21 @@ function check_hp_color()
  hp_color=(p.hp==p.maxhp and maxhp_color or 7)
 end
 
-function draw_print(split_string,x,y,color_flag)
-	local color_flag=color_flag or false
-	
-	for i=1,#split_string do
-		if color_flag then
-			local label,c_num=unpack(split(split_string[i]))	
-			print(label,x,y+(i*8),c_num)
-		else
-			local line_item,label=unpack(split(split_string[i]))
-			print(label,x,y+(i*8),7)	
-		end
-	end
+function draw_print(l,x,y)
+	for i,s in inext,l do print(split(s)[2],x,y+i*8,7) end
 end
 
 function draw_text()
 	--message box only (input is in update_menus)
 	if (not active_text) return
-	local x,y=4,52
 	draw_box(3,14,4,52)
-	print(active_text,x+4,y+4,7)
-	if (time()%.5<.25) spr(96,x+108,y+20)
+	print(active_text,8,56,7)
+	if (time()%.5<.25) spr(96,112,72)
 end
 
 function draw_box(rows,columns,x,y,face)
 	--face is the sprite or default box
-	local c,h,v=unpack(box_styles[face] or box_styles[64])
+	local c,h,v=unpack(box_styles[face or 64])
 	c,h,v=c or 64, h or 65, v or 80
 	local r,w=rows*8,columns*8
 
@@ -639,17 +585,10 @@ function draw_centered(text,y,c)
 	print(text,64-#text*2,y or 60,c or 7)
 end
 
-function print_range(list,start_i,end_i,x,y)
-  local str = ""
-  for i = start_i, min(#list, end_i) do
-    str = str .. list[i][1] .. " "
-  end
-  if str ~= "" then print(str,x,y,7) end
-end
-
-function trim(s)
-	while sub(s,-1)==" " do s=sub(s,1,-2) end
-	return s
+function print_range(l,a,b,x,y)
+	local s=""
+	for i=a,min(#l,b) do s..=l[i][1].." " end
+	print(s,x,y,7)
 end
 
 function pad(n) 
@@ -663,13 +602,12 @@ function init_player()
 	p={}
 	p.x,p.y,p.dx,p.dy,p.title,p.lvl,p.mp,p.xp,p.str,p.dex,p.con,p.mag,p.sword_score,p.shield_score=
 	unpack(split"2,2,0,-1,the last light,1,60,0,4,4,4,4,2,2")
-	set_xp_table()
+	xp_table = split"10,30,90,270,810"
 	p_maxmp=60
 	p.status={}
-	init_temp_stats()
+	p.temp_stats=split"0,0,0,0,0,0,0,0,0"
 	set_stats()
-	p_skills={}
-	set_skills()
+	p_skills=skill_defs
 	--negative fx sprite = flipped. fx defaults to 240,241,242
 	--shk=1 shakes the unit while it animates
 	--keep=1 leaves the last frame up after the anim
@@ -679,11 +617,12 @@ function init_player()
 		{seq=split"225,226,227,228,229,227",hit="000010",fx=split"204,205,206,207"}, --1 sword of light
 		{seq=split"227,233,234,235,234,235,233,227"}, --2 healing light
 		{seq=split"227,232,227"}, --3 shield of light
-		{seq=split"225,226",hit="01",fx=split"243,244,245,-245,245,-245"}, --4 flash
+		{seq=split"225,226",hit="01"}, --4 flash
+		{seq=split"225,226",hit="010101",fx=split"243,244,245,-245,245,-245"}, --5 last light
 		down={seq=split"227,233,236",keep=1}
 	}
 	p_inventory={}
-	set_inventory()
+	--set_inventory()
 end
 
 function init_name()
@@ -710,20 +649,18 @@ function init_name()
 	end
 end
 
-function set_xp_table()	xp_table = split"10,30,90,270,810" end
-
-function set_inventory()
+--function set_inventory()
 	--sets starting player inv
-	start_inv=split("1,1;2,8;3,11;4,1;5,2",";")
+	--start_inv=split("1,1;2,8;3,11;4,1;5,2",";")
  	--start_inv=split("5,2;1,2",";")
-	if start_inv then
-		for i=1,#start_inv do
-			local item_num,quantity=unpack(split(start_inv[i]))
+	--if start_inv then
+		--for i=1,#start_inv do
+			--local item_num,quantity=unpack(split(start_inv[i]))
 		
-			add_item(item_num,quantity)
-		end
-	end
-end
+			--add_item(item_num,quantity)
+		--end
+	--end
+--end
 
 function add_item(num,qty)
 	local it=split(inventory_data[num])
@@ -733,7 +670,7 @@ function add_item(num,qty)
 end
 
 function lookup_statuseffect_data(status_num)
-	return unpack(split(statuseffect_data[status_num],","))
+	return unpack(split(statuseffect_data[status_num]))
 end
 
 function use_item(q)
@@ -789,7 +726,7 @@ function lu_next()
 	if s==3 then
 		p.mp+=10
 		p_maxmp+=10
-		p_skills[5].name="the last light+ "
+		p_skills[5].name="the last light+"
 		p_skills[5].d2="destroy the darkness"
 		set_last_light()
 	end
@@ -809,8 +746,7 @@ function update_levelup()
 	end
 	if btnp(4) then
 		if s==1 then
-			local k=stat_keys[lu.sel]
-			p[k]+=1
+			p[stat_keys[lu.sel]]+=1
 			lu_next()
 		elseif s==2 then
 			local sk=p_skills[lu.sel]
@@ -860,7 +796,6 @@ end
 
 function set_stats(refresh)
 --sets all player battle stats
-	local refresh=refresh or false
 	local temp_str,temp_dex,temp_con,temp_mag,temp_atk,temp_def,temp_spd,temp_matk,temp_mdef=unpack(p.temp_stats)
 	local maxhp_start=p.maxhp
 	
@@ -876,23 +811,8 @@ function set_stats(refresh)
 	p.matk = p.mag*2 + p.sword_score + temp_matk
 	p.mdef = p.mag + p.shield_score + temp_mdef
 	p.maxhp = p.con*5 + p.lvl*2 + temp_con*3
-	if refresh then
-		--if maxhp increases hp increases
-		local hpdiff=p.maxhp-maxhp_start
-		if hpdiff>0 then
-			p.hp+=hpdiff
-		end
-		--if maxhp decreases hp decreases to match maxhp if over it
-		if p.hp>p.maxhp then
-			p.hp=p.maxhp
-		end
-		return
-	end
-	p.hp = p.maxhp
-end
-
-function set_skills()
-	p_skills=skill_defs
+	--refresh: hp rises with maxhp, and is capped if maxhp drops
+	p.hp=refresh and min(p.hp+max(p.maxhp-maxhp_start),p.maxhp) or p.maxhp
 end
 
 function skill_dmg(i,u)
@@ -965,7 +885,7 @@ function init_map()
   	poke(0x5f57,128)                      -- 128 tiles wide
   	memcpy(0x8000,0x2000,4096)            -- north half of map
   	reload(0x9000,0x2000,4096,"south.p8") -- south half of map
-	flip_at(10,12) flip_at(11,12)
+	flip_at(14,24) flip_at(15,23)
 end
 
 function update_map()
@@ -1018,8 +938,9 @@ function init_chests()
 	--x,y,"item,qty;item,qty" (qty defaults to 1)
 	chest(15,1,"4,3;5,2")
 	chest(19,17,"2,3")
-	chest(23,0,"3,3")
-	chest(25,0,"2,5")
+	--chest(23,0,"3,3")
+	--chest(25,0,"2,5")
+	chest(2,30,"1,2;3,2")
 	chest(17,46,"1;2;3;4;5")
 end
 
@@ -1062,17 +983,25 @@ function init_dialogue()
 	--entries must set a flag (or they re-fire)
 	--a function is optionally possible in the final slot
 	trigger(2,4,
-		run_once("exit_temple","as you leave this once holy place to face the agents of darkness, you are struck by;a feeling that you will likely never return.;did your goddess feel the same when she stood alone against the dark gods?")
+		run_once("exit_temple","hero:as i leave this once holy place to face the agents of darkness, i am struck by;hero:a feeling that i will likely never return.;hero:did she feel the same when she stood alone against the dark gods?")
 	)
-	trigger(25,54,
-		init_dlg("|the way forward is blocked... for now.")
-	)
-	trigger(26,54,
-		init_dlg("|the way forward is blocked... for now.")
-	)
-	trigger(27,54,
-		init_dlg("|the way forward is blocked... for now.")
-	)
+	for x=1,15 do
+		trigger(x,17,
+			init_dlg("!ambush|get him!|ambush",function() cutscene(ambush) end)
+		)
+		trigger(x,35,
+			run_once("enter_gy","hero:there is a foul energy here. it seeps into the ground & raises the noble fallen to serve it's dark master;hero:a necromancer... my master slew one long ago for such desecrated acts, though it cost him his life.")
+		)
+		trigger(x,40,
+			run_once("leaving_gy","hero:their power spreads like a plague, growing the more undead they raise to feed their swelling numbers.;hero:if not stopped, they'll cut through this land like a scythe through wheat...")
+		)
+	end
+	for x=25,27 do
+		trigger(x,54,
+			run_once("enter_forest","hero:i first heard her voice when i was a boy, lost & scared in these woods. her voice was warm, yet strong.;hero:she guided me home. asked nothing of me in return.;hero:i learned later that it was the voice of the goddess of light."),
+			init_dlg("|the way forward is blocked... for now.")
+		)
+	end
 end
 
 function trigger(x,y,...)
@@ -1093,10 +1022,10 @@ end
 function init_boxes()
 	--name,face,corner,h_border,v_border
 	faces,box_styles={},{}
-	for r in all(split("def,64,64,65,80;hero,66,92,67,82;d_hero,83;shad,68,77,69,84;ogre,85;necro,70,93,71,86;undead,87,93,71,86;drak,72,78,73,88;mage,89;d_def,74,74,75,90;gnome,91;rogue,76",";")) do
-		local name,face,c,h,v,f=unpack(split(r))
+	for r in all(split("def,64,64,65,80;hero,66,92,67,82;d_hero,83,64,65,80;shad,68,77,69,84;ogre,85,64,65,80;necro,70,93,71,86;undead,87,93,71,86;drak,72,78,73,88;mage,89,64,65,80;d_def,74,74,75,90;gnome,91,64,65,80;rogue,76,64,65,80",";")) do
+		local name,face,c,h,v=unpack(split(r))
 		faces[name]=face
-		box_styles[face]={c,h,v,f}
+		box_styles[face]={c,h,v}
 	end
 end
 
@@ -1115,7 +1044,7 @@ function make_cond(r)
 	if t then
 		return function()
 			for f,v in next,t do
-				if (flags[f] or false)~=v then return false end
+				if not flags[f]==v then return end
 			end
 			return true
 		end
@@ -1224,7 +1153,7 @@ end
 
 --cutscene commands (use inside cutscene or when)
 function pause(n)
-	--pause for n frames
+	n=n or 20
 	for i=1,n do yield() end
 end
 
@@ -1233,8 +1162,7 @@ function walk(e,steps,spd)
 	--spd = pixels per frame (default 1, 8 frames/tile)
 	spd=spd or 1
 	for s in all(split(steps)) do
-		local d=dirs[s]
-		local dx,dy=d[1],d[2]
+		local dx,dy=unpack(dirs[s])
 		local tx,ty=(e.x+dx)*8,(e.y+dy)*8
 		if e==p then p.dx,p.dy=dx,dy end
 		if (dx!=0) e.fx=dx<0
@@ -1247,7 +1175,7 @@ function walk(e,steps,spd)
 		e.x+=dx
 		e.y+=dy
 	end
-	e.px,e.py=nil,nil
+	e.px,e.py=nil
 end
 
 function say(s)
@@ -1331,40 +1259,66 @@ function init_scenes()
 end
 
 function gate_scene()
+	say("hero:go back from whence you came. we do not wish to fight you.;our master has sent us to cleanse this land. resist or don't, it matters not.;hero:i see. you give me no choice.")
 	p.sword=true
-	say("hero:this ends here.")
-	pause(20)
+	pause()
 	if fight("slime_x2") then
 		--only the two slimes (x=8) vanish
 		for n in all(npc_data) do
 			if (n.tag=="gate_scene" and n.x==8) del(npc_data,n)
 		end
-		say("hero:...the light preserves.;ogre:we should return for now.")
-		clear_gate_monsters()
+		say("hero:...the light preserves.;ogre:we should return for now. retreat, lest you forfeit your lives.")
+		clear("gate_scene","d,d")
 		mset(2,14,56) mset(5,15,56) mset(10,14,56)
-		pause(20)
+		pause()
 		flags.gate_won=true
 		p.sword=false
 	end
 end
 
-function clear_gate_monsters()
-	--the rest walk off the bottom of the screen, then vanish
+function clear(scene,w)
+	--the rest walk off ("r,l,u,d" steps in w, if given), then vanish
 	for n in all(npc_data) do
-		if n.tag=="gate_scene" then
-			async(function() walk(n,"d,d") del(npc_data,n) end)
+		if n.tag==scene then
+			if w then 
+				async(function() walk(n,w) del(npc_data,n) end) 
+			else
+				del(npc_data,n)
+			end
 		end
 	end
-	pause(24)
+	pause()
 end
 
 function golem_fight()
 	if fight("golem") then
-		pause(20)
-		for n in all(npc_data) do
-			if (n.tag=="chest_guardian") del(npc_data,n)
-		end
+		pause()
+		clear("chest_guardian")
 	end
+end
+
+function ogre_scene()
+	say("ogre:the way is blocked by some strange magic.;hero:it would seem so.;ogre:the dark gods would reward us for ending you. do you mean to fight us as well?")
+	if ask() then 
+		say("hero:you brought desecration and destruction with you. i will bring you swift justice.;ogre:spoken as a servant of the light. how many of my kind have you humans killed in the name of the light?")
+		if fight("ogres_x2") then
+			clear("ogres")
+		end
+	else
+		say("hero:not today. you may go on your way. your gods seem to have opened up a path for you.;ogre:you are not like the other servants of the light. your goddess has fallen and now the dark gods' armies march.;ogre:cherish the brief respite and go in peace, warrior.")
+		clear("ogres","r,r")
+	end
+end
+
+function ambush()
+	p.sword=true
+	for f in all(split"slime_x5,l_man_x2,garg_x3") do
+		fight(f)
+		pause()
+	end
+	clear("ambush")
+	p.sword=false
+	say("hero:that was unpleasant. a moment to rest...;hero:i count myself lucky the ogres didn't join them in that ambush. they must have headed back to the \"land between\".;hero:i will undoubtedly face them before long, for my foe likely calls the land beyond their base of power.")
 end
 
 function skel(x,y)
@@ -1375,7 +1329,7 @@ function skel(x,y)
 end
 
 function sigil(x,y)
-	say("hero:an unholy energy... perhaps if i use the light i may cleanse its influence.")
+	say("hero:an unholy energy... perhaps if i use the light i may cleanse its influence. (spend 1 mp?)")
 	if ask() then
 		if p.mp<1 then
 			say("hero:...i have no light to spare.")
@@ -1400,13 +1354,12 @@ function boss_scene()
 	p.sword=true
 	--undead on each side = sigils left, split around the knight
 	local g={}
-	for i=1,(sigs+1)\2 do add(g,"undead") end
-	add(g,"boss_undead")
-	for i=1,sigs\2 do add(g,"undead") end
+	for i=1,sigs do add(g,"undead") end
+	add(g,"boss_undead",(sigs+1)\2+1)
 	enemy_groups.knight=g
 	if fight("knight") then
 		del(npc_data,who.boss)
-		say("the dark presence in the area is quelled for now.")
+		say("hero:the dark presence in the area is quelled for now.")
 		snuff(sk,15)
 		snuff(sg,16)
 		p.sword=false
@@ -1435,22 +1388,25 @@ function init_battle(en,on_end)
 		xp=0,
 		fx={}
 	}
-	if (rnd(20)>p.spd+8) battle.state,battle.en_id="enemy",1
+	if (rnd(20)>p.spd+8) battle.state="enemy"
 	_update,_draw=update_battle,draw_battle
 end
 
 function init_enemies()
 	--enemy_def key,name,sprite,hp,atk,def,xp
-	enemy_defs=load_defs("slime,slime,152,12,6,2,3,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,5,aar;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,26,13,4,6,aah;golem,earth golem,169,26,11,3,6,aah;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,60,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")
+	enemy_defs=load_defs("slime,slime,152,12,6,2,3,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,5,aar;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,36,13,4,6,aah;golem,earth golem,169,26,11,3,6,aah;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,70,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")
 	enemy_groups={}
-	for r in all(split("slime_x2,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man",";")) do
+	for r in all(split("slime_x2,slime,slime;slime_x5,slime,slime,slime,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man;garg_x3,garg,garg,garg;ogre_x2,ogre,ogre",";")) do
 		local g=split(r)
 		enemy_groups[deli(g,1)]=g
 	end
 	atk_anims={
-		[152]={seq=split"153,154,155",hit="001"},
+		[152]={seq=split"153,154,155"},
 		[156]={seq=split"157,158",hit="00100",fx=split"204,205,206,207"},
-		[169]={seq=split"170,171,170,171",hit="1111"},
+		[159]={seq=split"160,161",hit="010",fx=split"249,250,251"},
+		[162]={seq=split"163,164,165",fx=split"165,164,163"},
+		[166]={seq=split"167,168,167,168",hit="1111"},
+		[169]={seq=split"170,171,170,171",hit="0101"},
 		[177]={seq=split"178,179",hit="00100",fx=split"204,205,206,207"}
 	}
 end
@@ -1626,6 +1582,7 @@ function update_enemy_turn()
 	local function land()
 		b.shake=nil
 		land_hit(h,d,h.safe and "blocked by the light!" or dodged and e.name.." missed!" or e.name.." hits for "..d.."!",8)
+		if (d>0 and e.sprite==177) b.flash,b.fc=6,11
 		b.state="enemy"
 	end
 	local a,t=atk_anims[e.sprite],max(d*3,10)
@@ -1715,21 +1672,22 @@ function cast(i,t)
 	h.mp-=c
 	local function land()
 		b.shake=nil
-			if i==2 then
-				land_hit(h,h.hp-h.maxhp,"you are fully healed!",11)
-			elseif i==3 then
-				h.safe=true
-				b.message,b.anim_timer="shield of light up!",30
-			else
-				local d
-				for e in all(ts) do
-					d=calc_dmg(base,e.mdef or 0,1)
-					land_hit(e,d,"",7)
-					if (i==4 and rnd()<.5) e.stun=true
-				end
-				b.message=trim(s.name)..(#ts>1 and " hits all!" or " hits for "..d.."!")
+		b.flash,b.fc=split"6,0,0,4,12"[i]
+		if i==2 then
+			land_hit(h,h.hp-h.maxhp,"you are fully healed!",11)
+		elseif i==3 then
+			h.safe=true
+			b.message,b.anim_timer="shield of light up!",30
+		else
+			local d
+			for e in all(ts) do
+				d=calc_dmg(base,e.mdef or 0,1)
+				land_hit(e,d,"",7)
+				if (i==4 and rnd()<.5) e.stun=true
 			end
-			end_player_action()
+			b.message=s.name..(#ts>1 and " hits all!" or " hits for "..d.."!")
+		end
+		end_player_action()
 	end
 	local a=b_anim[i]
 	if not a then play_anim(20,h,land)
@@ -1818,14 +1776,13 @@ function draw_battle()
 	if w or b.state=="lose" then
 		print(b.message,44,100,w and 11 or 8)
 	else
-		draw_centered(b.message,8,7)
+		draw_centered(b.message,8)
 	end
 
 	--enemies
 	for e in all(b.enemies) do
 		if e.hp>0 then
 			spr(e.frame or e.sprite,e.x+(b.shake==e and b.sx or 0),e.y)
-			mini_bar(e.x-3,e.y+10,e.hp,e.maxhp,14,8)
 			if (e.stun) print("zz",e.x,e.y-6,6)
 		end
 	end
@@ -1839,25 +1796,27 @@ function draw_battle()
 	--target cursor
 	if b.state=="target" then
 		local t=b.tl[b.tsel]
-		print("v",t.x+2,t.y-8+flr(sin(time()*2)*2),7)
-		draw_centered(t.name,20,7)
+		spr(97,t.x,t.y-14+flr(sin(time()*2)*2))
+		print(t.name,t.x-#t.name,t.y+10,7)
+		mini_bar(t.x-3,t.y-4,t.hp,t.maxhp)
 	end
 
 	--action menu
 	if b.state=="menu" then
-		local m=split"sword,shield,skills,items"
-		for i=1,4 do
-			print((b.sel==i and ">" or " ")..m[i],4,88+i*8,7)
+		for i,s in inext,split"sword,shield,skills,items" do
+			local y=88+i*8
+			if (b.sel==i) spr(98,40,y-1)
+			print(s,50,y,7)
 		end
 	elseif b.state=="skill" then
 		local s,d=p_skills[b.ksel],skill_dmg(b.ksel)
-		print(s.d1,4,16,6)
-		if (d>0) print(d,4,22,9)
-		print(s.d2,4,22,6)
+		print(s.d1,24,16,6)
+		if (d>0) print(d,24,22,9)
+		print(s.d2,24,22,6)
 		for i,s in inext,p_skills do
 			local c=h.mp<skill_cost(i,h) and 5 or 7
-			print((b.ksel==i and ">" or " ")..s.name,4,82+i*8,c)
-			print(skill_cost(i,h).."mp",76,82+i*8,c)
+			print((b.ksel==i and ">" or " ")..s.name,24,82+i*8,c)
+			print(skill_cost(i,h).."mp",96,82+i*8,c)
 		end	
 	elseif b.state=="items" or b.state=="use" then
 		local d=p_inventory[invselect]
@@ -1885,18 +1844,22 @@ function draw_battle()
 		print(s,o.x-#s*2+1,o.y+1,0)
 		print(s,o.x-#s*2,o.y,o.c)
 	end
+
+	if b.flash and b.flash>0 then
+		rectfill(0,0,127,127,b.fc or (b.flash>3 and 7 or 6))
+		b.flash-=1
+	end
 end
 
 function draw_bar(x,y,val,maxval,col)
-	local w=40
-	local fill=max(0,flr((val/maxval)*w)-1)
+	local fill=max(val*40\maxval-1)
 	if fill>0 then rectfill(x+1,y+1,x+fill,y+3,col) end
-	print(val.."/"..maxval,x+w+2,y,7)
+	print(val.."/"..maxval,x+42,y,7)
 end
 
-function mini_bar(x,y,v,m,w,c)
-	rectfill(x,y,x+w-1,y+1,5)
-	rectfill(x,y,x+max(1,flr(v/m*w))-1,y+1,c)
+function mini_bar(x,y,v,m)
+	rectfill(x,y,x+13,y+1,5)
+	rectfill(x,y,x+max(1,v*14\m)-1,y+1,8)
 end
 
 __gfx__
@@ -2178,21 +2141,21 @@ __map__
 040404040404041e1e1f04040404051010102320222010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101032101110101f1e1e32101010101010101020202120101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101010101032101f1e1e10101110161610101010202023201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101010101f1f1f10101010101010101010102020201116160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101610101110101f1f1f10101610111010111034102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101010101e1e1f10101010161010101010202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d101e1e1e1f1e1e1f101011101020232013161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+161616161616101f1f1f10161616161616101010102020201116160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+161616101110101f1f1f10101610111616111034102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101010101010101e1e1f10101010161616101010202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d101e1e1e1f1e1e1f101611101020232013161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101010101010101f1e1f1e1f1f1e202120202320202210161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 2d2d2d2d2d2d101f1e1e1f2f2f2e202020212020141016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101010101010101f1e1e1f2f2e20202320202010161616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d10101f1e10212020202e2f1f1616161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10101010101010101f1e102020232e2f1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d10101f1e10212020202e1f1f1616161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+10101010101010101f1e102020232e1f1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 2d2d2d2d2d2d10101f1e102021201f1e1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 10101010101014101e1f102020201f1f1f1f3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 10282828262810101f1e10102020201116161616160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-14282626262810101e1f11102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+14280b26262810101e1f11102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 10282626262816101e1e10101020202216160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-02280b26262810101e1e10161020232016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02283426082810101e1e10161020232016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 02282828282810101f1f10101010202021161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 000400000d02000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
