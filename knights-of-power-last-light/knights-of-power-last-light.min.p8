@@ -1,11 +1,11 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
-nn,𝘬,𝘷="𝘷0.2.1",0,0no={items="main",item_use="items",skills="main",skill_use="skills",status="main"}nt={r={1,0},l={-1,0},u={0,-1},d={0,1}}eb=split"str,dex,con,mag"function ni()𝘢(60)_update=nd _draw=na end function e_()x=1en={"new game","continue"}𝘢(30)_update=nl _draw=nr end function nf()x=1𝘢(30)_update=n1 _draw=nu end function ns()eo={}nh()nc()n0()n2()e9()n4()ev()n3()ng()nm()n5()𝘢(30)_update=ex _draw=eq end function nm()g,𝘣={},{}n("136,3,10,elder",i"elder_bread|oh goddess, preserve us in this, our darkest hour.",i("gate_won|you held the gate...i never doubted the light would prevail.;take this. dwarven bread, the last from our stores. may it aid you in beating back the darkness.|elder_bread",function()ez"1,3"end),i"|in our most dire need, where are the gnomes, the wild men, and the wizards of the spiral;tower? will they stand by & watch us burn?! or...are they already dead?")n("134,11,1",i"chest_guardian|my dad looks more relaxed. you checked what was there, right? what was it?;hero:it was nothing. just some trees hitting the wall.",i"|my dad said he heard something by this side of the wall. he looks worried...i'm scared.")n("133,7,3",i"gate_won|what were they yelling about at the gate?;hero:there were some arguments but things have calmed for now.;people should be more considerate of others.",i"|what are those at the gate yelling about? what's going on?")n("132,6,8",ej(4,"my grandma said you shouldn't show monsters fear. it only makes them stronger.;i'm still scared though...;hero:you don't have to be afraid. i won't let them inside these walls. the light will prevail.;but...aren't you scared too?;hero:of course. but sometimes we have to fight what is in front of us, even if we're scared.;hero:because the cost of not doing so is too high. stay strong. the light will win this day."),i"gate_won|i hope when i'm older i can defeat monsters like you, mister.",i"|i'm staying strong, mister.")n("135,7,8",i"gate_won|they were much less cute when they were attacking...",i"|the little blue ones look kind of cute.;are they really monsters?")n("128,12,8",i"gate_won|good old fashioned skill of arms works too! thank you, knight.",i"|i don't care about goddesses, gods, light, or darkness. but when a bunch of monsters,;ogres, & lizard folk turn up with weapons, well... i'm open to divine intervention.")n("129,9,2",i"gate_won|thank the goddess we live another day!",i"|how can the goddess of light let this happen? has the light truly faded?;should we accept our fate? is this the end?")n("130,11,10",i"gate_won|what a relief. i thought surely this was the end...",i"|i've made my peace. whatever comes next, be it darkness or light, i accept it.")n("131,9,10",i"gate_won|i'm going to go find my spell book and study for the next wave...",i"|it's been years since i've used magic. i wish i studied more at the spiral tower.")n("141,13,3",i"guard2|...",i"chest_guardian and !guard2|i heard you fighting with it, could it have...?;hero:yes, it could have broken through. i fear there are many more where it came from. ready yourself for what is to come.|guard2",i"|i know it's just beyond this wall. will it climb or...is it strong enough to bust through?")n("140,7,13,gl",i"gate_won|thank you for letting us catch our breath. we'll do our best to hold back any others.",i"|this is bad. we simply don't have the numbers to hold this many back!")n("138,9,13,gr",i"guard|i wish you a safe return...",i"gate_won and !guard|thank you, this town is in your debt. without you, we would have been overrun.;hero:rest and ready for the waves to come.;there will be more?!;hero:very likely. i'll go forth to face them head on. should i fall, it will be up to you.;...|guard",i"|we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?")n("169,15,2,tag:chest_guardian",i("!chest_guardian||chest_guardian",function()𝘤(n8)end))for e in all(split("152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene",";"))do n(e)end end function e9()l=1e𝘷=split([[	1,dwarven bread,quick:heal 3hp/3 turns,full:heal 6hp+3 def/3 turns,3,4,0,6,5,4;
+e𝘸,e,j="𝘷0.3.0",0,0e8={items="main",item_use="items",skills="main",skill_use="skills",status="main"}e𝘹={r=split"1,0",l=split"-1,0",u=split"0,-1",d=split"0,1"}ew=split"str,dex,con,mag"function e𝘺()e,_update,_draw=60,e𝘻,ne end function e7()𝘷,ey=1,split"new game,continue"e,_update,_draw=30,nn,no end function nt()𝘷,e,_update,_draw=1,30,ni,nd end function na()ee={}nr()nl()nf()ns()n1()nh()nu()nc()n0()n2()ng()e,_update,_draw=30,eb,ek end function n2()w,𝘢={},{}n("136,3,10,elder",i"elder_bread|oh goddess, preserve us in this, our darkest hour.",i("gate_won|you held the gate...i never doubted the light would prevail.;take this. dwarven bread, the last from our stores. may it aid you in beating back the darkness.|elder_bread",function()ep"1,3"end),i"|in our most dire need, where are the gnomes, the wild men, and the wizards of the spiral;tower? will they stand by & watch us burn?! or...are they already dead?")n("134,11,1",i"chest_guardian|my dad looks more relaxed. you checked what was there, right? what was it?;hero:it was nothing. just some trees hitting the wall.",i"|my dad said he heard something by this side of the wall. he looks worried...i'm scared.")n("133,7,3",i"gate_won|what were they yelling about at the gate?;hero:there were some arguments but things have calmed for now.;people should be more considerate of others.",i"|what are those at the gate yelling about? what's going on?")n("132,6,8",𝘣(4,"my grandma said you shouldn't show monsters fear. it only makes them stronger.;i'm still scared though...;hero:you don't have to be afraid. i won't let them inside these walls. the light will prevail.;but...aren't you scared too?;hero:of course. but sometimes we have to fight what is in front of us, even if we're scared.;hero:because the cost of not doing so is too high. stay strong. the light will win this day."),i"gate_won|i hope when i'm older i can defeat monsters like you, mister.",i"|i'm staying strong, mister.")n("135,7,8",i"gate_won|they were much less cute when they were attacking...",i"|the little blue ones look kind of cute.;are they really monsters?")n("128,12,8",i"gate_won|good old fashioned skill of arms works too! thank you, knight.",i"|i don't care about goddesses, gods, light, or darkness. but when a bunch of monsters,;ogres, & lizard folk turn up with weapons, well... i'm open to divine intervention.")n("129,9,2",i"gate_won|thank the goddess we live another day!",i"|how can the goddess of light let this happen? has the light truly faded?;should we accept our fate? is this the end?")n("130,11,10",i"gate_won|what a relief. i thought surely this was the end...",i"|i've made my peace. whatever comes next, be it darkness or light, i accept it.")n("131,9,10",i"gate_won|i'm going to go find my spell book and study for the next wave...",i"|it's been years since i've used magic. i wish i studied more at the spiral tower.")n("141,13,3",i"guard2|...",i"chest_guardian,!guard2|i heard you fighting with it, could it have...?;hero:yes, it could have broken through. i fear there are many more where it came from. ready yourself for what is to come.|guard2",i"|i know it's just beyond this wall. will it climb or...is it strong enough to bust through?")n("140,7,13,gl",i"gate_won|thank you for letting us catch our breath. we'll do our best to hold back any others.",i"|this is bad. we simply don't have the numbers to hold this many back!")n("138,9,13,gr",i"guard|i wish you a safe return...",i"gate_won,!guard|thank you, this town is in your debt. without you, we would have been overrun.;hero:rest and ready for the waves to come.;there will be more?!;hero:very likely. i'll go forth to face them head on. should i fall, it will be up to you.;...|guard",i"|we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?")n("169,15,2,tag:chest_guardian",i("!chest_guardian||chest_guardian",function()p(nm)end))n("166,28,58,tag:ogres",i("!ogres||ogres",function()p(n4)end))for e in all(split("152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene;159,5,17,tag:ambush;159,11,17,tag:ambush;152,7,19,tag:ambush;152,7,20,tag:ambush;152,8,20,tag:ambush;152,9,20,tag:ambush;152,9,19,tag:ambush;162,10,19,tag:ambush;162,4,18,tag:ambush;162,12,18,tag:ambush",";"))do n(e)end end function n1()d=1e9=split([[	1,dwarven bread,quick:heal 3hp/3 turns,full:heal 6hp+3 def/3 turns,3,4,0,6,5,4;
 	2,kobold's bane,quick:cure burned,full:quick+3 atk/3 turns,0,0,1,0,6,1;
 	3,rogue's folly,quick:cure fouled,full:quick+3 spd/3 turns,0,0,2,0,7,2;
 	4,weak health potion,quick:heal 5hp,full:heal 12hp,5,0,0,12,0,0,0;
-	5,whitewood tincture,quick:+3 mag/3 turns,full:+3 to stats/3 turns,0,8,0,0,9,0]],";")end function ev()m=1n6=e𝘢("1,sword of light  ,one enemy,   holy damage,4,0,e;2,healing light   ,self,restores hp to full,6,1,s;3,shield of light ,self,negate all damage/1 turn,2,0,s;4,flash of light  ,all enemies,   holy damage + 50% stun,3,0,a;5,the last light  ,all enemies,release remaining light,60,0,a","name,d1,d2,mp,menu,tgt")end function n3()nw=split([[	1,lv: ;
+	5,whitewood tincture,quick:+3 mag/3 turns,full:+3 to stats/3 turns,0,8,0,0,9,0]],";")end function nu()g=1n3=e_("1,sword of light,one enemy,   holy damage,4,0,e;2,healing light,self,restores hp to full,6,1,s;3,shield of light,self,negate all damage/1 turn,2,0,s;4,flash of light,all enemies,   holy damage + 50% stun,3,0,a;5,the last light,all enemies,release remaining light,60,0,a","name,d1,d2,mp,menu,tgt")end function nc()n5=split([[	1,lv: ;
 	2,hp: ;
 	3,mp: ;
 	4,xp: ;
@@ -14,7 +14,7 @@ nn,𝘬,𝘷="𝘷0.2.1",0,0no={items="main",item_use="items",skills="main",skil
 	7, ;
 	8,=equipment=;
 	9,iron sword : +;
-	10,iron shield: +]],";")n7=split([[	11,  str: ;
+	10,iron shield: +]],";")n6=split([[	11,  str: ;
 	12,  dex: ;
 	13,  con: ;
 	14,  mag: ;
@@ -23,7 +23,7 @@ nn,𝘬,𝘷="𝘷0.2.1",0,0no={items="main",item_use="items",skills="main",skil
 	17,  spd: ;
 	18,  eva: ;
 	19,m.atk: ;
-	20,m.def:	]],";")end function n2()ny=split([[	1,burned,0,-1,5,-3;
+	20,m.def:	]],";")end function ns()n8=split([[	1,burned,0,-1,5,-3;
 	2,fouled,0,-2,0,0;
 	3,afraid,10,-2,0,0;
 	4,full,0,3,0,0;
@@ -33,184 +33,181 @@ nn,𝘬,𝘷="𝘷0.2.1",0,0no={items="main",item_use="items",skills="main",skil
 	8,smart,4,3,0,0;
 	9,super,10,3,0,0;
 	10,safe,0,0,0,0;
-	11,stun,0,0,0,0]],";")end function nk()s.temp_stats=split"0,0,0,0,0,0,0,0,0"end function n(e,...)local n,o,t,e=unpack(split(e))local n={sprite=n,x=o,y=t,dialogue={...}}if(e)if(sub(e,1,4)=="tag:")n.tag=sub(e,5)else 𝘣[e]=n
-add(g,n)end function ej(e,n,o)return i("!t"..e.."|"..n.."|t"..e,o)end function e𝘢(n,e)local e,t={},split(e)for n in all(split(n,";"))do local n,o=split(n),{}for e,t in inext,t do o[t]=n[e+1]end e[n[1]]=o end return e end _init=ni function nd()if(btnp(4)or 𝘥())e_()
-end function nl()if 𝘷==2do if np(#en)do if(x==1)nb()
-if(x==2)nf()
-end end end function n1()if(𝘥())if(btnp(4))e_()
-end function ex()if 𝘥()do if not e𝘣 do n_()if f do n9()elseif h.active do nv()elseif w do nx()else nq()if(not et)if(btnp(5))w,p="main",1else nz()
-nj()end elseif btnp(5)do extcmd"reset"end end end function nx()local e=w if 𝘦 do if(btnp(4))𝘦=nil
-return end if btnp(5)do w=no[e]elseif e=="main"do p=o(p,4,1,0)if(btnp(4))if p==1do e9()w="items"elseif p==2do ev()w="skills"elseif p==3do w="status"end
-elseif e=="items"do local e=#u if(e>0)l=o(l,e,3,2)if(btnp(4))w,d="item_use",1
-elseif e=="skills"do m=o(m,#a,3,2)if(btnp(4))w,d="skill_use",1
-elseif e=="item_use"or e=="skill_use"do local e=e=="item_use"d=o(d,2,3,2)if btnp(4)do w=e and"items"or"skills"if d==1do if e do local e=e𝘤()if(e)𝘦="\n     "..e else e𝘥(false)
-elseif n𝘷()do n𝘢()end end end end end function e𝘤()if(u[l][1]==4and s.hp==s.maxhp)return"your health is full"
-end function n𝘷()local n,e=a[m]if n.menu<1do e="\n   skill can't be used now"elseif n.mp>s.mp or s.mp==0do e="\n    your mana is too low"elseif m==2and s.hp==s.maxhp do e="\n     your health is full"end if(e)𝘦=e return false
-return true end function nj()e𝘣=q.bbeg_defeated or s.hp<=0end function ei(e)add(eo,cocreate(e))end function n_()for e in all(eo)do if(costatus(e)=="dead")del(eo,e)else assert(coresume(e))
-end end function 𝘥()if(𝘬==0)return true else 𝘬-=1return false
-end function 𝘢(e)𝘬=e end function np(e)x=o(x,e,3,2)return btnp(4)end function ed(e,n)return(btnp(e)and 1or 0)-(btnp(n)and 1or 0)end function o(e,n,o,t)return(e+ed(o,t)-1)%n+1end function na()cls()c"a mr traveling bard production"end function nr()cls()if(𝘥()and 𝘷<2)𝘷+=1𝘢(60)
-if(𝘷>=1)n𝘣(60,28)
-if 𝘷==2do for e=1,#en do local n=x==e if(n)spr(98,39,86+e*8)
-?en[e],48,88+e*8,n and 7or 6
-end?nn,0,120,5
-end end function nu()cls()if(𝘥())c"placeholder for save menu"
-end function eq()cls()if e𝘣 do n𝘤()else if 𝘬==0do n𝘥()n𝘦()n𝘧()camera()if(h.active)n𝘨()
-n𝘩()if(e𝘦)e𝘧(split"yes,no")
-if(f)n𝘪()
-end end end function n𝘩()local e=w if(not e)return
-n𝘫()n𝘬()n𝘭(e𝘨())if(e=="items"or e=="item_use")n𝘮()
-if(e=="skills"or e=="skill_use")n𝘯()
-if(e=="status")n𝘰()
-if(e=="item_use"or e=="skill_use")e𝘧(split"yes,no")
-n𝘱()end function n𝘣(e,n)spr(112,e,n)local o=time()*.45%1if o<.7do for o=1,o/.7*3\1+1do if(rnd()>.4)pset(e+6+rnd(3)\1,n-2+rnd(5)\1,6)
-end end local o=o<.7and 7or 10line(e+7,n,e+7,n+4,o)c("knights of power: last light",60,o)end function n𝘬()n𝘲,n𝘳=10,7local e,n=split"8,32,60,88",split"30,58,86,118"y(1,14,4,2)rectfill(e[p],6,n[p],12,13)?"items skills status options",n𝘲,n𝘳,7
-end function n𝘮()y(5,11,4,44)y(2,14,4,19)if#u>0do rectfill(8,40+l*8,95,46+l*8,13)for n,e in inext,u do?b(e[3]).." "..e[2],10,41+n*8,7
-end local e=u[l]?e[4],10,24,7
+	11,stun,0,0,0,0]],";")end function n(e,...)local n,o,t,e=unpack(split(e))local n={sprite=n,x=o,y=t,dialogue={...}}if(e)if(sub(e,1,4)=="tag:")n.tag=sub(e,5)else 𝘢[e]=n
+add(w,n)end function 𝘣(e,n,o)return i("!t"..e.."|"..n.."|t"..e,o)end function e_(n,e)local e,t={},split(e)for n in all(split(n,";"))do local n,o=split(n),{}for e,t in inext,t do o[t]=n[e+1]end e[n[1]]=o end return e end _init=e𝘺 function e𝘻()if(btnp(4)or 𝘤())e7()
+end function nn()if j==2do 𝘷=o(𝘷,#ey,3,2)if(btnp(4))if(𝘷==1)nw()else nt()
+end end function ni()if(𝘤()and btnp(4))e7()
+end function eb()if 𝘤()do if not ev do n7()if r do ny()elseif u.active do nb()elseif y do nk()else np()if(not en)if(btnp(5))y,𝘥="main",1else n9()
+n_()end elseif btnp(5)do extcmd"reset"end end end function nk()local e=y if 𝘦 do if(btnp(4))𝘦=nil
+return end if btnp(5)do y=e8[e]elseif e=="main"do 𝘥=o(𝘥,4,1,0)if(btnp(4))y=split"items,skills,status,main"[𝘥]d,g=1,1
+elseif e=="items"do local e=#f if(e>0)d=o(d,e,3,2)if(btnp(4))y,a="item_use",1
+elseif e=="skills"do g=o(g,#s,3,2)if(btnp(4))y,a="skill_use",1
+elseif e=="item_use"or e=="skill_use"do local n=e=="item_use"a=o(a,2,3,2)if btnp(4)do y=e8[e]if a==1do if n do local e=ex()if(e)𝘦="\n     "..e else eq(false)
+elseif nv()do nx()end end end end end function ex()if(f[d][1]==4and h.hp==h.maxhp)return"your health is full"
+end function nv()local n,e=s[g]if n.menu<1do e="\n   skill can't be used now"elseif n.mp>h.mp or h.mp==0do e="\n    your mana is too low"elseif g==2and h.hp==h.maxhp do e="\n     your health is full"end 𝘦=e return not e end function n_()ev=q.bbeg_defeated or h.hp<=0end function eo(e)add(ee,cocreate(e))end function n7()for e in all(ee)do if(costatus(e)=="dead")del(ee,e)else assert(coresume(e))
+end end function 𝘤()if(e==0)return true else e-=1return false
+end function et(e,n)return(btnp(e)and 1or 0)-(btnp(n)and 1or 0)end function o(e,n,o,t)return(e+et(o,t)-1)%n+1end function ne()cls()m"a mr traveling bard production"end function no()cls()if(𝘤()and j<2)j+=1e=60
+if(j>=1)nq()
+if j==2do for e,o in inext,ey do local n=𝘷==e if(n)spr(98,39,86+e*8)
+?o,48,88+e*8,n and 7or 6
+end?e𝘸,0,120,5
+end end function nd()cls()if(𝘤())m"placeholder for save menu"
+end function ek()cls()if ev do nz()else if e==0do nj()n𝘷()n𝘢()camera()if(u.active)n𝘣()
+n𝘤()if(ez)ej()
+if(r)n𝘥()
+end end end function n𝘤()local e=y if(not e)return
+n𝘦()n𝘧()n𝘨(e𝘷())if e=="status"do n𝘩()elseif e~="main"do b(5,11,4,44)b(2,14,4,19)if(e=="items"or e=="item_use")n𝘪()else n𝘫()
+if(#e>7)ej()
+end n𝘬()end function nq()spr(112,60,28)local e=time()*.45%1if e<.7do for e=1,e/.7*3\1+1do if(rnd()>.4)pset(66+rnd(3)\1,26+rnd(5)\1,6)
+end end local e=e<.7and 7or 10line(67,28,67,32,e)m("knights of power: last light",60,e)end function n𝘧()local e,n=split"8,32,60,88",split"30,58,86,118"b(1,14,4,2)rectfill(e[𝘥],6,n[𝘥],12,13)?"items skills status options",10,7,7
+end function n𝘪()if#f>0do rectfill(8,40+d*8,95,46+d*8,13)for n,e in inext,f do?_(e[3]).." "..e[2],10,41+n*8,7
+end local e=f[d]?e[4],10,24,7
 ?e[5],10,32,7
-end end function n𝘯()y(5,11,4,44)y(2,14,4,19)rectfill(8,40+m*8,95,46+m*8,13)for n,e in inext,a do?e.name.." "..b(e.mp).."mp",10,41+n*8,7
-end local e,n=a[m],ea(m)?e.d1,10,24,7
+end end function n𝘫()rectfill(8,40+g*8,95,46+g*8,13)for e,n in inext,s do?n.name,10,41+e*8,7
+?_(n.mp).."mp",78,41+e*8,7
+end local e,n=s[g],ei(g)?e.d1,10,24,7
 if(n>0)?n,10,32,9
 ?e.d2,10,32,7
-end function e𝘧(e)y(#e+1,3,94,44)rectfill(98,47+d*8,122,53+d*8,13)?"use?",99,48,7
-for e,n in inext,e do?n,99,48+e*8,7
-end end function n𝘭(e)z,j=42,92y(3,5,42,94,e)?"lv: "..s.lvl,z+6,j+7,7
-?"hp: ",z+6,j+15,7
-?b(s.hp),z+22,j+15,e𝘩
-?"/",z+30,j+15,7
-?s.maxhp,z+34,j+15,el
-?"mp: "..b(s.mp).."/"..𝘭,z+6,j+23,7
-end function n𝘰()y(12,14,4,19)?s.name,10,24,7
-?s.title,10,32,7
-er(nw,10,32)er(n7,82,32)?s.lvl,24,40,7
-?b(s.hp),24,48,e𝘩
+end function ej()b(3,3,94,44)rectfill(98,47+a*8,122,53+a*8,13)?"use?",99,48,7
+for e,n in inext,split"yes,no"do?n,99,48+e*8,7
+end end function n𝘨(e)b(3,5,42,94,e)?"lv: "..h.lvl,48,99,7
+?"hp: ",48,107,7
+?_(h.hp),64,107,e𝘢
+?"/",72,107,7
+?h.maxhp,76,107,ed
+?"mp: ".._(h.mp).."/"..𝘭,48,115,7
+end function n𝘩()b(12,14,4,19)?h.name,10,24,7
+?h.title,10,32,7
+e𝘣(n5,10,32)e𝘣(n6,82,32)?h.lvl,24,40,7
+?_(h.hp),24,48,e𝘢
 ?"/",32,48,7
-?s.maxhp,36,48,el
-?b(s.mp).."/"..𝘭,24,56,7
-?s.xp,24,64,7
-if#s.status<1do?"normal",38,72,7
-else ef(s.status,1,2,38,72)ef(s.status,3,5,10,80)ef(s.status,6,8,10,88)end?s.sword_score,67,104,7
-?s.shield_score,67,112,7
-e1=split(n𝘴..",;"..e𝘪..",;"..n𝘵..",;"..n𝘶..",;"..s.atk..",;"..s.def..",;"..s.spd..",;"..s.eva.."%,;"..s.matk..",;"..s.mdef..",",";")local n=s.temp_stats for e=1,10do e1[e]=e1[e]..e𝘫(e<8and n[e]or e==8and n[2]+n[7]or n[e-1])end er(e1,108,32,true)end function e𝘫(e)return e>0and 11or e<0and 8or 7end function n𝘫()el=e𝘫(s.temp_stats[3])e𝘩=s.hp==s.maxhp and el or 7end function er(n,o,t,e)local i=e or false for e=1,#n do if i do local n,i=unpack(split(n[e]))?n,o,t+e*8,i
-else local i,n=unpack(split(n[e]))?n,o,t+e*8,7
-end end end function n𝘱()if(not 𝘦)return
-y(3,14,4,52)?𝘦,8,56,7
+?h.maxhp,36,48,ed
+?_(h.mp).."/"..𝘭,24,56,7
+?h.xp,24,64,7
+if#h.status<1do?"normal",38,72,7
+else ea(h.status,1,2,38,72)ea(h.status,3,5,10,80)ea(h.status,6,8,10,88)end?h.sword_score,67,104,7
+?h.shield_score,67,112,7
+local n=h.temp_stats for e,o in inext,{n𝘭,e𝘤,n𝘮,n𝘯,h.atk,h.def,h.spd,h.eva.."%",h.matk,h.mdef}do?o,108,32+e*8,e𝘥(e<8and n[e]or e==8and n[2]+n[7]or n[e-1])
+end end function e𝘥(e)return e>0and 11or e<0and 8or 7end function n𝘦()ed=e𝘥(h.temp_stats[3])e𝘢=h.hp==h.maxhp and ed or 7end function e𝘣(e,n,o)for e,t in inext,e do?split(t)[2],n,o+e*8,7
+end end function n𝘬()if(not 𝘦)return
+b(3,14,4,52)?𝘦,8,56,7
 if(time()%.5<.25)spr(96,112,72)
-end function y(d,r,e,n,f)local o,t,i=unpack(eu[f]or eu[64])o,t,i=o or 64,t or 65,i or 80local a,l=d*8,r*8spr(f or o,e,n)spr(o,e+l,n,1,1,true)spr(o,e,n+a,1,1,false,true)spr(o,e+l,n+a,1,1,true,true)for o=1,r-1do spr(t,e+o*8,n)spr(t,e+o*8,n+a,1,1,false,true)for t=1,d-1do spr(81,e+o*8,n+t*8)end end for o=1,d-1do spr(i,e,n+o*8)spr(i,e+l,n+o*8,1,1,true)end end function n𝘤()camera()c(q.bbeg_defeated and"★ you win! ★"or"game over! :(",64)c("press ❎ to play again",72,5)end function c(e,n,o)?e,64-#e*2,n or 60,o or 7
-end function ef(n,o,t,i,d)local e=""for o=o,min(#n,t)do e=e..n[o][1].." "end if(e~="")?e,i,d,7
-end function n𝘸(e)while(sub(e,-1)==" ")e=sub(e,1,-2)
-return e end function b(e)return(e<10and"0"or"")..e end function ng()s={}s.x,s.y,s.dx,s.dy,s.title,s.lvl,s.mp,s.xp,s.str,s.dex,s.con,s.mag,s.sword_score,s.shield_score=unpack(split"2,2,0,-1,the last light,1,60,0,4,4,4,4,2,2")n𝘹()𝘭=60s.status={}nk()es()a={}n𝘺()𝘮={sw={seq=split"225,227,229,227",hit="0010",fx=split"204,205,206,207"},sh={seq=split"230,230",shk=1},{seq=split"225,226,227,228,229,227",hit="000010",fx=split"204,205,206,207"},{seq=split"227,233,234,235,234,235,233,227"},{seq=split"227,232,227"},{seq=split"225,226",hit="01",fx=split"243,244,245,-245,245,-245"},down={seq=split"227,233,236",keep=1}}u={}n𝘻()end function nb()e,𝘯,𝘰,oe="","",1,"abcdefghijklmnopqrstuvwxyz*"_update=function()𝘰=o(𝘰,27,3,2)𝘯=sub(oe,𝘰,𝘰)if btnp(5)do e=sub(e,1,-2)elseif btnp(4)do if 𝘯=="*"do ns()s.name=e~=""and e or"lance"elseif#e<8do e..=𝘯 end end end _draw=function()cls()spr(112,60,28)?"name your hero:\n"..e..𝘯,30,50,7
+end function b(d,l,e,n,f)local o,t,i=unpack(e𝘦[f or 64])o,t,i=o or 64,t or 65,i or 80local a,r=d*8,l*8spr(f or o,e,n)spr(o,e+r,n,1,1,true)spr(o,e,n+a,1,1,false,true)spr(o,e+r,n+a,1,1,true,true)for o=1,l-1do spr(t,e+o*8,n)spr(t,e+o*8,n+a,1,1,false,true)for t=1,d-1do spr(81,e+o*8,n+t*8)end end for o=1,d-1do spr(i,e,n+o*8)spr(i,e+r,n+o*8,1,1,true)end end function nz()camera()m(q.bbeg_defeated and"★ you win! ★"or"game over! :(",64)m("press ❎ to play again",72,5)end function m(e,n,o)?e,64-#e*2,n or 60,o or 7
+end function ea(e,o,t,i,d)local n=""for o=o,min(#e,t)do n..=e[o][1].." "end?n,i,d,7
+end function _(e)return(e<10and"0"or"")..e end function n0()h={}h.x,h.y,h.dx,h.dy,h.title,h.lvl,h.mp,h.xp,h.str,h.dex,h.con,h.mag,h.sword_score,h.shield_score=unpack(split"2,2,0,-1,the last light,1,60,0,4,4,4,4,2,2")e𝘧=split"10,30,90,270,810"𝘭=60h.status={}h.temp_stats=split"0,0,0,0,0,0,0,0,0"er()s=n3 𝘮={sw={seq=split"225,227,229,227",hit="0010",fx=split"204,205,206,207"},sh={seq=split"230,230",shk=1},{seq=split"225,226,227,228,229,227",hit="000010",fx=split"204,205,206,207"},{seq=split"227,233,234,235,234,235,233,227"},{seq=split"227,232,227"},{seq=split"225,226",hit="01"},{seq=split"225,226",hit="010101",fx=split"243,244,245,-245,245,-245"},down={seq=split"227,233,236",keep=1}}f={}end function nw()v,𝘯,𝘰,n𝘰="","",1,"abcdefghijklmnopqrstuvwxyz*"_update=function()𝘰=o(𝘰,27,3,2)𝘯=sub(n𝘰,𝘰,𝘰)if btnp(5)do v=sub(v,1,-2)elseif btnp(4)do if 𝘯=="*"do na()h.name=v~=""and v or"lance"elseif#v<8do v..=𝘯 end end end _draw=function()cls()spr(112,60,28)?"name your hero:\n"..v..𝘯,30,50,7
 ?"⬆️⬇️ letter 🅾️ add ❎ del *=done",0,120,5
-end end function n𝘹()e𝘬=split"10,30,90,270,810"end function n𝘻()eh=split("1,1;2,8;3,11;4,1;5,2",";")if(eh)for e=1,#eh do local e,n=unpack(split(eh[e]))e𝘭(e,n)end
-end function e𝘭(e,n)local e=split(e𝘷[e])local o=e𝘮(u,e[2],2)if(o)u[o][3]+=n else add(e,n,3)add(u,e)
-end function e𝘯(e)return unpack(split(ny[e],","))end function e𝘥(n)local e,n=u[l],n and 6or 9local t,n,o=e[n],e[n+1],e[n+2]if(o>0)ec(o,false)
-if(n>0)ec(n,true)
-s.hp=min(s.hp+t,s.maxhp)e[3]-=1if(e[3]==0)deli(u,l)l=min(l,#u)
-end function ec(o,e)local n,t,i,d,a,l=e𝘯(o)local n=e𝘮(s.status,t)if e and n do s.status[n][2]=3elseif e or n do if(e)add(s.status,{t,3,o})else deli(s.status,n)
-local e=e and 1or-1e𝘰(i,d*e)e𝘰(a,l*e)end es(true)end function e𝘰(e,o)for n=1,9do if(e==10or e==n)s.temp_stats[n]+=o
-end end function e𝘮(e,o,t)for n=1,#e do if(e[n][t or 1]==o)return n end end function e0()if(e𝘬[s.lvl]and s.xp>=e𝘬[s.lvl])s.lvl+=1f={step=1,sel=1}
-end function e2()local e,n=f.step+1,s.lvl if(e==2and n~=2and n~=4)e=3
+end end function n𝘱(e,n)local e=split(e9[e])local o=e𝘨(f,e[2],2)if(o)f[o][3]+=n else add(e,n,3)add(f,e)
+end function e𝘩(e)return unpack(split(n8[e]))end function eq(n)local e,n=f[d],n and 6or 9local t,n,o=e[n],e[n+1],e[n+2]if(o>0)el(o,false)
+if(n>0)el(n,true)
+h.hp=min(h.hp+t,h.maxhp)e[3]-=1if(e[3]==0)deli(f,d)d=min(d,#f)
+end function el(o,e)local n,t,i,d,a,r=e𝘩(o)local n=e𝘨(h.status,t)if e and n do h.status[n][2]=3elseif e or n do if(e)add(h.status,{t,3,o})else deli(h.status,n)
+local e=e and 1or-1e𝘪(i,d*e)e𝘪(a,r*e)end er(true)end function e𝘪(e,o)for n=1,9do if(e==10or e==n)h.temp_stats[n]+=o
+end end function e𝘨(e,o,t)for n=1,#e do if(e[n][t or 1]==o)return n end end function ef()if(e𝘧[h.lvl]and h.xp>=e𝘧[h.lvl])h.lvl+=1r={step=1,sel=1}
+end function es()local e,n=r.step+1,h.lvl if(e==2and n~=2and n~=4)e=3
 if(e==3and n~=5)e=4
-if(e==3)s.mp+=10𝘭+=10a[5].name="the last light+ "a[5].d2="destroy the darkness"𝘱()
-if(e==4)f=nil es()e0()else f.step,f.sel=e,1
-end function n9()local e=f.step if(e<3)f.sel=o(f.sel,4,3,2)
-if btnp(4)do if e==1do local e=eb[f.sel]s[e]+=1e2()elseif e==2do local e=a[f.sel]if(e.mp>1)e.mp-=1e2()
-else e2()end end end function n𝘪()local e=f.step rectfill(0,0,127,127,0)rect(2,2,125,125,6)c("level up! lv "..s.lvl,10,10)if e==1do c("raise a stat",24,6)for e=1,4do local n=eb[e]?(f.sel==e and">"or" ")..n.."  "..s[n].." > "..s[n]+1,36,40+e*10,f.sel==e and 7or 6
-end elseif e==2do c("reduce a skill's mp cost",24,6)for n=1,4do local e=a[n]local o=e.mp>1and 7or 5?(f.sel==n and">"or" ")..e.name,8,40+n*10,o
+if(e==3)h.mp+=10𝘭+=10s[5].name="the last light+"s[5].d2="destroy the darkness"𝘱()
+if(e==4)r=nil er()ef()else r.step,r.sel=e,1
+end function ny()local e=r.step if(e<3)r.sel=o(r.sel,4,3,2)
+if btnp(4)do if e==1do h[ew[r.sel]]+=1es()elseif e==2do local e=s[r.sel]if(e.mp>1)e.mp-=1es()
+else es()end end end function n𝘥()local e=r.step rectfill(0,0,127,127,0)rect(2,2,125,125,6)m("level up! lv "..h.lvl,10,10)if e==1do m("raise a stat",24,6)for e=1,4do local n=ew[e]?(r.sel==e and">"or" ")..n.."  "..h[n].." > "..h[n]+1,36,40+e*10,r.sel==e and 7or 6
+end elseif e==2do m("reduce a skill's mp cost",24,6)for n=1,4do local e=s[n]local o=e.mp>1and 7or 5?(r.sel==n and">"or" ")..e.name,8,40+n*10,o
 ?e.mp>1and e.mp.." > "..e.mp-1or"min",96,40+n*10,o
-end else?e4"the light within is honed into a sharp blade",8,36,7
+end else?e1"the light within is honed into a sharp blade",8,36,7
 ?"last light upgraded!",8,56,10
-?e4"a residual spark of the goddess' light finds its way to you",8,72,7
+?e1"a residual spark of the goddess' light finds its way to you",8,72,7
 ?"+10 mp",8,96,12
-end c("z: confirm",114,5)end function es(e)local o,t,i,e,d,a,l,n,r,f=e or false,unpack(s.temp_stats)local u=s.maxhp n𝘴=s.str+t e𝘪=s.dex+i n𝘵=s.con+e n𝘶=s.mag+d s.atk=s.str*2+s.sword_score+a s.def=s.con+s.shield_score+l s.spd=s.dex+s.lvl+n s.eva=mid(0,e𝘪*3+n*2,50)s.matk=s.mag*2+s.sword_score+r s.mdef=s.mag+s.shield_score+f s.maxhp=s.con*5+s.lvl*2+e*3if o do local e=s.maxhp-u if(e>0)s.hp+=e
-if(s.hp>s.maxhp)s.hp=s.maxhp
-return end s.hp=s.maxhp end function n𝘺()a=n6 end function ea(n,e)e=e or s return n==1and e.atk+e.matk*2or n==4and e.matk or 0end function 𝘲(e,n)return e==5and n.mp or a[e].mp end function n𝘢()if(m==2)s.hp=s.maxhp
-s.mp-=a[m].mp 𝘱()end function 𝘱()a[5].mp=s.mp end function n𝘧()spr(on(),s.px or s.x*8,s.py or s.y*8,1,1,s.fx and s.dy==0)end function on()local e=s.dy<0and 117or s.dy>0and 115or 113return e+(s.sword and 1or 0)end function e𝘨()return 𝘳[s.mp==0and"d_hero"or"hero"]end function nz()local e,n=ed(1,0),ed(3,2)if(e~=0or n~=0)s.dx,s.dy=e,n if(e~=0)s.fx=e<0
-local e,n=s.x+e,s.y+n oo(e,n)if(ot(e,n))s.x,s.y=mid(0,e,127),mid(0,n,63)else sfx(0)
-end function oo(e,n)e3,eg=s.x+s.dx,s.y+s.dy local e=em[e+n*128]if(e)𝘧(e)
-local e=e5(e3,eg)if(btnp(4)and e)𝘧(e)
-if(btnp(4))oi(e3,eg)
-local e=𝘴[e3+eg*128]if(btnp(4)and e and not et)𝘤(e)
-end function nh()e8=0e𝘱={}poke(24406,128)poke(24407,128)memcpy(32768,8192,4096)reload(36864,8192,4096,"south.p8")e𝘲(10,12)e𝘲(11,12)end function nq()if e8<0do for e=e6,e6+15do for n=𝘵,𝘵+15do local o=mget(e,n)if(fget(o,1))mset(e,n,o~1)
-end end e8=15end e8-=1end function e𝘲(e,n)e𝘱[e+n*128]=true end function e5(n,o)for e in all(g)do if(e.x==n and e.y==o)return e
-end end function n𝘥()e6=s.x\16*16𝘵=s.y\16*16camera(e6*8,𝘵*8)map(0,0,0,0,128,64)for e in next,e𝘱 do local e,n=e%128,e\128spr(mget(e,n),e*8,n*8,1,1,true)end end function n𝘦()for e in all(g)do spr(e.sprite,e.px or e.x*8,e.py or e.y*8,1,1,e.fx)end end function ot(e,n)return not e5(e,n)and not fget(mget(e,n),0)end function n4()𝘶={}𝘨(15,1,"4,3;5,2")𝘨(19,17,"2,3")𝘨(23,0,"3,3")𝘨(25,0,"2,5")𝘨(17,46,"1;2;3;4;5")end function 𝘨(e,n,o)𝘶[e+n*128]=o end function oi(e,n)local o=e+n*128if(𝘶[o])ez(𝘶[o])𝘶[o]=nil mset(e,n,mget(e,n)+1)
-end function ez(e)𝘧{dialogue={i("|found "..od(e).."!")}}end function od(e)local n=""for e in all(split(e,";",false))do local o,e=unpack(split(e))e=e or 1e𝘭(o,e)n..=(n==""and""or", ")..e.." "..split(e𝘷[o])[2]end return n end function nc()oa()q,h,em={},{},{}_(2,4,ej("exit_temple","as you leave this once holy place to face the agents of darkness, you are struck by;a feeling that you will likely never return.;did your goddess feel the same when she stood alone against the dark gods?"))_(25,54,i"|the way forward is blocked... for now.")_(26,54,i"|the way forward is blocked... for now.")_(27,54,i"|the way forward is blocked... for now.")end function _(e,n,...)em[e+n*128]={dialogue={...}}end function i(e,n)local e,o,t=unpack(split(e,"|",false))return{cond=ol(e),pages=split(o,";",false),on_end=of(t,n)}end function oa()𝘳,eu={},{}for e in all(split("def,64,64,65,80;hero,66,92,67,82;d_hero,83;shad,68,77,69,84;ogre,85;necro,70,93,71,86;undead,87,93,71,86;drak,72,78,73,88;mage,89;d_def,74,74,75,90;gnome,91;rogue,76",";"))do local n,e,o,t,i,d=unpack(split(e))𝘳[n]=e eu[e]={o,t,i,d}end end function e𝘳(e)if(not e or e=="")return
-local n={}for e in all(split(e,",",false))do local o=sub(e,1,1)=="!"n[o and sub(e,2)or e]=not o end return n end function ol(e)local e=e𝘳(e)if e do return function()for e,n in next,e do if((q[e]or false)~=n)return false
-end return true end end end function of(n,e)local n=e𝘳(n)if n or e do return function()for e,n in next,n or{}do q[e]=n end if(e)e()
-end end end function 𝘧(n)if(n.x and s.x~=n.x)n.fx=s.x<n.x
+end m("z: confirm",114,5)end function er(o)local t,i,e,d,a,r,n,l,f=unpack(h.temp_stats)local s=h.maxhp n𝘭=h.str+t e𝘤=h.dex+i n𝘮=h.con+e n𝘯=h.mag+d h.atk=h.str*2+h.sword_score+a h.def=h.con+h.shield_score+r h.spd=h.dex+h.lvl+n h.eva=mid(0,e𝘤*3+n*2,50)h.matk=h.mag*2+h.sword_score+l h.mdef=h.mag+h.shield_score+f h.maxhp=h.con*5+h.lvl*2+e*3h.hp=o and min(h.hp+max(h.maxhp-s),h.maxhp)or h.maxhp end function ei(n,e)e=e or h return n==1and e.atk+e.matk*2or n==4and e.matk or 0end function 𝘲(e,n)return e==5and n.mp or s[e].mp end function nx()if(g==2)h.hp=h.maxhp
+h.mp-=s[g].mp 𝘱()end function 𝘱()s[5].mp=h.mp end function n𝘢()spr(n𝘲(),h.px or h.x*8,h.py or h.y*8,1,1,h.fx and h.dy==0)end function n𝘲()local e=h.dy<0and 117or h.dy>0and 115or 113return e+(h.sword and 1or 0)end function e𝘷()return 𝘳[h.mp==0and"d_hero"or"hero"]end function n9()local e,n=et(1,0),et(3,2)if(e~=0or n~=0)h.dx,h.dy=e,n if(e~=0)h.fx=e<0
+local e,n=h.x+e,h.y+n n𝘳(e,n)if(n𝘴(e,n))h.x,h.y=mid(0,e,127),mid(0,n,63)else sfx(0)
+end function n𝘳(e,n)eh,eu=h.x+h.dx,h.y+h.dy local e=ec[e+n*128]if(e)𝘧(e)
+local e=e0(eh,eu)if(btnp(4)and e)𝘧(e)
+if(btnp(4))n𝘵(eh,eu)
+local e=𝘴[eh+eu*128]if(btnp(4)and e and not en)p(e)
+end function nr()e2=0e𝘫={}poke(24406,128)poke(24407,128)memcpy(32768,8192,4096)reload(36864,8192,4096,"south.p8")e𝘬(14,24)e𝘬(15,23)end function np()if e2<0do for e=eg,eg+15do for n=𝘵,𝘵+15do local o=mget(e,n)if(fget(o,1))mset(e,n,o~1)
+end end e2=15end e2-=1end function e𝘬(e,n)e𝘫[e+n*128]=true end function e0(n,o)for e in all(w)do if(e.x==n and e.y==o)return e
+end end function nj()eg=h.x\16*16𝘵=h.y\16*16camera(eg*8,𝘵*8)map(0,0,0,0,128,64)for e in next,e𝘫 do local e,n=e%128,e\128spr(mget(e,n),e*8,n*8,1,1,true)end end function n𝘷()for e in all(w)do spr(e.sprite,e.px or e.x*8,e.py or e.y*8,1,1,e.fx)end end function n𝘴(e,n)return not e0(e,n)and not fget(mget(e,n),0)end function nh()𝘶={}𝘸(15,1,"4,3;5,2")𝘸(19,17,"2,3")𝘸(2,30,"1,2;3,2")𝘸(17,46,"1;2;3;4;5")end function 𝘸(e,n,o)𝘶[e+n*128]=o end function n𝘵(e,n)local o=e+n*128if(𝘶[o])ep(𝘶[o])𝘶[o]=nil mset(e,n,mget(e,n)+1)
+end function ep(e)𝘧{dialogue={i("|found "..n𝘶(e).."!")}}end function n𝘶(e)local n=""for e in all(split(e,";",false))do local o,e=unpack(split(e))e=e or 1n𝘱(o,e)n..=(n==""and""or", ")..e.." "..split(e9[o])[2]end return n end function nl()n𝘸()q,u,ec={},{},{}k(2,4,𝘣("exit_temple","hero:as i leave this once holy place to face the agents of darkness, i am struck by;hero:a feeling that i will likely never return.;hero:did she feel the same when she stood alone against the dark gods?"))for e=1,15do k(e,17,i("!ambush|get him!|ambush",function()p(n𝘹)end))k(e,35,𝘣("enter_gy","hero:there is a foul energy here. it seeps into the ground & raises the noble fallen to serve it's dark master;hero:a necromancer... my master slew one long ago for such desecrated acts, though it cost him his life."))k(e,40,𝘣("leaving_gy","hero:their power spreads like a plague, growing the more undead they raise to feed their swelling numbers.;hero:if not stopped, they'll cut through this land like a scythe through wheat..."))end for e=25,27do k(e,54,𝘣("enter_forest","hero:i first heard her voice when i was a boy, lost & scared in these woods. her voice was warm, yet strong.;hero:she guided me home. asked nothing of me in return.;hero:i learned later that it was the voice of the goddess of light."),i"|the way forward is blocked... for now.")end end function k(e,n,...)ec[e+n*128]={dialogue={...}}end function i(e,n)local e,o,t=unpack(split(e,"|",false))return{cond=n𝘺(e),pages=split(o,";",false),on_end=n𝘻(t,n)}end function n𝘸()𝘳,e𝘦={},{}for e in all(split("def,64,64,65,80;hero,66,92,67,82;d_hero,83,64,65,80;shad,68,77,69,84;ogre,85,64,65,80;necro,70,93,71,86;undead,87,93,71,86;drak,72,78,73,88;mage,89,64,65,80;d_def,74,74,75,90;gnome,91,64,65,80;rogue,76,64,65,80",";"))do local n,e,o,t,i=unpack(split(e))𝘳[n]=e e𝘦[e]={o,t,i}end end function e𝘭(e)if(not e or e=="")return
+local n={}for e in all(split(e,",",false))do local o=sub(e,1,1)=="!"n[o and sub(e,2)or e]=not o end return n end function n𝘺(e)local e=e𝘭(e)if e do return function()for e,n in next,e do if(not q[e]==n)return
+end return true end end end function n𝘻(n,e)local n=e𝘭(n)if n or e do return function()for e,n in next,n or{}do q[e]=n end if(e)e()
+end end end function 𝘧(n)if(n.x and h.x~=n.x)n.fx=h.x<n.x
 for e in all(n.dialogue)do if not e.cond or e.cond()do if not e.pages[1]or e.pages[1]==""do if(e.on_end)e.on_end()
-else h={active=true,entry=e,page=1,src=n}end return end end end function nv()if btnp(4)do local e=h if(e.page<#e.entry.pages)e.page+=1else h={}if(e.entry.on_end)e.entry.on_end()
-end end function n𝘨()local e,o=h.entry.pages[h.page],64local n=split(e,":",false)[1]if(𝘳[n])o,e=𝘳[n],sub(e,#n+2)
-if(n=="hero")o=e𝘨()
-h.y=h.y or o1()local n=h.y y(3,15,0,n,o)?e4(e),5,n+5,7
+else u={active=true,entry=e,page=1,src=n}end return end end end function nb()if btnp(4)do local e=u if(e.page<#e.entry.pages)e.page+=1else u={}if(e.entry.on_end)e.entry.on_end()
+end end function n𝘣()local e,o=u.entry.pages[u.page],64local n=split(e,":",false)[1]if(𝘳[n])o,e=𝘳[n],sub(e,#n+2)
+if(n=="hero")o=e𝘷()
+u.y=u.y or oe()local n=u.y b(3,15,0,n,o)?e1(e),5,n+5,7
 if(time()%.5<.25)spr(96,116,n+20)
-end function o1()local e,n for o in all{s,h.src}do if(o.y)local o=(o.py or o.y*8)-𝘵*8e=e or o+8>96n=n or o<32
-end return e and not n and 0or 96end function e4(o,n)n=n or 29local t,e="",""for o in all(split(o," ",false))do if(e~=""and#e+#o+1>n)t..=e.."\n"e=o else e..=(e==""and""or" ")..o
-end return t..e end function 𝘤(e)et=true ei(function()e()et=false end)end function ou(e,n)ei(function()while(not q[e])yield()
-n()end)end function 𝘸(e)for e=1,e do yield()end end function e𝘴(e,o,n)n=n or 1for o in all(split(o))do local o=nt[o]local o,t=o[1],o[2]local i,d=(e.x+o)*8,(e.y+t)*8if(e==s)s.dx,s.dy=o,t
+end function oe()local e,n for o in all{h,u.src}do if(o.y)local o=(o.py or o.y*8)-𝘵*8e=e or o+8>96n=n or o<32
+end return e and not n and 0or 96end function e1(o,n)n=n or 29local t,e="",""for o in all(split(o," ",false))do if(e~=""and#e+#o+1>n)t..=e.."\n"e=o else e..=(e==""and""or" ")..o
+end return t..e end function p(e)en=true eo(function()e()en=false end)end function on(e,n)eo(function()while(not q[e])yield()
+n()end)end function 𝘨(e)e=e or 20for e=1,e do yield()end end function e𝘮(e,o,n)n=n or 1for o in all(split(o))do local o,t=unpack(e𝘹[o])local i,d=(e.x+o)*8,(e.y+t)*8if(e==h)h.dx,h.dy=o,t
 if(o~=0)e.fx=o<0
 e.px,e.py=e.px or e.x*8,e.py or e.y*8while(e.px~=i or e.py~=d)e.px+=mid(-n,i-e.px,n)e.py+=mid(-n,d-e.py,n)yield()
-e.x+=o e.y+=t end e.px,e.py=nil,nil end function k(e)𝘧{dialogue={i("|"..e)}}e𝘵()end function oj(e)𝘧(e)e𝘵()end function e𝘵()while(h.active)yield()
-end function 𝘹(n)local e os(n,function(n)e=n end)repeat yield()until e~=nil while(f)yield()
-return e end function oh()d,e𝘦=1,true repeat d=o(d,2,3,2)yield()until btnp(4)e𝘦=nil yield()return d==1end function 𝘺(e,o)for n=1,#e,2do mset(e[n],e[n+1],o)local e=e[n]+e[n+1]*128em[e],𝘴[e]=nil end end function n5()𝘴,ew={},4𝘻,ee=split"3,36,1,38,1,42,3,44,5,44,11,45,11,41,13,43",split"1,34,1,45,10,43,3,54"local e=i("!gate_scene||gate_scene",function()𝘤(oc)end)_(8,14,e)e5(8,14).dialogue={e}for e=1,#𝘻,2do local n,o=𝘻[e],𝘻[e+1]_(n,o,i("!sk"..e.."||sk"..e,function()𝘤(function()e𝘶(n,o)end)end))𝘴[n+o*128]=function()e𝘶(n,o)end end for e=1,#ee,2do local e,n=ee[e],ee[e+1]𝘴[e+n*128]=function()o0(e,n)end end n("175,12,59,boss",e𝘸(176))𝘣.boss.fx=true _(12,60,e𝘸(177))ou("gate_won",function()e𝘴(𝘣.elder,"l,u,u,u,u,u,u,u,u")end)end function oc()s.sword=true k"hero:this ends here."𝘸(20)if 𝘹"slime_x2"do for e in all(g)do if(e.tag=="gate_scene"and e.x==8)del(g,e)
-end k"hero:...the light preserves.;ogre:we should return for now."o2()mset(2,14,56)mset(5,15,56)mset(10,14,56)𝘸(20)q.gate_won=true s.sword=false end end function o2()for e in all(g)do if(e.tag=="gate_scene")ei(function()e𝘴(e,"d,d")del(g,e)end)
-end 𝘸(24)end function n8()if 𝘹"golem"do 𝘸(20)for e in all(g)do if(e.tag=="chest_guardian")del(g,e)
-end end end function e𝘶(e,n)k"necro:grr..."if(𝘹(rnd{"undead","undead_x2"}))𝘺({e,n},15)
-end function o0(e,n)k"hero:an unholy energy... perhaps if i use the light i may cleanse its influence."if oh()do if(s.mp<1)k"hero:...i have no light to spare."return
-s.mp-=1𝘱()ew-=1𝘺({e,n},16)k"the sigil is cleansed. you gain 3 xp."s.xp+=3e0()end end function e𝘸(e)return i("!boss_scene||boss_scene",function()𝘣.boss.sprite=e 𝘤(o4)end)end function o4()k"hero:i'm sorry master... dark forces have desecrated your remains.;hero:turned your form against the light you served your whole life.;undead:then you know what you must do, my pupil.;hero:i do."s.sword=true local e={}for n=1,(ew+1)\2do add(e,"undead")end add(e,"boss_undead")for n=1,ew\2do add(e,"undead")end e7.knight=e if(𝘹"knight")del(g,𝘣.boss)k"the dark presence in the area is quelled for now."𝘺(𝘻,15)𝘺(ee,16)s.sword=false
-end function o3(e,n)s.bx,s.by,s.x,s.y,s.defending,s.safe=s.x,s.y,58,52for o,n in inext,e do n.x,n.y=59+(o-(#e+1)/2)*16,32end r={state="menu",sel=1,message="your turn!",anim_timer=0,hero=s,enemies=e,popups={},on_end=n,en_id=1,xp=0,fx={}}if(rnd(20)>s.spd+8)r.state,r.en_id="enemy",1
-_update,_draw=og,om end function n0()o5=e𝘢("slime,slime,152,12,6,2,3,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,5,aar;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,26,13,4,6,aah;golem,earth golem,169,26,11,3,6,aah;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,60,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")e7={}for e in all(split("slime_x2,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man",";"))do local e=split(e)e7[deli(e,1)]=e end o8={[152]={seq=split"153,154,155",hit="001"},[156]={seq=split"157,158",hit="00100",fx=split"204,205,206,207"},[169]={seq=split"170,171,170,171",hit="1111"},[177]={seq=split"178,179",hit="00100",fx=split"204,205,206,207"}}end function o6(n)local e={}for n,o in next,n do e[n]=o end e.maxhp=n.hp return e end function os(e,o)local n={}for e in all(e7[e]or{e})do add(n,o6(o5[e]))end o3(n,o)end function ow(e)s.x,s.y=s.bx,s.by s.xp+=r.xp e0()𝘱()_update,_draw=ex,eq if(r.on_end)r.on_end(e)
-end function og()local n=r local e=n.state n.anim_timer-=1o7()if e=="anim"do v.t-=1n.shake,n.sx=v.u,flr(rnd(3))-1if(v.step)v.step()
-if(v.t<=0)n.shake=nil v.done()
-elseif e=="menu"do oy()elseif e=="skill"do ok()elseif e=="items"or e=="use"do op()elseif e=="target"do ob()elseif e=="enemy"do o_()elseif e=="win"or e=="lose"do if(n.anim_timer<=0)ow(e=="win")
-end end function oy()local e,n=r,r.hero e.sel=o(e.sel,4,3,2)if btnp(4)and e.anim_timer<=0do local o=e.sel==2if e.sel<3do e𝘹("e",function(e)o9(n,e,o)end)elseif e.sel==3do e.state,e.ksel="skill",1else if(#u>0)e.state,l="items",1else e.message="no items"
-end end end function ok()local e,n=r,#a e.ksel=o(e.ksel,n,3,2)if(btnp(5))e.state="menu"
-if(btnp(4)and e.anim_timer<=0)ov(e.ksel)
-end function op()local e=r if e.state=="items"do l=o(l,#u,3,2)if(btnp(5))e.state="menu"
-if(btnp(4))e.state,d="use",1
-else d=o(d,3,3,2)if(btnp(5))e.state="items"
-if btnp(4)do e.state="items"if d<3do local n=e𝘤()if(n)e.message=n else local n,o=s.hp,u[l]e𝘥(d==1)e𝘺(n)e.message,e.anim_timer=o[2].." used",30if(d==2)ey()else e.state="menu"
-end end end end function ob()local e=r e.tsel=o(e.tsel,#e.tl,1,0)if(btnp(5))e.state=e.back
+e.x+=o e.y+=t end e.px,e.py=nil end function c(e)𝘧{dialogue={i("|"..e)}}e𝘯()end function o7(e)𝘧(e)e𝘯()end function e𝘯()while(u.active)yield()
+end function z(n)local e oo(n,function(n)e=n end)repeat yield()until e~=nil while(r)yield()
+return e end function e𝘰()a,ez=1,true repeat a=o(a,2,3,2)yield()until btnp(4)ez=nil yield()return a==1end function 𝘹(e,o)for n=1,#e,2do mset(e[n],e[n+1],o)local e=e[n]+e[n+1]*128ec[e],𝘴[e]=nil end end function ng()𝘴,em={},4𝘺,𝘻=split"3,36,1,38,1,42,3,44,5,44,11,45,11,41,13,43",split"1,34,1,45,10,43,3,54"local e=i("!gate_scene||gate_scene",function()p(ot)end)k(8,14,e)e0(8,14).dialogue={e}for e=1,#𝘺,2do local n,o=𝘺[e],𝘺[e+1]k(n,o,i("!sk"..e.."||sk"..e,function()p(function()e𝘱(n,o)end)end))𝘴[n+o*128]=function()e𝘱(n,o)end end for e=1,#𝘻,2do local e,n=𝘻[e],𝘻[e+1]𝘴[e+n*128]=function()oi(e,n)end end n("175,12,59,boss",e𝘲(176))𝘢.boss.fx=true k(12,60,e𝘲(177))on("gate_won",function()e𝘮(𝘢.elder,"l,u,u,u,u,u,u,u,u")end)end function ot()c"hero:go back from whence you came. we do not wish to fight you.;our master has sent us to cleanse this land. resist or don't, it matters not.;hero:i see. you give me no choice."h.sword=true 𝘨()if z"slime_x2"do for e in all(w)do if(e.tag=="gate_scene"and e.x==8)del(w,e)
+end c"hero:...the light preserves.;ogre:we should return for now. retreat, lest you forfeit your lives."𝘩("gate_scene","d,d")mset(2,14,56)mset(5,15,56)mset(10,14,56)𝘨()q.gate_won=true h.sword=false end end function 𝘩(o,n)for e in all(w)do if(e.tag==o)if(n)eo(function()e𝘮(e,n)del(w,e)end)else del(w,e)
+end 𝘨()end function nm()if(z"golem")𝘨()𝘩"chest_guardian"
+end function n4()c"ogre:the way is blocked by some strange magic.;hero:it would seem so.;ogre:the dark gods would reward us for ending you. do you mean to fight us as well?"if e𝘰()do c"hero:you brought desecration and destruction with you. i will bring you swift justice.;ogre:spoken as a servant of the light. how many of my kind have you humans killed in the name of the light?"if(z"ogres_x2")𝘩"ogres"
+else c"hero:not today. you may go on your way. your gods seem to have opened up a path for you.;ogre:you are not like the other servants of the light. your goddess has fallen and now the dark gods' armies march.;ogre:cherish the brief respite and go in peace, warrior."𝘩("ogres","r,r")end end function n𝘹()h.sword=true for e in all(split"slime_x5,l_man_x2,garg_x3")do z(e)𝘨()end 𝘩"ambush"h.sword=false c'hero:that was unpleasant. a moment to rest...;hero:i count myself lucky the ogres didn\'t join them in that ambush. they must have headed back to the "land between".;hero:i will undoubtedly face them before long, for my foe likely calls the land beyond their base of power.'end function e𝘱(e,n)c"necro:grr..."if(z(rnd{"undead","undead_x2"}))𝘹({e,n},15)
+end function oi(e,n)c"hero:an unholy energy... perhaps if i use the light i may cleanse its influence. (spend 1 mp?)"if e𝘰()do if(h.mp<1)c"hero:...i have no light to spare."return
+h.mp-=1𝘱()em-=1𝘹({e,n},16)c"the sigil is cleansed. you gain 3 xp."h.xp+=3ef()end end function e𝘲(e)return i("!boss_scene||boss_scene",function()𝘢.boss.sprite=e p(od)end)end function od()c"hero:i'm sorry master... dark forces have desecrated your remains.;hero:turned your form against the light you served your whole life.;undead:then you know what you must do, my pupil.;hero:i do."h.sword=true local e={}for n=1,em do add(e,"undead")end add(e,"boss_undead",(em+1)\2+1)e4.knight=e if(z"knight")del(w,𝘢.boss)c"hero:the dark presence in the area is quelled for now."𝘹(𝘺,15)𝘹(𝘻,16)h.sword=false
+end function oa(e,n)h.bx,h.by,h.x,h.y,h.defending,h.safe=h.x,h.y,58,52for o,n in inext,e do n.x,n.y=59+(o-(#e+1)/2)*16,32end l={state="menu",sel=1,message="your turn!",anim_timer=0,hero=h,enemies=e,popups={},on_end=n,en_id=1,xp=0,fx={}}if(rnd(20)>h.spd+8)l.state="enemy"
+_update,_draw=ol,of end function nf()os=e_("slime,slime,152,12,6,2,3,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,5,aar;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,36,13,4,6,aah;golem,earth golem,169,26,11,3,6,aah;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,70,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")e4={}for e in all(split("slime_x2,slime,slime;slime_x5,slime,slime,slime,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man;garg_x3,garg,garg,garg;ogre_x2,ogre,ogre",";"))do local e=split(e)e4[deli(e,1)]=e end o1={[152]={seq=split"153,154,155"},[156]={seq=split"157,158",hit="00100",fx=split"204,205,206,207"},[159]={seq=split"160,161",hit="010",fx=split"249,250,251"},[162]={seq=split"163,164,165",fx=split"165,164,163"},[166]={seq=split"167,168,167,168",hit="1111"},[169]={seq=split"170,171,170,171",hit="0101"},[177]={seq=split"178,179",hit="00100",fx=split"204,205,206,207"}}end function oh(n)local e={}for n,o in next,n do e[n]=o end e.maxhp=n.hp return e end function oo(e,o)local n={}for e in all(e4[e]or{e})do add(n,oh(os[e]))end oa(n,o)end function ou(e)h.x,h.y=h.bx,h.by h.xp+=l.xp ef()𝘱()_update,_draw=eb,ek if(l.on_end)l.on_end(e)
+end function ol()local n=l local e=n.state n.anim_timer-=1oc()if e=="anim"do x.t-=1n.shake,n.sx=x.u,flr(rnd(3))-1if(x.step)x.step()
+if(x.t<=0)n.shake=nil x.done()
+elseif e=="menu"do o0()elseif e=="skill"do o2()elseif e=="items"or e=="use"do og()elseif e=="target"do om()elseif e=="enemy"do o4()elseif e=="win"or e=="lose"do if(n.anim_timer<=0)ou(e=="win")
+end end function o0()local e,n=l,l.hero e.sel=o(e.sel,4,3,2)if btnp(4)and e.anim_timer<=0do local o=e.sel==2if e.sel<3do e𝘳("e",function(e)o3(n,e,o)end)elseif e.sel==3do e.state,e.ksel="skill",1else if(#f>0)e.state,d="items",1else e.message="no items"
+end end end function o2()local e,n=l,#s e.ksel=o(e.ksel,n,3,2)if(btnp(5))e.state="menu"
+if(btnp(4)and e.anim_timer<=0)o5(e.ksel)
+end function og()local e=l if e.state=="items"do d=o(d,#f,3,2)if(btnp(5))e.state="menu"
+if(btnp(4))e.state,a="use",1
+else a=o(a,3,3,2)if(btnp(5))e.state="items"
+if btnp(4)do e.state="items"if a<3do local n=ex()if(n)e.message=n else local n,o=h.hp,f[d]eq(a==1)e𝘴(n)e.message,e.anim_timer=o[2].." used",30if(a==2)e3()else e.state="menu"
+end end end end function om()local e=l e.tsel=o(e.tsel,#e.tl,1,0)if(btnp(5))e.state=e.back
 if(btnp(4))e.act(e.tl[e.tsel])
-end function o_()local n,o=r,r.hero if(n.anim_timer>0)return
-if(o.hp<=0)𝘩(o,𝘮.down,nil,function()n.state,n.message,n.anim_timer="lose","you lost...",60end)return
-if n.en_id>#n.enemies do o.defending,o.safe=false,false ox(o)n.en_id=1if(o.hp>0)n.state,n.sel,n.message="menu",1,"your turn!"
+end function o4()local n,o=l,l.hero if(n.anim_timer>0)return
+if(o.hp<=0)𝘪(o,𝘮.down,nil,function()n.state,n.message,n.anim_timer="lose","you lost...",60end)return
+if n.en_id>#n.enemies do o.defending,o.safe=false,false o6(o)n.en_id=1if(o.hp>0)n.state,n.sel,n.message="menu",1,"your turn!"
 return end local e=n.enemies[n.en_id]n.en_id+=1if(e.hp<=0)return
 if(e.stun)e.stun=false n.message,n.anim_timer=e.name.." is stunned!",30return
 local t=split(e.ai,1)e.n=(e.n or 0)+1local t=e.cyc and t[(e.n-1)%#t+1]or rnd(t)if(t=="f"and e.hp>e.maxhp/2)t="a"
-if t=="f"do 𝘪(e,-(e.maxhp\4),e.name.." heals!",11)return elseif t=="c"do n.message,n.anim_timer=e.name.." is charging!",30return elseif t=="r"do e.atk+=2n.message,n.anim_timer=e.name.." rallies!",30return end local t,i=ek(e.atk*(t=="s"and 3or t=="h"and 2or 1),o.def),rnd(100)<s.eva if(o.defending)t=max(t\2,1)
+if t=="f"do 𝘫(e,-(e.maxhp\4),e.name.." heals!",11)return elseif t=="c"do n.message,n.anim_timer=e.name.." is charging!",30return elseif t=="r"do e.atk+=2n.message,n.anim_timer=e.name.." rallies!",30return end local t,i=e5(e.atk*(t=="s"and 3or t=="h"and 2or 1),o.def),rnd(100)<h.eva if(o.defending)t=max(t\2,1)
 if(o.safe or i)t=0
-local function d()n.shake=nil 𝘪(o,t,o.safe and"blocked by the light!"or i and e.name.." missed!"or e.name.." hits for "..t.."!",8)n.state="enemy"end local n,i=o8[e.sprite],max(t*3,10)if(n)𝘩(e,n,t>0and{o},function()𝘫(i,t>0and o,d)end)else 𝘫(i,e,d)
-end function e𝘹(o,n)local e=r e.act,e.back=n,e.state if o=="e"do e.tl,e.tsel=ep(e.enemies),1if(#e.tl>1)e.state="target"return
-n(e.tl[1])else n()end end function o9(e,n,o)local i,t=r,ek(o and e.atk\2+e.shield_score or e.atk,n.def)𝘩(e,o and 𝘮.sh or 𝘮.sw,{n},function()𝘫(10,n,function()i.shake=nil e.defending=o 𝘪(n,t,"you hit for "..t.."!",8)ey()end)end)end function ov(n)local o,e,t=r,r.hero,a[n]if 𝘲(n,e)>e.mp or e.mp==0do o.message="your mana is too low"elseif n==2and e.hp==e.maxhp do o.message="your health is full"else e𝘹(t.tgt,function(e)oq(n,e)end)end end function 𝘩(n,e,a,l)local i,o,t,d=r,0,0,split"0,0,-4,-3,4,3,-3,4"v={t=#e.seq*6,u=e.shk and n,done=function()if(not e.keep)n.frame=nil
-l()end,step=function()if(o%6==0)local o=o\6+1n.frame=e.seq[o]if(sub(e.hit or"",o,o)=="1")t+=1for n in all(a or{})do add(i.fx,{x=n.x+d[t*2-1],y=n.y+d[t*2],s=e.fx or split"240,241,242",t=0})end
-o+=1end}i.state="anim"end function oq(n,d)local o,e,a=r,r.hero,a[n]local i,l,t=𝘲(n,e),n==5and e.matk*e.mp*(s.lvl==5and 2or 1)or ea(n,e),a.tgt=="a"and ep(o.enemies)or{d}e.mp-=i local function i()o.shake=nil if n==2do 𝘪(e,e.hp-e.maxhp,"you are fully healed!",11)elseif n==3do e.safe=true o.message,o.anim_timer="shield of light up!",30else local e for o in all(t)do e=ek(l,o.mdef or 0,1)𝘪(o,e,"",7)if(n==4and rnd()<.5)o.stun=true
-end o.message=n𝘸(a.name)..(#t>1and" hits all!"or" hits for "..e.."!")end ey()end local o=𝘮[n]if not o do 𝘫(20,e,i)elseif n==1do 𝘩(e,o,t,function()𝘫(10,d,i)end)else 𝘩(e,o,t,i)end end function ey()local e=r if(#ep(e.enemies)>0)e.state,e.en_id="enemy",1return
-local n=0for e in all(e.enemies)do n+=e.xp end e.state,e.message,e.anim_timer,e.xp="win","you won!\nyou gain "..n.."xp",60,n end function ox(e)local e=s.hp for e in all(s.status)do local d,a,n,o,t,i=e𝘯(e[3])if(n==0)s.hp+=o
-if(t==0)s.hp+=i
-s.hp=mid(0,s.hp,s.maxhp)e[2]-=1if(e[2]<=0)ec(e[3],false)
-end e𝘺(e)end function e𝘺(e)if(s.hp~=e)e𝘻(s.x,s.y-4,abs(s.hp-e),s.hp>e and 11or 8)
-end function ek(e,n,o)return max(e+flr(rnd(o or 3))-n,1)end function 𝘪(e,n,o,t)e.hp=mid(0,e.hp-n,e.maxhp)e𝘻(e.x,e.y-4,abs(n),t)r.message=o r.anim_timer=30end function ep(n)local e={}for n in all(n)do if(n.hp>0)add(e,n)
-end return e end function 𝘫(e,n,o)v={t=e,u=n,done=o}r.state="anim"end function e𝘻(e,n,o,t)add(r.popups,{x=e+flr(rnd(5))-2,y=n,v=o,c=t,t=30})end function o7()for e in all(r.popups)do e.y-=.5e.t-=1if(e.t<=0)del(r.popups,e)
-end for e in all(r.fx)do e.t+=1if(e.t\3>=#e.s)del(r.fx,e)
-end end function om()cls()camera()local e,n=r,r.hero local o=e.state=="win"if o or e.state=="lose"do?e.message,44,100,o and 11or 8
-else c(e.message,8,7)end for n in all(e.enemies)do if(n.hp>0)spr(n.frame or n.sprite,n.x+(e.shake==n and e.sx or 0),n.y)oz(n.x-3,n.y+10,n.hp,n.maxhp,14,8)if(n.stun)?"zz",n.x,n.y-6,6
-end spr(n.frame or 224,s.x+(e.shake==s and e.sx or 0),s.y)?n.name,35,68,7
-ne(35,75,n.hp,n.maxhp,11)ne(35,82,n.mp,𝘭,9)if e.state=="target"do local e=e.tl[e.tsel]?"v",e.x+2,e.y-8+flr(sin(time()*2)*2),7
-c(e.name,20,7)end if e.state=="menu"do local o=split"sword,shield,skills,items"for n=1,4do?(e.sel==n and">"or" ")..o[n],4,88+n*8,7
-end elseif e.state=="skill"do local o,t=a[e.ksel],ea(e.ksel)?o.d1,4,16,6
-if(t>0)?t,4,22,9
-?o.d2,4,22,6
-for o,i in inext,a do local t=n.mp<𝘲(o,n)and 5or 7?(e.ksel==o and">"or" ")..i.name,4,82+o*8,t
-?𝘲(o,n).."mp",76,82+o*8,t
-end elseif e.state=="items"or e.state=="use"do local n=u[l]?n[4],4,16,6
+local function d()n.shake=nil 𝘫(o,t,o.safe and"blocked by the light!"or i and e.name.." missed!"or e.name.." hits for "..t.."!",8)if(t>0and e.sprite==177)n.flash,n.fc=6,11
+n.state="enemy"end local n,i=o1[e.sprite],max(t*3,10)if(n)𝘪(e,n,t>0and{o},function()𝘬(i,t>0and o,d)end)else 𝘬(i,e,d)
+end function e𝘳(o,n)local e=l e.act,e.back=n,e.state if o=="e"do e.tl,e.tsel=e6(e.enemies),1if(#e.tl>1)e.state="target"return
+n(e.tl[1])else n()end end function o3(e,n,o)local i,t=l,e5(o and e.atk\2+e.shield_score or e.atk,n.def)𝘪(e,o and 𝘮.sh or 𝘮.sw,{n},function()𝘬(10,n,function()i.shake=nil e.defending=o 𝘫(n,t,"you hit for "..t.."!",8)e3()end)end)end function o5(n)local o,e,t=l,l.hero,s[n]if 𝘲(n,e)>e.mp or e.mp==0do o.message="your mana is too low"elseif n==2and e.hp==e.maxhp do o.message="your health is full"else e𝘳(t.tgt,function(e)o8(n,e)end)end end function 𝘪(n,e,a,r)local i,o,t,d=l,0,0,split"0,0,-4,-3,4,3,-3,4"x={t=#e.seq*6,u=e.shk and n,done=function()if(not e.keep)n.frame=nil
+r()end,step=function()if(o%6==0)local o=o\6+1n.frame=e.seq[o]if(sub(e.hit or"",o,o)=="1")t+=1for n in all(a or{})do add(i.fx,{x=n.x+d[t*2-1],y=n.y+d[t*2],s=e.fx or split"240,241,242",t=0})end
+o+=1end}i.state="anim"end function o8(n,d)local o,e,a=l,l.hero,s[n]local i,r,t=𝘲(n,e),n==5and e.matk*e.mp*(h.lvl==5and 2or 1)or ei(n,e),a.tgt=="a"and e6(o.enemies)or{d}e.mp-=i local function i()o.shake=nil o.flash,o.fc=split"6,0,0,4,12"[n]if n==2do 𝘫(e,e.hp-e.maxhp,"you are fully healed!",11)elseif n==3do e.safe=true o.message,o.anim_timer="shield of light up!",30else local e for o in all(t)do e=e5(r,o.mdef or 0,1)𝘫(o,e,"",7)if(n==4and rnd()<.5)o.stun=true
+end o.message=a.name..(#t>1and" hits all!"or" hits for "..e.."!")end e3()end local o=𝘮[n]if not o do 𝘬(20,e,i)elseif n==1do 𝘪(e,o,t,function()𝘬(10,d,i)end)else 𝘪(e,o,t,i)end end function e3()local e=l if(#e6(e.enemies)>0)e.state,e.en_id="enemy",1return
+local n=0for e in all(e.enemies)do n+=e.xp end e.state,e.message,e.anim_timer,e.xp="win","you won!\nyou gain "..n.."xp",60,n end function o6(e)local e=h.hp for e in all(h.status)do local d,a,n,o,t,i=e𝘩(e[3])if(n==0)h.hp+=o
+if(t==0)h.hp+=i
+h.hp=mid(0,h.hp,h.maxhp)e[2]-=1if(e[2]<=0)el(e[3],false)
+end e𝘴(e)end function e𝘴(e)if(h.hp~=e)e𝘵(h.x,h.y-4,abs(h.hp-e),h.hp>e and 11or 8)
+end function e5(e,n,o)return max(e+flr(rnd(o or 3))-n,1)end function 𝘫(e,n,o,t)e.hp=mid(0,e.hp-n,e.maxhp)e𝘵(e.x,e.y-4,abs(n),t)l.message=o l.anim_timer=30end function e6(n)local e={}for n in all(n)do if(n.hp>0)add(e,n)
+end return e end function 𝘬(e,n,o)x={t=e,u=n,done=o}l.state="anim"end function e𝘵(e,n,o,t)add(l.popups,{x=e+flr(rnd(5))-2,y=n,v=o,c=t,t=30})end function oc()for e in all(l.popups)do e.y-=.5e.t-=1if(e.t<=0)del(l.popups,e)
+end for e in all(l.fx)do e.t+=1if(e.t\3>=#e.s)del(l.fx,e)
+end end function of()cls()camera()local e,n=l,l.hero local o=e.state=="win"if o or e.state=="lose"do?e.message,44,100,o and 11or 8
+else m(e.message,8)end for n in all(e.enemies)do if(n.hp>0)spr(n.frame or n.sprite,n.x+(e.shake==n and e.sx or 0),n.y)if(n.stun)?"zz",n.x,n.y-6,6
+end spr(n.frame or 224,h.x+(e.shake==h and e.sx or 0),h.y)?n.name,35,68,7
+e𝘶(35,75,n.hp,n.maxhp,11)e𝘶(35,82,n.mp,𝘭,9)if e.state=="target"do local e=e.tl[e.tsel]spr(97,e.x,e.y-14+flr(sin(time()*2)*2))?e.name,e.x-#e.name,e.y+10,7
+ow(e.x-3,e.y-4,e.hp,e.maxhp)end if e.state=="menu"do for n,t in inext,split"sword,shield,skills,items"do local o=88+n*8if(e.sel==n)spr(98,40,o-1)
+?t,50,o,7
+end elseif e.state=="skill"do local o,t=s[e.ksel],ei(e.ksel)?o.d1,24,16,6
+if(t>0)?t,24,22,9
+?o.d2,24,22,6
+for o,i in inext,s do local t=n.mp<𝘲(o,n)and 5or 7?(e.ksel==o and">"or" ")..i.name,24,82+o*8,t
+?𝘲(o,n).."mp",96,82+o*8,t
+end elseif e.state=="items"or e.state=="use"do local n=f[d]?n[4],4,16,6
 ?n[5],4,22,6
-for e,n in inext,u do?(l==e and">"or" ")..b(n[3]).." "..n[2],4,82+e*8,7
-end if e.state=="use"do for e,n in inext,split"quick,full,back"do?(d==e and">"or" ")..n,100,82+e*8,7
+for e,n in inext,f do?(d==e and">"or" ").._(n[3]).." "..n[2],4,82+e*8,7
+end if e.state=="use"do for e,n in inext,split"quick,full,back"do?(a==e and">"or" ")..n,100,82+e*8,7
 end end end for e in all(e.fx)do local n=e.s[e.t\3+1]spr(abs(n),e.x,e.y,1,1,n<0)end for e in all(e.popups)do local n=tostr(e.v)?n,e.x-#n*2+1,e.y+1,0
 ?n,e.x-#n*2,e.y,e.c
-end end function ne(e,n,o,t,d)local i=max(0,flr(o/t*40)-1)if(i>0)rectfill(e+1,n+1,e+i,n+3,d)
-?o.."/"..t,e+40+2,n,7
-end function oz(e,n,t,i,o,d)rectfill(e,n,e+o-1,n+1,5)rectfill(e,n,e+max(1,flr(t/i*o))-1,n+1,d)end
+end if(e.flash and e.flash>0)rectfill(0,0,127,127,e.fc or(e.flash>3and 7or 6))e.flash-=1
+end function e𝘶(e,n,o,t,d)local i=max(o*40\t-1)if(i>0)rectfill(e+1,n+1,e+i,n+3,d)
+?o.."/"..t,e+42,n,7
+end function ow(e,n,o,t)rectfill(e,n,e+13,n+1,5)rectfill(e,n,e+max(1,o*14\t)-1,n+1,8)end
 __gfx__
 000000004444444433344454335d5dd333333333335ddd53333333336644446666444466a782287a666666666666666622a222a222a262a23331133333333333
 000000004ffffff133444544335ddd5333333333335d5dd33bbbbbb36647746666cccc66799aa997666666666666566622a222a222a767a23317713333333333
@@ -357,21 +354,21 @@ __map__
 040404040404041e1e1f04040404051010102320222010161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101032101110101f1e1e32101010101010101020202120101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101010101032101f1e1e10101110161610101010202023201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101010101f1f1f10101010101010101010102020201116160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101610101110101f1f1f10101610111010111034102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-101010101010101e1e1f10101010161010101010202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d101e1e1e1f1e1e1f101011101020232013161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+161616161616101f1f1f10161616161616101010102020201116160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+161616101110101f1f1f10101610111616111034102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+101010101010101e1e1f10101010161616101010202020101616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d101e1e1e1f1e1e1f101611101020232013161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101010101010101f1e1f1e1f1f1e202120202320202210161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 2d2d2d2d2d2d101f1e1e1f2f2f2e202020212020141016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 101010101010101f1e1e1f2f2e20202320202010161616000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-2d2d2d2d2d2d10101f1e10212020202e2f1f1616161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-10101010101010101f1e102020232e2f1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2d2d2d2d2d2d10101f1e10212020202e1f1f1616161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+10101010101010101f1e102020232e1f1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 2d2d2d2d2d2d10101f1e102021201f1e1e1e3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 10101010101014101e1f102020201f1f1f1f3f16160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 10282828262810101f1e10102020201116161616160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-14282626262810101e1f11102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+14280b26262810101e1f11102021201016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 10282626262816101e1e10101020202216160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-02280b26262810101e1e10161020232016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+02283426082810101e1e10161020232016160000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 02282828282810101f1f10101010202021161600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
 0101010101010101010101010000010100000100000101010100010100000000010101010101000001010100010100000303030305010303030300000001010900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003030303
