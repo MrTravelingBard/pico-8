@@ -5,13 +5,18 @@ __lua__
 --by mr traveling bard
 
 --global variables
-version,wait,wait_cnt="V0.3.1",0,0
+version,wait,wait_cnt="V0.3.2",0,0
 --for menus
-menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main"}
+menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main",options="main"}
 --for cutscenes
 dirs={r=split"1,0",l=split"-1,0",u=split"0,-1",d=split"0,1"}
 --for levelups
-stat_keys,stat_desc=split"str,dex,con,mag",split"increases atk of sword and shield,increases spd which affects turn order,increases maxhp and def,increases matk and mdef"
+stat_keys,stat_desc=split"str,dex,con,mag",split"increases atk of sword and shield,increases eva % & spd which affects turn order,increases maxhp and def,increases matk and mdef"
+--for saves
+cartdata"mrtravelingbard_kolast"
+save_keys=split"x,y,lvl,xp,str,dex,con,mag,mp"
+--append new flags at the END only (max 15) or old saves break
+flag_list=split"t4,texit_temple,tenter_gy,tleaving_gy,tenter_forest,ambush,gate_scene,gate_won,chest_guardian,guard,guard2,elder_bread,ogres,boss_scene"
 
 --init scenes
 function init_intro()
@@ -21,10 +26,6 @@ end
 function init_mainmenu()
 	menu_sel,menu_options=1,split"new game,continue"
 	wait,_update,_draw=30,update_mainmenu,draw_mainmenu
-end
-
-function init_savemenu()
-	menu_sel,wait,_update,_draw=1,30,update_savemenu,draw_savemenu
 end
 
 function init_game()
@@ -88,6 +89,8 @@ init_dlg"gate_won,!guard|thank you, this town is in your debt. without you, we w
 init_dlg"|we are supposed to deal with bandits & the occasional monster. but this...;this is a small army... what if it's only the vanguard?")
 npc("169,15,2,tag:chest_guardian",
 init_dlg("!chest_guardian||chest_guardian",function()cutscene(golem_fight)end))
+npc("1,3,57,tag:sign",
+init_dlg("|here lies master humphrey of the order of light. he served the land and goddess in life and earned his place by her side."))
 for r in all(split("152,8,14,tag:gate_scene;162,7,15,tag:gate_scene;152,8,15,tag:gate_scene;162,9,15,tag:gate_scene;166,3,14,tag:gate_scene;159,2,15,tag:gate_scene;166,12,14,tag:gate_scene;159,13,15,tag:gate_scene;159,5,17,tag:ambush2;159,11,17,tag:ambush2;152,7,19,tag:ambush1;152,7,20,tag:ambush1;152,8,20,tag:ambush1;152,9,20,tag:ambush1;152,9,19,tag:ambush1;162,6,18,tag:ambush3;162,10,18,tag:ambush3;166,28,58,tag:ogres;166,28,60,tag:ogres",";"))do
 npc(r)
 end
@@ -208,13 +211,10 @@ function update_mainmenu()
 	if wait_cnt==2 then
 		menu_sel=nav(menu_sel,#menu_options,3,2)
 		if btnp(4) then
-			if menu_sel==1 then init_name() else init_savemenu() end
+			if menu_sel==1 then init_name()
+			elseif has_save() then load_game() end
 		end
 	end
-end
-
-function update_savemenu()
-	if wait_check() and btnp(4) then init_mainmenu() end
 end
 
 function update_game()
@@ -260,9 +260,8 @@ function update_menus()
 	elseif m=="main" then
 		menuselect=nav(menuselect,4,1,0)
 		if btnp(4) then
-			--4th entry (options) is a no-op for now
-			menu_mode=split"items,skills,status,main"[menuselect]
-			invselect,skiselect=1,1
+			menu_mode=split"items,skills,status,options"[menuselect]
+			invselect,skiselect,useselect=1,1,1
 		end
 
 	elseif m=="items" then
@@ -275,6 +274,19 @@ function update_menus()
 	elseif m=="skills" then
 		skiselect=nav(skiselect,#p_skills,3,2)
 		if (btnp(4)) menu_mode,useselect="skill_use",1
+
+	elseif m=="options" then
+		useselect=nav(useselect,2,3,2)
+		if btnp(4) then
+			if useselect==1 then
+				save_game()
+				active_text="\n      game saved!"
+			elseif has_save() then
+				load_game()
+			else
+				active_text="\n     no save found"
+			end
+		end
 
 	elseif m=="item_use" or m=="skill_use" then
 		local item=m=="item_use"
@@ -376,16 +388,9 @@ function draw_mainmenu()
 		for n,o in inext,menu_options do
 			local s=menu_sel==n
 			if (s) spr(98,39,86+n*8)
-			print(o,48,88+n*8,s and 7 or 6)
+			print(o,48,88+n*8,n==2 and not has_save() and 5 or s and 7 or 6)
 		end
 		print(version,0,120,5)
-	end
-end
-
-function draw_savemenu()
-	cls()
-	if wait_check() then
-		draw_centered("placeholder for save menu")
 	end
 end
 
@@ -420,6 +425,8 @@ function draw_menus()
 
 	if m=="status" then
 		draw_status()
+	elseif m=="options" then
+		draw_options()
 	elseif m!="main" then
 		draw_box(5,11,4,44)
 		draw_box(2,14,4,19)
@@ -481,6 +488,14 @@ function draw_use_menu()
 	rectfill(98,47+useselect*8,122,53+useselect*8,13)
 	print("use?",99,48,7)
 	for i,o in inext,split"yes,no" do print(o,99,48+i*8,7) end
+end
+
+function draw_options()
+	draw_box(3,14,4,19)
+	rectfill(8,19+useselect*8,95,25+useselect*8,13)
+	for i,o in inext,split"save game,load game" do
+		print(o,10,20+i*8,i==2 and not has_save() and 5 or 7)
+	end
 end
 
 function draw_mini_status(face)
@@ -718,6 +733,7 @@ end
 
 function lu_next()
 	--steps: 1 stat, 2 skill cost, 3 lv5 info, 4 done
+	set_stats()
 	local s,l=lu.step+1,p.lvl
 	if (s==2 and l!=2 and l!=4) s=3
 	if (s==3 and l!=5) s=4
@@ -730,7 +746,6 @@ function lu_next()
 	end
 	if s==4 then
 		lu=nil
-		set_stats()
 		check_for_levelup()
 	else
 		lu.step,lu.sel=s,1
@@ -929,7 +944,7 @@ function can_move(x,y)
 end
 
 function init_chests()
-	chests={}
+	chests,chest_keys={},{}
 	--x,y,"item,qty;item,qty" (qty defaults to 1)
 	chest(15,1,"4,3;5,2")
 	chest(19,17,"2,3")
@@ -940,7 +955,9 @@ function init_chests()
 end
 
 function chest(x,y,loot)
-	chests[x+y*128]=loot
+	local k=x+y*128
+	chests[k]=loot
+	add(chest_keys,k)
 end
 
 function open_chest(x,y)
@@ -1062,7 +1079,7 @@ function make_onend(sets,action)
 end
 
 function dialogue_start(src)
-	if src.x and p.x!=src.x then src.fx=p.x<src.x end
+	if src.x and src.tag!="sign" and p.x!=src.x then src.fx=p.x<src.x end
 	for e in all(src.dialogue) do
 		if not e.cond or e.cond() then
 			if not e.pages[1] or e.pages[1]=="" then
@@ -1351,6 +1368,7 @@ function boss_dlg(s)
 end
 
 function boss_scene()
+	p.dx,p.dy=0,-1
 	say("hero:i'm sorry master... dark forces have desecrated your remains.;hero:turned your form against the light you served your whole life.;undead:then you know what you must do, my pupil.;hero:i do.")
 	p.sword=true
 	--undead on each side = sigils left, split around the knight
@@ -1395,7 +1413,7 @@ end
 
 function init_enemies()
 	--enemy_def key,name,sprite,hp,atk,def,xp
-	enemy_defs=load_defs("slime,slime,152,12,6,2,3,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,5,aar;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,36,13,4,6,aah;golem,earth golem,169,26,11,3,6,aah;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,70,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")
+	enemy_defs=load_defs("slime,slime,152,12,6,2,2,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,4,aar;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,36,13,4,6,aah;golem,earth golem,169,26,11,3,6,aah;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,70,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")
 	enemy_groups={}
 	for r in all(split("slime_x2,slime,slime;slime_x5,slime,slime,slime,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man;garg_x2,garg,garg;ogre_x2,ogre,ogre",";")) do
 		local g=split(r)
@@ -1582,7 +1600,7 @@ function update_enemy_turn()
 	if (h.safe or dodged) d=0
 	local function land()
 		b.shake=nil
-		land_hit(h,d,h.safe and "blocked by the light!" or dodged and e.name.." missed!" or e.name.." hits for "..d.."!",8)
+		land_hit(h,d,h.safe and "blocked by the light!" or dodged and e.name.." attacks...but you evade!" or e.name.." hits for "..d.."!",8)
 		if (d>0 and e.sprite==177) b.flash,b.fc=6,11
 		b.state="enemy"
 	end
@@ -1773,14 +1791,14 @@ function draw_battle()
 	if w or b.state=="lose" then
 		print(b.message,44,100,w and 11 or 8)
 	else
-		draw_centered(b.message,8)
+		print(wrap(b.message),max(4,64-#b.message*2),8,7)
 	end
 
 	--enemies
 	for e in all(b.enemies) do
 		if e.hp>0 then
 			spr(e.frame or e.sprite,e.x+(b.shake==e and b.sx or 0),e.y)
-			if (e.stun) print("zz",e.x,e.y-6,6)
+			if (e.stun) spr(109,e.x,e.y-8)
 		end
 	end
 
@@ -1789,6 +1807,8 @@ function draw_battle()
 	print(h.name,35,68,7)
 	draw_bar(35,75,h.hp,h.maxhp,11)
 	draw_bar(35,82,h.mp,p_maxmp,9)
+	for i,s in inext,p.status do spr(98+s[3],61+i*9,65) end
+	if (h.safe) spr(108,61+(#p.status+1)*9,65)
 
 	--target cursor
 	if b.state=="target" then
@@ -1862,6 +1882,99 @@ end
 function mini_bar(x,y,v,m)
 	rectfill(x,y,x+13,y+1,5)
 	rectfill(x,y,x+max(1,v*14\m)-1,y+1,8)
+end
+
+-->8
+--save code
+--slots: 0 exists, 1-9 stats, 10 hp, 11 max mp,
+--12-19 name, 20-23 skill mp, 25 skeletons,
+--26 sigils, 27 chests, 28 flags, 30-34 inventory
+
+function has_save()
+	return dget(0)==1
+end
+
+function bits(l,f)
+	--bitmask of the entries where f(v,i) is true
+	local m=0
+	for i,v in inext,l do
+		if (f(v,i)) m|=1<<i-1
+	end
+	return m
+end
+
+function unbits(l,m,f)
+	--calls f(v,i) for every set bit
+	for i,v in inext,l do
+		if (m&1<<i-1>0) f(v,i)
+	end
+end
+
+function save_game()
+	for i,k in inext,save_keys do dset(i,p[k]) end
+	dset(10,p.hp)
+	dset(11,p_maxmp)
+	for i=1,8 do dset(11+i,ord(p.name,i) or 0) end
+	for i=1,4 do dset(19+i,p_skills[i].mp) end
+	for i=1,5 do
+		local it=p_inventory[i]
+		dset(29+i,it and it[1]*100+it[3] or 0)
+	end
+	--cleansed skeleton/sigil tiles, opened chests, story flags
+	dset(25,bits(sk,function(v,i) return i%2==1 and mget(v,sk[i+1])==15 end))
+	dset(26,bits(sg,function(v,i) return i%2==1 and mget(v,sg[i+1])==16 end))
+	dset(27,bits(chest_keys,function(k) return not chests[k] end))
+	dset(28,bits(flag_list,function(f) return flags[f] end))
+	dset(0,1)
+end
+
+function drop(tag)
+	for n in all(npc_data) do
+		if (n.tag==tag) del(npc_data,n)
+	end
+end
+
+function load_game()
+	init_game()
+	menu_mode,active_text,game_over=nil
+	for i,k in inext,save_keys do p[k]=dget(i) end
+	p_maxmp=dget(11)
+	p.name=""
+	for i=1,8 do
+		local c=dget(11+i)
+		if (c>0) p.name..=chr(c)
+	end
+	for i=1,4 do p_skills[i].mp=dget(19+i) end
+	if p.lvl>4 then
+		p_skills[5].name,p_skills[5].d2="the last light+","destroy the darkness"
+	end
+	set_stats()
+	p.hp=min(dget(10),p.maxhp)
+	set_last_light()
+	for i=1,5 do
+		local v=dget(29+i)
+		if (v>0) add_item(v\100,v%100)
+	end
+	unbits(flag_list,dget(28),function(f) flags[f]=true end)
+	unbits(chest_keys,dget(27),function(k)
+		local x,y=k%128,k\128
+		chests[k]=nil
+		mset(x,y,mget(x,y)+1)
+	end)
+	unbits(sk,dget(25),function(v,i) snuff({v,sk[i+1]},15) end)
+	unbits(sg,dget(26),function(v,i) snuff({v,sg[i+1]},16) sigs-=1 end)
+	--scenes already played: remove leftover npcs/tiles
+	local fl=flags
+	if fl.gate_won then
+		drop"gate_scene"
+		mset(2,14,56) mset(5,15,56) mset(10,14,56)
+	end
+	if (fl.chest_guardian) drop"chest_guardian"
+	if (fl.ogres) drop"ogres"
+	if fl.ambush then
+		for i=1,3 do drop("ambush"..i) end
+	end
+	if (fl.boss_scene) del(npc_data,who.boss)
 end
 
 __gfx__
