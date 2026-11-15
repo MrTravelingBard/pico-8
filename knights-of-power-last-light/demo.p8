@@ -33,7 +33,7 @@ function init_game()
 	reload(0x9000,0x2000,4096,"south.p8") -- south half of map
 	init_dialogue()
 	--enemy_def key,name,sprite,hp,atk,def,xp
-	enemy_defs=load_defs("slime,slime,152,12,6,2,2,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,4,aarf;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,40,13,4,6,aah;golem,earth golem,169,32,11,3,6,aac;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,70,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")
+	enemy_defs=load_defs("slime,slime,152,12,6,2,2,a;undead,undead,156,14,8,3,4,a;l_man,lizardman,159,20,10,3,4,aarf;garg,gargoyle,162,18,10,2,5,a;ogre,ogre,166,40,13,4,11,aah;golem,earth golem,169,32,11,3,6,aac;mid_rogue,famous rogue,193,30,12,3,12,aahr;mid_mage,spiral mage,172,45,8,2,12,aahr;mid_ogre,ogre warchief,200,40,14,4,12,aahf,1;boss_undead,undead knight,177,70,11,5,20,aacs,1;boss_necro,necromancer,180,55,9,3,25,aahr;boss_shadow,shadow knight,183,75,14,6,0,aahr;boss_drak,dragon,196,100,15,6,40,hhar;shadow,shadow,211,30,12,3,12,aar","name,sprite,hp,atk,def,xp,ai,cyc")
 	enemy_groups={}
 	for r in all(split("slime_x2,slime,slime;slime_x5,slime,slime,slime,slime,slime;undead_x2,undead,undead;l_man_x2,l_man,l_man;garg_x2,garg,garg;ogre_x2,ogre,ogre",";")) do
 		local g=split(r)
@@ -893,7 +893,7 @@ function init_dialogue()
 	for x=25,27 do
 		trigger(x,54,
 			run_once("enter_forest","hero:i first heard her voice when i was a boy, lost & scared in these woods. her voice was warm, yet strong.;hero:she guided me home. asked nothing of me in return.;hero:i learned later that it was the voice of the goddess of light."),
-			init_dlg("|the way forward is blocked... for now.")
+			init_dlg("|the way forward is blocked... for now. (end of demo)")
 		)
 	end
 	for y=56,63 do
@@ -1164,12 +1164,15 @@ function sigil(x,y)
 end
 
 function boss_dlg(s)
-	return init_dlg("!boss_scene||boss_scene",function() who.boss.sprite=s cutscene(boss_scene) end)
+ return init_dlg("!boss_scene||boss_scene",function()
+  who.boss.sprite=s
+  pause()
+  if(s==177)p.dx,p.dy=0,-1
+  cutscene(boss_scene)
+ end)
 end
 
 function boss_scene()
-	pause()
-	p.dx,p.dy=0,-1
 	say("hero:i'm sorry master... dark forces have desecrated your remains.;hero:turned your form against the light you served your whole life.;undead:then you know what you must do, my pupil.;hero:i do.")
 	p.sword=true
 	--undead on each side = sigils left, split around the knight
