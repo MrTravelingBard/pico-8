@@ -5,7 +5,7 @@ __lua__
 --by mr traveling bard
 
 --global variables
-version,wait,wait_cnt="V0.3.2",0,0
+version,wait,wait_cnt="V0.3.2",0,0 --last version before demo trimming and reworking for tokens...
 --for menus
 menu_back={items="main",item_use="items",skills="main",skill_use="skills",status="main",options="main"}
 --for cutscenes
@@ -16,7 +16,7 @@ stat_keys,stat_desc=split"str,dex,con,mag",split"increases atk of sword and shie
 cartdata"mrtravelingbard_kolast"
 save_keys=split"x,y,lvl,xp,str,dex,con,mag,mp"
 --append new flags at the END only (max 15) or old saves break
-flag_list=split"t4,texit_temple,tenter_gy,tleaving_gy,tenter_forest,ambush,gate_scene,gate_won,chest_guardian,guard,guard2,elder_bread,ogres,boss_scene"
+flag_list=split"exit_temple,enter_gy,leaving_gy,enter_forest,ambush,gate_scene,gate_won,chest_guardian,guard,guard2,elder_bread,ogres,boss_scene"
 
 --init scenes
 function init_intro()
